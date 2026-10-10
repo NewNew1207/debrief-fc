@@ -141,6 +141,9 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .detail{padding:0 0 14px 56px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .detail p{margin:0;font-size:15px;overflow-wrap:anywhere}
 .detail b{display:block;font-size:13px;color:var(--muted);font-weight:600}
+.sharebtn{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;border:0;background:var(--blue-soft);color:var(--blue-ink);border-radius:10px;padding:9px 14px;font-size:15px;font-weight:700;cursor:pointer}
+.sharebtn svg{width:18px;height:18px}
+#shareGo svg{width:20px;height:20px}
 .del{align-self:flex-start;border:1.5px solid var(--line);background:none;border-radius:10px;padding:7px 12px;font-size:14px;font-weight:600;color:var(--warn)}
 .tag{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:var(--blue-soft);color:var(--blue-ink)}
 .tag.warn{background:var(--warn-soft);color:var(--warn)}
@@ -583,6 +586,16 @@ body.locked #app,body.locked .tabbar{display:none}
   </div>
 </div>
 
+<div class="overlay" id="shareOv" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+    <div class="eyebrow" data-i18n="share.eyebrow">Check-in bewaard</div>
+    <h2 id="shareTitle">Goed gedaan!</h2>
+    <p class="muted" style="margin:0" data-i18n="share.desc">Wil je je antwoorden delen met je ouders?</p>
+    <button class="btn btn-primary" id="shareGo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span data-i18n="share.btn">Deel met mijn ouders</span></button>
+    <button class="btn btn-ghost" id="shareLater" data-i18n="share.later">Nu niet</button>
+    <p class="muted" style="margin:0;font-size:14px;text-align:center" data-i18n="share.hint">Later delen kan ook.</p>
+  </div>
+</div>
 <div class="overlay" id="codeOv" hidden>
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="codeTitle">
     <div class="eyebrow" data-i18n="code.eyebrow">Persoonlijke code</div>
@@ -824,6 +837,10 @@ if (typeof module !== "undefined") module.exports = A4;
       "start.focus": "Jouw focus", "start.noFocus": "Nog geen focus gekozen. Die kies je bij vraag 4.",
       "start.empty": "Nog geen check-ins deze week. Je eerste doe je na je volgende training of match.",
       "start.energy": "energie {e}/5", "start.sleep": "{h} slaap",
+      "share.btn": "Deel met mijn ouders", "share.eyebrow": "Check-in bewaard", "share.title": "Goed gedaan, {n}!", "share.titleNo": "Goed gedaan!",
+      "share.desc": "Wil je je antwoorden delen met je ouders? Jij kiest of je deelt, en met wie: WhatsApp, mail of een berichtje.",
+      "share.later": "Nu niet", "share.hint": "Later delen kan ook: tik op de check-in onder Deze week.",
+      "share.copied": "Tekst gekopieerd. Plak hem in WhatsApp of in een mail.", "share.subject": "Debrief FC · check-in {d}",
       "tag.pain": "Pijn gemeld", "detail.pain": "Pijn", "detail.del": "Verwijder deze check-in",
       "detail.delSure": "Zeker? Tik nog eens om te verwijderen", "detail.deleted": "Check-in verwijderd.",
       "today.training": "Vandaag training. Daarna: vier vragen, twee minuten.",
@@ -936,6 +953,10 @@ if (typeof module !== "undefined") module.exports = A4;
       "start.focus": "Ton point d'attention", "start.noFocus": "Pas encore de point d'attention. Tu le choisis à la question 4.",
       "start.empty": "Pas encore de check-in cette semaine. Ton premier, ce sera après ton prochain entraînement ou match.",
       "start.energy": "énergie {e}/5", "start.sleep": "{h} de sommeil",
+      "share.btn": "Partager avec mes parents", "share.eyebrow": "Check-in enregistré", "share.title": "Bien joué, {n}" + NB + "!", "share.titleNo": "Bien joué" + NB + "!",
+      "share.desc": "Tu veux partager tes réponses avec tes parents" + NB + "? C'est toi qui choisis si tu partages, et avec qui" + NB + ": WhatsApp, mail ou message.",
+      "share.later": "Pas maintenant", "share.hint": "Tu peux aussi partager plus tard" + NB + ": touche le check-in sous Cette semaine.",
+      "share.copied": "Texte copié. Colle-le dans WhatsApp ou dans un mail.", "share.subject": "Debrief FC · check-in du {d}",
       "tag.pain": "Douleur signalée", "detail.pain": "Douleur", "detail.del": "Supprimer ce check-in",
       "detail.delSure": "Sûr" + NB + "? Touche encore pour supprimer", "detail.deleted": "Check-in supprimé.",
       "today.training": "Entraînement aujourd'hui. Ensuite" + NB + ": quatre questions, deux minutes.",
@@ -1097,7 +1118,7 @@ if (typeof module !== "undefined") module.exports = A4;
       { e: "Étape 4", t: "Ton rapport hebdomadaire",
         h: "<p>Dans <b>Rapport</b>, choisis la semaine et coche les check-ins à inclure. Choisis-y aussi une fois <b>ton équipe</b> (catégorie U), elle apparaît en haut de ton rapport.</p><p>Ensuite <b>Télécharger le PDF</b> ou <b>Imprimer</b>" + NB + ": une page A4 soignée pour toi et ton entraîneur, avec de la place pour des notes. Les photos ne sont pas imprimées.</p>" },
       { e: "Pour les parents", t: "Comment suivre",
-        h: "<p>L'app n'a <b>ni serveur ni compte</b>. Tout ce que votre enfant encode reste uniquement sur son propre téléphone.</p><p>Si vous ouvrez l'app sur votre propre téléphone, elle est vide, même avec le code de votre enfant. Ce n'est pas une erreur" + NB + ": les réponses restent ainsi privées.</p><p><b>Pour suivre" + NB + ":</b></p><ul><li><b>Le rapport hebdomadaire" + NB + ":</b> votre enfant télécharge le PDF dans Rapport et vous l'envoie.</li><li><b>Regarder ensemble</b> sur le téléphone de votre enfant.</li></ul><p><b>Accord" + NB + ":</b> votre enfant reçoit son code via vous. En donnant le code ou en le saisissant vous-même, vous acceptez l'app et le texte sur la vie privée.</p>" },
+        h: "<p>L'app n'a <b>ni serveur ni compte</b>. Tout ce que votre enfant encode reste uniquement sur son propre téléphone.</p><p>Si vous ouvrez l'app sur votre propre téléphone, elle est vide, même avec le code de votre enfant. Ce n'est pas une erreur" + NB + ": les réponses restent ainsi privées.</p><p><b>Pour suivre" + NB + ":</b></p><ul><li><b>Le rapport hebdomadaire" + NB + ":</b> votre enfant télécharge le PDF dans Rapport et vous l'envoie.</li><li><b>Après chaque check-in" + NB + ":</b> votre enfant peut vous envoyer ses réponses en un clic via WhatsApp ou mail. C'est lui qui choisit.</li><li><b>Regarder ensemble</b> sur le téléphone de votre enfant.</li></ul><p><b>Accord" + NB + ":</b> votre enfant reçoit son code via vous. En donnant le code ou en le saisissant vous-même, vous acceptez l'app et le texte sur la vie privée.</p>" },
       { e: "Étape 5", t: "Garder tes données en sécurité",
         h: "<p>Tout reste uniquement sur cet appareil. Personne d'autre ne peut le voir.</p><p>Fais de temps en temps une <b>sauvegarde</b> (Rapport, tout en bas), surtout sur iPhone. Tu changes de téléphone" + NB + "? Restaure ta sauvegarde et saisis à nouveau ton <b>code personnel</b>.</p>" }
     ],
@@ -1123,7 +1144,7 @@ if (typeof module !== "undefined") module.exports = A4;
         "<h3>Ce que l'app ne fait pas</h3><p>Pas de compte, pas de suivi, pas de publicité. Tes réponses ne sont envoyées ni à Sofia ni à un serveur.</p>" +
         "<h3>Services de tiers</h3><p>Pour bien fonctionner, l'app utilise quelques services externes. Comme pour tout site web, ils voient ton adresse IP" + NB + ":</p>" +
         "<ul><li><b>GitHub Pages</b> met l'app en ligne.</li><li><b>Google Fonts</b> fournit les polices.</li><li><b>jsDelivr</b> fournit le module PDF et, uniquement pour une photo iPhone sur Android, un convertisseur.</li></ul>" +
-        "<p><b>Dictée" + NB + ":</b> l'app n'utilise pas elle-même le micro. Si tu dictes une réponse avec le micro de ton clavier, ton téléphone transforme ta voix en texte. Cela peut passer par Google ou Apple. Si tu ne le souhaites pas, écris ta réponse.</p>" +
+        "<p><b>Dictée" + NB + ":</b> l'app n'utilise pas elle-même le micro. Si tu dictes une réponse avec le micro de ton clavier, ton téléphone transforme ta voix en texte. Cela peut passer par Google ou Apple. Si tu ne le souhaites pas, écris ta réponse.</p><p><b>Partager avec tes parents" + NB + ":</b> si tu touches <b>Partager avec mes parents</b>, le menu de partage de ton téléphone s'ouvre. C'est toi qui choisis si tu envoies quelque chose, et à qui. L'app n'envoie rien elle-même.</p>" +
         "<h3>Sauvegarde</h3><p>Un fichier de sauvegarde contient toutes tes données, y compris tes photos et tes douleurs signalées. Garde-le en lieu sûr, par exemple dans Fichiers sur ton téléphone, et ne l'envoie pas à n'importe qui.</p>" +
         "<h3>Effacer tes données</h3><p>Dans <b>Rapport</b>, tout en bas, tu trouves <b>Enregistrer une sauvegarde</b>, <b>Restaurer une sauvegarde</b> et <b>Tout effacer</b>. Ce dernier bouton supprime tout de cet appareil, y compris les photos et le nom.</p>" +
         '<h3>Questions ou plaintes</h3><p>Envoie un e-mail à l\'adresse ci-dessus. Tu peux aussi t\'adresser à l\'Autorité de protection des données' + NB + ': <a href="https://www.autoriteprotectiondonnees.be" target="_blank" rel="noopener">autoriteprotectiondonnees.be</a>.</p>' +
@@ -1991,7 +2012,7 @@ if (typeof module !== "undefined") module.exports = A4;
     { e: "Stap 4", t: "Je weekverslag",
       h: "<p>In <b>Verslag</b> kies je de week en vink je aan welke check-ins erin komen. Kies daar ook één keer <b>je ploeg</b> (U-categorie), die komt bovenaan je verslag.</p><p>Daarna <b>Download PDF</b> of <b>Print</b>: een nette A4 voor jou en je trainer, met plaats voor notities. Foto's komen niet op papier.</p>" },
     { e: "Voor ouders", t: "Zo volg je mee",
-      h: "<p>De app heeft <b>geen server en geen account</b>. Alles wat je kind invult, staat alleen op zijn eigen telefoon.</p><p>Open je de app op je eigen telefoon, dan is die leeg, ook met de code van je kind. Dat is geen fout: zo blijven de antwoorden privé.</p><p><b>Zo volg je mee:</b></p><ul><li><b>Het weekverslag:</b> je kind downloadt de PDF in Verslag en stuurt hem naar jou.</li><li><b>Samen kijken</b> op de telefoon van je kind.</li></ul><p><b>Akkoord:</b> je kind krijgt zijn code via jou. Door de code te geven of zelf in te geven, ga je akkoord met de app en de privacytekst.</p>" },
+      h: "<p>De app heeft <b>geen server en geen account</b>. Alles wat je kind invult, staat alleen op zijn eigen telefoon.</p><p>Open je de app op je eigen telefoon, dan is die leeg, ook met de code van je kind. Dat is geen fout: zo blijven de antwoorden privé.</p><p><b>Zo volg je mee:</b></p><ul><li><b>Het weekverslag:</b> je kind downloadt de PDF in Verslag en stuurt hem naar jou.</li><li><b>Na elke check-in:</b> je kind kan met één tik zijn antwoorden naar jou sturen via WhatsApp of mail. Je kind kiest zelf.</li><li><b>Samen kijken</b> op de telefoon van je kind.</li></ul><p><b>Akkoord:</b> je kind krijgt zijn code via jou. Door de code te geven of zelf in te geven, ga je akkoord met de app en de privacytekst.</p>" },
     { e: "Stap 5", t: "Veilig bewaren",
       h: "<p>Alles staat alleen op dit toestel. Niemand anders kan het zien.</p><p>Maak af en toe een <b>back-up</b> (Verslag, onderaan), zeker op iPhone. Wissel je van telefoon? Zet je back-up terug en geef je <b>persoonlijke code</b> opnieuw in.</p>" }
   ];
@@ -2053,7 +2074,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "<h3>Wat doet de app niet?</h3><p>Geen account, geen tracking, geen advertenties. Je antwoorden gaan niet naar Sofia en niet naar een server.</p>" +
       "<h3>Diensten van anderen</h3><p>Om goed te werken, gebruikt de app een paar externe diensten. Die zien, zoals bij elke website, je IP-adres:</p>" +
       "<ul><li><b>GitHub Pages</b> zet de app online.</li><li><b>Google Fonts</b> levert de lettertypes.</li><li><b>jsDelivr</b> levert de PDF-module, en alleen bij een iPhone-foto op Android ook een omzetter.</li></ul>" +
-      "<p><b>Inspreken:</b> de app gebruikt zelf geen microfoon. Spreek je een antwoord in met de microfoon van je toetsenbord, dan zet je telefoon je stem om in tekst. Dat kan via Google of Apple gebeuren. Wil je dat niet, typ dan je antwoord.</p>" +
+      "<p><b>Inspreken:</b> de app gebruikt zelf geen microfoon. Spreek je een antwoord in met de microfoon van je toetsenbord, dan zet je telefoon je stem om in tekst. Dat kan via Google of Apple gebeuren. Wil je dat niet, typ dan je antwoord.</p><p><b>Delen met je ouders:</b> tik je op <b>Deel met mijn ouders</b>, dan opent het deelmenu van je telefoon. Jij kiest of je iets stuurt, en naar wie. De app stuurt zelf niets door.</p>" +
       "<h3>Back-up</h3><p>Een back-upbestand bevat al je gegevens, ook je foto's en pijnmeldingen. Bewaar het op een veilige plek, bijvoorbeeld in Bestanden op je telefoon, en stuur het niet zomaar door.</p>" +
       '<h3>Je gegevens wissen</h3><p>In <b>Verslag</b>, helemaal onderaan, vind je <b>Back-up opslaan</b>, <b>Back-up terugzetten</b> en <b>Alles wissen</b>. Met die laatste verwijder je alles van dit toestel, ook de foto\'s en de naam.</p>' +
       '<h3>Vragen of klachten</h3><p>Mail gerust naar het adres hierboven. Je kan ook terecht bij de Gegevensbeschermingsautoriteit: <a href="https://www.gegevensbeschermingsautoriteit.be" target="_blank" rel="noopener">gegevensbeschermingsautoriteit.be</a>.</p>' +
@@ -2114,6 +2135,7 @@ if (typeof module !== "undefined") module.exports = A4;
           (s.pain ? '<p><b>' + T("detail.pain") + '</b>' + esc(s.painText || T("common.yesL")) + "</p>" : "") +
           QS.map(function (q, i) { return "<p><b>" + (i + 1) + ". " + esc(q.short) + "</b>" + esc(s.a[i] || "-") + "</p>"; }).join("") +
           (open ? '<div class="phdetail"><b>' + T("ph.label") + '</b><div id="phd-' + s.id + '"></div></div>' : "") +
+          '<button class="sharebtn" data-share="' + s.id + '">' + SHARE_SVG + T("share.btn") + "</button>" +
           '<button class="del" data-del="' + s.id + '">' + (delArm === s.id ? T("detail.delSure") : T("detail.del")) + "</button></div>";
         return '<li><button class="sess-row" data-open="' + s.id + '" aria-expanded="' + open + '" aria-controls="d-' + s.id + '">' +
           '<span class="score">' + (s.score || "–") + '</span><span class="t">' +
@@ -2129,6 +2151,8 @@ if (typeof module !== "undefined") module.exports = A4;
   }
   $("sessList").addEventListener("click", function (e) {
     if (e.target.closest(".phdetail")) return;
+    var sh = e.target.closest("[data-share]");
+    if (sh) { var ss = store.sessions.filter(function (x) { return x.id === sh.dataset.share; })[0]; if (ss) shareSession(ss); return; }
     var o = e.target.closest("[data-open]"), d = e.target.closest("[data-del]");
     if (o) { openId = openId === o.dataset.open ? null : o.dataset.open; delArm = null; renderStart(); return; }
     if (d) {
@@ -2228,15 +2252,16 @@ if (typeof module !== "undefined") module.exports = A4;
     if (key === "quick" && (!d.energy || d.pain === null)) { toast(T("ck.needQuick")); return; }
     if (key === "q0" && !d.score) { toast(T("ck.needScore")); return; }
     if (step < keys.length - 1) { d.step = step + 1; save(); renderStep(); window.scrollTo(0, 0); return; }
-    store.sessions.push({
+    var newS = {
       id: "s" + Date.now(), created: Date.now(), date: d.date, type: d.type, energy: d.energy,
       pain: d.pain, painText: d.pain ? d.painText.trim() : "", score: d.score, sleepH: d.sleepH || "", sleepQ: d.sleepQ || "",
       stats: statsForSave(d), photos: (d.photos || []).slice(),
       a: d.a.map(function (x) { return x.trim(); })
-    });
+    };
+    store.sessions.push(newS);
     store.draft = null; save();
-    toast(T("ck.saved"));
     go("start");
+    openShare(newS);
   });
 
   /* Inspreken gebeurt met de microfoon van het toetsenbord (iPhone en Android).
@@ -2253,18 +2278,53 @@ if (typeof module !== "undefined") module.exports = A4;
            noAnswer: T("rep.noAnswer"), empty: T("rep.empty"), notes: T("rep.notes"), html: T("rep.html"), qo: T("rep.qo"), qc: T("rep.qc") },
       printed: fmt(today(), { day: "numeric", month: "long", year: "numeric" }),
       quote: { text: q.t, src: q.s },
-      sessions: ws.map(function (s) {
-        return {
-          title: cap(fmt(parse(s.date), { weekday: "long", day: "numeric", month: "long" })) + " · " + typeLabel(s.type),
-          meta: T("rep.energy", { e: s.energy }) + sleepTxt(s) + T("rep.pain") + (s.pain ? (T("common.yesL") + (s.painText ? " - " + s.painText : "")) : T("common.noL")),
-          stats: statsLine(s),
-          qa: QS.map(function (qq, i) {
-            return { q: (i + 1) + ". " + qq.short, a: i === 0 ? (T("rep.score", { s: s.score }) + (s.a[0] ? " " + s.a[0] : "")) : s.a[i] };
-          })
-        };
+      sessions: ws.map(sessReport)
+    };
+  }
+  function sessReport(s) {
+    return {
+      title: cap(fmt(parse(s.date), { weekday: "long", day: "numeric", month: "long" })) + " · " + typeLabel(s.type),
+      meta: T("rep.energy", { e: s.energy }) + sleepTxt(s) + T("rep.pain") + (s.pain ? (T("common.yesL") + (s.painText ? " - " + s.painText : "")) : T("common.noL")),
+      stats: statsLine(s),
+      qa: QS.map(function (qq, i) {
+        return { q: (i + 1) + ". " + qq.short, a: i === 0 ? (T("rep.score", { s: s.score }) + (s.a[0] ? " " + s.a[0] : "")) : s.a[i] };
       })
     };
   }
+
+  /* ====== DELEN MET OUDERS ======
+     Geen server: het deelmenu van de telefoon opent (WhatsApp, Mail, Berichten...).
+     De speler kiest zelf of en naar wie hij stuurt. Lukt dat niet, dan kopiëren we de tekst. */
+  var SHARE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+  function shareText(s) {
+    var r = sessReport(s), out = ["Debrief FC" + (nameNow() ? " · " + nameNow() : ""), r.title, r.meta];
+    if (r.stats) out.push(r.stats);
+    r.qa.forEach(function (x) { out.push("", x.q, (x.a && String(x.a).trim()) ? String(x.a).trim() : T("rep.noAnswer")); });
+    return out.join("\n");
+  }
+  function copyFallback(text, subject) {
+    var done = function () { toast(T("share.copied")); };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () {});
+    } catch (e) {}
+    if (!inViewer()) { try { location.href = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(text); } catch (e) {} }
+  }
+  function shareSession(s) {
+    var text = shareText(s), subject = T("share.subject", { d: fmt(parse(s.date), { day: "numeric", month: "long" }) });
+    if (navigator.share) {
+      navigator.share({ title: subject, text: text }).catch(function (e) { if (!e || e.name !== "AbortError") copyFallback(text, subject); });
+    } else copyFallback(text, subject);
+  }
+  var lastSaved = null;
+  function openShare(s) {
+    lastSaved = s;
+    $("shareTitle").textContent = nameNow() ? T("share.title", { n: nameNow() }) : T("share.titleNo");
+    $("shareOv").hidden = false; setTimeout(function () { $("shareGo").focus(); }, 30);
+  }
+  function closeShare() { $("shareOv").hidden = true; }
+  $("shareGo").addEventListener("click", function () { if (lastSaved) shareSession(lastSaved); closeShare(); });
+  $("shareLater").addEventListener("click", closeShare);
+  $("shareOv").addEventListener("click", function (e) { if (e.target === $("shareOv")) closeShare(); });
 
   function weekAll() { return sessionsIn(exportMon); }
   function chosen() { return weekAll().filter(function (s) { return !excluded[s.id]; }); }
