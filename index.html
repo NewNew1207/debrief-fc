@@ -36,6 +36,7 @@
   --bg:#EDF2F9; --surface:#FFFFFF; --ink:#0B1A33; --muted:#56678A; --line:#D3DDEC;
   --blue:#0A3F9C; --blue-ink:#0A3F9C; --blue-soft:#E2EBF9; --on-blue:#FFFFFF;
   --hero:#0A3F9C; --hero-2:#0C4BB5;
+  --up:#23894C; --mid:#2F64C8; --down:#D03A36;
   --warn:#A64B07; --warn-soft:#FBE9DA; --rec:#C62828; --cancel:#C62828; --cancel-soft:#FDECEC; --star:#D99A00;
   --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --body:"Barlow",Arial,Helvetica,sans-serif;
@@ -46,11 +47,11 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#06122A; --surface:#0D1E3C; --ink:#E7EEFA; --muted:#9CACCB; --line:#1D345C;
   --blue:#2C6BE0; --blue-ink:#8FB5FF; --blue-soft:#132C57;
-  --hero:#0B3A8F; --hero-2:#0F47A8; --warn:#F2A766; --warn-soft:#3A2410; --cancel:#FF8A80; --cancel-soft:#3B1515; --star:#FFD54A; color-scheme:dark}}
+  --hero:#0B3A8F; --hero-2:#0F47A8; --up:#2FA25E; --mid:#5B8FF0; --down:#E2504D; --warn:#F2A766; --warn-soft:#3A2410; --cancel:#FF8A80; --cancel-soft:#3B1515; --star:#FFD54A; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#06122A; --surface:#0D1E3C; --ink:#E7EEFA; --muted:#9CACCB; --line:#1D345C;
   --blue:#2C6BE0; --blue-ink:#8FB5FF; --blue-soft:#132C57;
-  --hero:#0B3A8F; --hero-2:#0F47A8; --warn:#F2A766; --warn-soft:#3A2410; --cancel:#FF8A80; --cancel-soft:#3B1515; --star:#FFD54A; color-scheme:dark}
+  --hero:#0B3A8F; --hero-2:#0F47A8; --up:#2FA25E; --mid:#5B8FF0; --down:#E2504D; --warn:#F2A766; --warn-soft:#3A2410; --cancel:#FF8A80; --cancel-soft:#3B1515; --star:#FFD54A; color-scheme:dark}
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -155,6 +156,8 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .focus .ic{width:46px;height:46px;border-radius:12px;background:var(--blue-soft);display:grid;place-items:center;flex:none;color:var(--blue-ink)}
 .focus .ic svg{width:24px;height:24px}
 .focus p{margin:0;font-weight:600;font-size:17px}
+.teambtn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--blue-ink);border-radius:999px;padding:7px 14px;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+.teambtn.empty{background:var(--blue-soft);border-color:transparent}
 .focusbtn{width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer}
 .focusbtn .chev-r{width:22px;height:22px;flex:none;color:var(--muted)}
 
@@ -228,6 +231,7 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .pglbl{font-size:13px;color:var(--muted);margin-top:-6px}
 .status{font-size:14px;color:var(--muted);margin:0;min-height:1.4em}
 
+body.typing .tabbar{display:none}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);padding:8px 16px calc(8px + env(safe-area-inset-bottom,0px))}
 .tabbar nav{max-width:460px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .tab{border:0;background:transparent;border-radius:12px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
@@ -260,9 +264,34 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .srow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 8px 8px 14px;font-weight:600}
 .stepper{display:grid;grid-template-columns:44px 52px 44px;align-items:center}
 .stepper button{width:44px;height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font-size:24px;font-weight:700;line-height:1;padding:0}
+.minin{width:52px;height:44px;text-align:center;font-family:var(--display);font-weight:800;font-size:24px;color:var(--blue-ink);border:1.5px solid var(--line);border-radius:10px;background:var(--surface);padding:0;-moz-appearance:textfield;appearance:textfield}
+.minin::-webkit-outer-spin-button,.minin::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.minhint{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-top:2px}
 .stepper output{text-align:center;font-family:var(--display);font-weight:800;font-size:26px;color:var(--blue-ink);font-variant-numeric:tabular-nums}
 .seg.mini{grid-template-columns:64px 64px}
 .seg.mini button{min-height:44px;font-size:15px}
+.asklist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.asklist li{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.asklist p{margin:0;font-size:16px;font-weight:600;overflow-wrap:anywhere}
+.asklist small{display:block;font-size:13px;color:var(--muted);font-weight:500;margin-top:2px}
+.askdone{flex:none;border:0;background:var(--blue-soft);color:var(--blue-ink);border-radius:10px;padding:8px 12px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.asknow{margin:0 0 10px;background:var(--blue);color:var(--on-blue);border-radius:10px;padding:8px 12px;font-weight:700;font-size:15px}
+.askadd{margin-top:10px}
+.tr-pend rect{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:4 3}
+.trend-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:2px 0 12px;font-size:13px;color:var(--muted)}
+.trend-legend span{display:inline-flex;align-items:center;gap:6px}
+.trend-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.tr{padding:10px 0 12px;border-top:1px solid var(--line)}
+.tr:first-of-type{border-top:0}
+.tr-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.tr-h b{font-size:16px}
+.tr-h span{font-size:14px;color:var(--muted);white-space:nowrap}
+.tr svg{display:block;width:100%;height:auto;margin:6px 0 4px;overflow:visible}
+.tr-last{margin:0;font-size:14px;color:var(--ink)}
+.tr-last em{font-style:normal;font-weight:700}
+.tips{margin-top:6px;background:var(--blue-soft);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.tips p{margin:0;font-size:15px}
+.tips .eyebrow{color:var(--blue-ink)}
 .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .tile{border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center;background:var(--bg)}
 .tile b{display:block;font-family:var(--display);font-weight:800;font-size:30px;line-height:1;color:var(--blue-ink);font-variant-numeric:tabular-nums}
@@ -397,6 +426,7 @@ body.locked #app,body.locked .tabbar{display:none}
         <h2 id="greet">Ciao. Klaar voor je check-in?</h2>
         <p class="muted" id="greetSub">Vier vragen, twee minuten.</p>
         <button class="linkbtn" id="codeBtn" data-i18n="code.enter">Persoonlijke code ingeven</button>
+        <button type="button" class="teambtn" id="teamBtn"></button>
       </div>
       <div class="card">
         <div class="sec-h"><h3 data-i18n="start.thisWeek">Deze week</h3><span class="muted" id="wkrange" style="font-size:14px"></span></div>
@@ -408,10 +438,19 @@ body.locked #app,body.locked .tabbar{display:none}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M9 13.5l2 2 4-4.5"/></svg>
         <span id="startLbl">Start check-in</span>
       </button>
+      <div class="card" id="askCard">
+        <div class="sec-h"><h3 data-i18n="ask.title">Vraag voor je trainer</h3><span class="muted" id="askCount" style="font-size:14px"></span></div>
+        <div id="askBody"></div>
+        <button type="button" class="sharebtn askadd" id="askAdd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="ask.add">Vraag toevoegen</span></button>
+      </div>
       <div class="card" id="seasonCard" hidden>
         <div class="sec-h"><h3 data-i18n="season.title">Seizoen</h3><span class="muted" id="seasonLbl" style="font-size:14px"></span></div>
         <div class="tiles" id="seasonTiles"></div>
         <p class="legend" id="seasonNote" style="margin:10px 0 0"></p>
+      </div>
+      <div class="card" id="trendCard">
+        <div class="sec-h"><h3 data-i18n="trend.title">Mijn evolutie</h3><span class="muted" id="trendLbl" style="font-size:14px"></span></div>
+        <div id="trendBody"></div>
       </div>
       <div class="card" id="momentsCard" hidden>
         <div class="sec-h"><h3 data-i18n="ph.moments">Fotomomenten</h3><span class="muted" id="momentsCount" style="font-size:14px"></span></div>
@@ -586,6 +625,25 @@ body.locked #app,body.locked .tabbar{display:none}
   </div>
 </div>
 
+<div class="overlay" id="askOv" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="askOvTitle">
+    <div class="eyebrow" data-i18n="ask.title">Vraag voor je trainer</div>
+    <h2 id="askOvTitle" data-i18n="ask.q">Wat wil je vragen?</h2>
+    <div class="answer"><textarea class="plain" id="askIn" maxlength="300" data-i18n-ph="ask.ph" placeholder="Bijvoorbeeld: hoe kan ik beter vrijlopen bij een inworp?"></textarea></div>
+    <button class="btn btn-primary" id="askOk" data-i18n="common.save">Bewaar</button>
+    <button class="btn btn-ghost" id="askCancel" data-i18n="common.cancel">Annuleer</button>
+  </div>
+</div>
+<div class="overlay" id="teamOv" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="teamTitle">
+    <div class="eyebrow" data-i18n="my.team">Mijn ploeg</div>
+    <h2 id="teamTitle" data-i18n="team.q">In welke ploeg speel je?</h2>
+    <p class="muted" style="margin:0" data-i18n="my.teamNote">Komt bovenaan je verslag.</p>
+    <select id="teamSel2" class="dateinput" aria-labelledby="teamTitle"></select>
+    <button class="btn btn-primary" id="teamOk" data-i18n="common.save">Bewaar</button>
+    <button class="btn btn-ghost" id="teamCancel" data-i18n="common.cancel">Annuleer</button>
+  </div>
+</div>
 <div class="overlay" id="shareOv" hidden>
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
     <div class="eyebrow" data-i18n="share.eyebrow">Check-in bewaard</div>
@@ -853,6 +911,22 @@ if (typeof module !== "undefined") module.exports = A4;
       "plan.eyebrow": "Planning", "plan.group": "Wat staat er op deze dag?", "plan.none": "Niets",
       "plan.every": "Elke {d} zo", "plan.onlyDay": "Geldt alleen voor deze dag", "plan.cancelWord": "geannuleerd",
       "plan.toastCancel": "Gemarkeerd als geannuleerd.", "plan.toastSet": "{w} gepland.", "plan.toastClear": "Planning gewist.",
+      "ask.title": "Vraag voor je trainer", "ask.q": "Wat wil je vragen?", "ask.add": "Vraag toevoegen", "ask.done": "✓ Gesteld",
+      "ask.ph": "Bijvoorbeeld: hoe kan ik beter vrijlopen bij een inworp?", "ask.empty": "Heb je een vraag voor je trainer? Noteer ze hier, dan vergeet je ze niet tegen de volgende training.",
+      "ask.today": "Vandaag training: stel je vraag!", "ask.from": "genoteerd {d}", "ask.saved": "Vraag bewaard. Je vindt ze op het startscherm.",
+      "ask.asked": "Top, vraag gesteld!", "ask.open1": "{n} open", "ask.openN": "{n} open", "ask.label": "Vraag voor de trainer",
+      "ask.stepEyebrow": "Tot slot", "ask.stepTitle": "Een vraag voor je trainer?", "ask.stepHint": "Optioneel. Zo vergeet je hem niet tegen de volgende training.",
+      "trend.pending": "Je grafiek kleurt in vanaf 3 matchen met cijfers als {p}. Nog {k} te gaan!",
+      "trend.pendingNoPos": "Je grafiek kleurt in vanaf 3 matchen met cijfers. Kies bij je eerste match je positie.",
+      "trend.title": "Mijn evolutie", "trend.sub": "als {p} · laatste {n}",
+      "trend.up": "Boven je gemiddelde", "trend.mid": "Rond je gemiddelde", "trend.down": "Onder je gemiddelde", "trend.avg": "gemiddeld {a}",
+      "trend.last": "Laatste match: {v}", "trend.oldNew": "ouder → recenter", "trend.tips": "Tips",
+      "trend.few": "Na 3 matchen met cijfers als {p} zie je hier hoe je evolueert. Je vergelijkt je met jezelf, niet met anderen.",
+      "trend.note": "Je vergelijkt je met je eigen gemiddelde als {p} dit seizoen, niet met anderen.",
+      "trend.tipUp": "Sterk! Je {s} gaan omhoog: de laatste 3 matchen gemiddeld {r}, daarvoor {b}. Hou dat vast.",
+      "trend.tipDown": "Aandachtspunt: je {s} zakten de laatste 3 matchen ({r} tegen {b}). Misschien iets voor je focus bij vraag 4?",
+      "trend.tipFlat": "Je cijfers zijn stabiel. Kies bij vraag 4 één punt om nog een stap verder te zetten.",
+      "trend.tipMin": "Je speelde de laatste match {m} minuten, minder dan gewoonlijk ({a}). Dan liggen je cijfers vanzelf wat lager.",
       "season.title": "Seizoen", "season.match1": "{n} match", "season.matchN": "{n} matchen", "season.cs": "Clean sheets",
       "season.note": "Totalen als {p}, sinds 1 augustus. Vergelijk met jezelf, niet met anderen.",
       "code.enter": "Persoonlijke code ingeven", "code.eyebrow": "Persoonlijke code", "code.title": "Geef je code in",
@@ -887,7 +961,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "stats.hint": "Optioneel. Tel wat je je herinnert, een schatting is goed genoeg. Inzet telt even zwaar als goals.",
       "stats.pos": "Positie", "stats.posNote": "de app onthoudt dit",
       "stats.pickPos": "Kies eerst je positie. Dan krijg je de cijfers die bij jouw rol passen.",
-      "stats.gR": "Resultaat", "stats.gI": "Inzet", "stats.gC": "Context", "stats.minutes": "Minuten gespeeld",
+      "stats.gR": "Resultaat", "stats.gI": "Inzet", "stats.gC": "Context", "stats.minutes": "Minuten gespeeld", "stats.minHint": "Tik op het getal om zelf te typen",
       "stats.less": "Minder {l}", "stats.more": "Meer {l}",
       "chips.title": "Snel kiezen", "chips.all": "Voor iedereen", "chips.own": "Voor jou als {p}", "chips.others": "Andere posities",
       "chips.perPos": "Tips per positie", "chips.max": "Max. twee. Hoe minder focuspunten, hoe scherper je traint.",
@@ -901,6 +975,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "ph.moments": "Fotomomenten", "ph.count1": "{n} foto", "ph.countN": "{n} foto's", "ph.of": "Foto van {m}", "ph.label": "Foto's",
       "ph.viewer": "Foto", "ph.close": "Sluiten", "ph.prev": "Vorige foto", "ph.next": "Volgende foto",
       "parents.tip": "Ouders volgen mee via dit verslag: download de PDF en stuur hem door.",
+      "team.q": "In welke ploeg speel je?", "team.pick": "Kies je ploeg (U-categorie)", "team.is": "Ploeg: {t} · wijzig", "team.saved": "Ploeg {t} bewaard.",
       "my.title": "Mijn gegevens", "my.team": "Mijn ploeg", "my.teamPick": "Kies je ploeg", "my.other": "Andere", "my.teamNote": "Komt bovenaan je verslag.",
       "code.nameTitle": "Hoe heet je?", "code.nameLabel": "Naam", "code.namePh": "LUCAS", "code.nameSave": "Bewaar mijn naam",
       "code.nameDesc": "Zoals op je shirt of zoals je trainer je noemt. Heeft een ploegmaat dezelfde naam? Zet dan de eerste letters van je familienaam erachter, bijvoorbeeld LUCASVDB.",
@@ -969,6 +1044,22 @@ if (typeof module !== "undefined") module.exports = A4;
       "plan.eyebrow": "Planning", "plan.group": "Qu'est-ce qui est prévu ce jour-là" + NB + "?", "plan.none": "Rien",
       "plan.every": "Chaque {d}", "plan.onlyDay": "Uniquement pour ce jour", "plan.cancelWord": "annulé",
       "plan.toastCancel": "Marqué comme annulé.", "plan.toastSet": "{w} prévu.", "plan.toastClear": "Planning effacé.",
+      "ask.title": "Question pour ton entraîneur", "ask.q": "Que veux-tu demander" + NB + "?", "ask.add": "Ajouter une question", "ask.done": "✓ Posée",
+      "ask.ph": "Par exemple" + NB + ": comment mieux me démarquer sur une rentrée de touche" + NB + "?", "ask.empty": "Tu as une question pour ton entraîneur" + NB + "? Note-la ici, comme ça tu ne l'oublies pas d'ici le prochain entraînement.",
+      "ask.today": "Entraînement aujourd'hui" + NB + ": pose ta question" + NB + "!", "ask.from": "notée le {d}", "ask.saved": "Question enregistrée. Tu la retrouves sur l'écran d'accueil.",
+      "ask.asked": "Top, question posée" + NB + "!", "ask.open1": "{n} ouverte", "ask.openN": "{n} ouvertes", "ask.label": "Question pour l'entraîneur",
+      "ask.stepEyebrow": "Pour finir", "ask.stepTitle": "Une question pour ton entraîneur" + NB + "?", "ask.stepHint": "Facultatif. Comme ça, tu ne l'oublies pas d'ici le prochain entraînement.",
+      "trend.pending": "Ton graphique se colore à partir de 3 matchs avec des stats en tant que {p}. Encore {k}" + NB + "!",
+      "trend.pendingNoPos": "Ton graphique se colore à partir de 3 matchs avec des stats. Choisis ton poste lors de ton premier match.",
+      "trend.title": "Mon évolution", "trend.sub": "en tant que {p} · {n} derniers",
+      "trend.up": "Au-dessus de ta moyenne", "trend.mid": "Autour de ta moyenne", "trend.down": "En dessous de ta moyenne", "trend.avg": "moyenne {a}",
+      "trend.last": "Dernier match" + NB + ": {v}", "trend.oldNew": "plus ancien → plus récent", "trend.tips": "Conseils",
+      "trend.few": "Après 3 matchs avec des stats en tant que {p}, tu verras ici ton évolution. Tu te compares à toi-même, pas aux autres.",
+      "trend.note": "Tu te compares à ta propre moyenne en tant que {p} cette saison, pas aux autres.",
+      "trend.tipUp": "Bravo" + NB + "! Tes {s} augmentent" + NB + ": {r} en moyenne sur les 3 derniers matchs, contre {b} avant. Continue comme ça.",
+      "trend.tipDown": "Point d'attention" + NB + ": tes {s} ont baissé sur les 3 derniers matchs ({r} contre {b}). Peut-être une idée pour ton point d'attention à la question 4" + NB + "?",
+      "trend.tipFlat": "Tes stats sont stables. Choisis un point à la question 4 pour faire encore un pas de plus.",
+      "trend.tipMin": "Tu as joué {m} minutes au dernier match, moins que d'habitude ({a}). C'est normal que tes stats soient un peu plus basses.",
       "season.title": "Saison", "season.match1": "{n} match", "season.matchN": "{n} matchs", "season.cs": "Clean sheets",
       "season.note": "Totaux en tant que {p}, depuis le 1er août. Compare-toi à toi-même, pas aux autres.",
       "code.enter": "Saisir mon code personnel", "code.eyebrow": "Code personnel", "code.title": "Saisis ton code",
@@ -1003,7 +1094,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "stats.hint": "Facultatif. Compte ce dont tu te souviens, une estimation suffit. L'engagement compte autant que les buts.",
       "stats.pos": "Poste", "stats.posNote": "l'app s'en souvient",
       "stats.pickPos": "Choisis d'abord ton poste. Tu recevras les stats qui correspondent à ton rôle.",
-      "stats.gR": "Résultat", "stats.gI": "Engagement", "stats.gC": "Contexte", "stats.minutes": "Minutes jouées",
+      "stats.gR": "Résultat", "stats.gI": "Engagement", "stats.gC": "Contexte", "stats.minutes": "Minutes jouées", "stats.minHint": "Touche le nombre pour l'écrire toi-même",
       "stats.less": "Retirer 1" + NB + ": {l}", "stats.more": "Ajouter 1" + NB + ": {l}",
       "chips.title": "Choix rapide", "chips.all": "Pour tout le monde", "chips.own": "Pour toi en tant que {p}", "chips.others": "Autres postes",
       "chips.perPos": "Conseils par poste", "chips.max": "Deux maximum. Moins de points d'attention, plus de précision à l'entraînement.",
@@ -1017,6 +1108,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "ph.moments": "Moments photo", "ph.count1": "{n} photo", "ph.countN": "{n} photos", "ph.of": "Photo" + NB + ": {m}", "ph.label": "Photos",
       "ph.viewer": "Photo", "ph.close": "Fermer", "ph.prev": "Photo précédente", "ph.next": "Photo suivante",
       "parents.tip": "Les parents suivent via ce rapport" + NB + ": télécharge le PDF et envoie-le-leur.",
+      "team.q": "Dans quelle équipe joues-tu" + NB + "?", "team.pick": "Choisis ton équipe (catégorie U)", "team.is": "Équipe" + NB + ": {t} · modifier", "team.saved": "Équipe {t} enregistrée.",
       "my.title": "Mes infos", "my.team": "Mon équipe", "my.teamPick": "Choisis ton équipe", "my.other": "Autre", "my.teamNote": "Apparaît en haut de ton rapport.",
       "code.nameTitle": "Comment t'appelles-tu" + NB + "?", "code.nameLabel": "Prénom", "code.namePh": "LUCAS", "code.nameSave": "Enregistrer mon prénom",
       "code.nameDesc": "Comme sur ton maillot ou comme ton entraîneur t'appelle. Un coéquipier a le même prénom" + NB + "? Ajoute alors les premières lettres de ton nom de famille, par exemple LUCASVDB.",
@@ -1098,13 +1190,12 @@ if (typeof module !== "undefined") module.exports = A4;
       claims: "Ballons captés", crosses: "Bons centres", onevone: "1 contre 1 gagnés" },
     POSL: { doelman: "Gardien", verdediger: "Défenseur central", back: "Arrière latéral", middenvelder: "Milieu de terrain", flank: "Ailier", aanvaller: "Attaquant" },
     FOCUS: {
-      algemeen: ["Scanner avant de recevoir le ballon", "Jouer des deux pieds", "Contrôle du ballon", "Me démarquer et être disponible", "Revenir vite après une perte de balle", "Mettre la pression", "Transitions rapides", "Parler et coacher sur le terrain"],
-      doelman: ["Bon placement sur les tirs", "Sortir sur les centres", "Relancer au pied", "Coacher ma défense"],
-      verdediger: ["Tenir la ligne", "Gagner les duels aériens", "Relancer calmement de derrière", "Couvrir la profondeur"],
-      back: ["Monter au bon moment", "Centrer au bon endroit", "Stopper mon adversaire sur le côté", "Revenir vite en position"],
-      middenvelder: ["Me retourner avec le ballon", "Dicter le rythme du jeu", "Être disponible entre les lignes", "Bien me placer défensivement"],
-      flank: ["Oser le 1 contre 1", "Plonger dans le dos de la défense", "Bon choix" + NB + ": centrer ou repiquer", "Aider en défense"],
-      aanvaller: ["Finir en une touche", "Garder le ballon dos au but", "Appels en profondeur", "Presser en premier défenseur"]
+      doelman: ["Bon placement sur les tirs", "Sortir sur les centres", "Relancer au pied", "Coacher ma défense", "Relancer vite et juste à la main ou au pied", "Le 1 contre 1 face à l'attaquant", "Couper les ballons en profondeur derrière ma défense", "Rester calme après une erreur"],
+      verdediger: ["Tenir la ligne", "Gagner les duels aériens", "Relancer calmement de derrière", "Couvrir la profondeur", "Rester proche de mon adversaire", "Intervenir et intercepter au bon moment", "Scanner avant de recevoir le ballon", "Parler et coacher derrière"],
+      back: ["Monter au bon moment", "Centrer au bon endroit", "Stopper mon adversaire sur le côté", "Revenir vite en position", "Tenter de marquer quand l'occasion se présente", "Combiner avec mon ailier", "Scanner avant de recevoir le ballon", "Revenir vite après une perte de balle"],
+      middenvelder: ["Me retourner avec le ballon", "Dicter le rythme du jeu", "Être disponible entre les lignes", "Bien me placer défensivement", "Scanner avant de recevoir le ballon", "Jouer des deux pieds", "Presser après une perte de balle", "Oser frapper de loin"],
+      flank: ["Oser le 1 contre 1", "Plonger dans le dos de la défense", "Bon choix" + NB + ": centrer ou repiquer", "Aider en défense", "Finir au second poteau", "Contrôle du ballon en course", "Jouer des deux pieds", "Transitions rapides après la récupération"],
+      aanvaller: ["Finir en une touche", "Garder le ballon dos au but", "Appels en profondeur", "Presser en premier défenseur", "Me démarquer dans la surface", "Cadrer mes têtes", "Rester calme devant le but", "Combiner avec les milieux"]
     },
     GUIDE: [
       { e: "Bienvenue", t: "Deux minutes après chaque séance",
@@ -1116,7 +1207,7 @@ if (typeof module !== "undefined") module.exports = A4;
       { e: "Étape 3", t: "Écrire ou dicter",
         h: "<p>Écris simplement ta réponse dans la zone de texte.</p><p><b>Tu préfères dicter" + NB + "?</b> Touche la zone de texte et appuie sur le <b>micro de ton clavier</b>. Ton téléphone transforme ta voix en texte. Ça marche sur iPhone et Android.</p><p>Tu peux ensuite encore modifier le texte.</p>" },
       { e: "Étape 4", t: "Ton rapport hebdomadaire",
-        h: "<p>Dans <b>Rapport</b>, choisis la semaine et coche les check-ins à inclure. Choisis-y aussi une fois <b>ton équipe</b> (catégorie U), elle apparaît en haut de ton rapport.</p><p>Ensuite <b>Télécharger le PDF</b> ou <b>Imprimer</b>" + NB + ": une page A4 soignée pour toi et ton entraîneur, avec de la place pour des notes. Les photos ne sont pas imprimées.</p>" },
+        h: "<p>Dans <b>Rapport</b>, choisis la semaine et coche les check-ins à inclure. Ton <b>équipe</b> (catégorie U) se choisit sur l'écran d'accueil, sous ton nom. Elle apparaît en haut de ton rapport.</p><p>Ensuite <b>Télécharger le PDF</b> ou <b>Imprimer</b>" + NB + ": une page A4 soignée pour toi et ton entraîneur, avec de la place pour des notes. Les photos ne sont pas imprimées.</p>" },
       { e: "Pour les parents", t: "Comment suivre",
         h: "<p>L'app n'a <b>ni serveur ni compte</b>. Tout ce que votre enfant encode reste uniquement sur son propre téléphone.</p><p>Si vous ouvrez l'app sur votre propre téléphone, elle est vide, même avec le code de votre enfant. Ce n'est pas une erreur" + NB + ": les réponses restent ainsi privées.</p><p><b>Pour suivre" + NB + ":</b></p><ul><li><b>Le rapport hebdomadaire" + NB + ":</b> votre enfant télécharge le PDF dans Rapport et vous l'envoie.</li><li><b>Après chaque check-in" + NB + ":</b> votre enfant peut vous envoyer ses réponses en un clic via WhatsApp ou mail. C'est lui qui choisit.</li><li><b>Regarder ensemble</b> sur le téléphone de votre enfant.</li></ul><p><b>Accord" + NB + ":</b> votre enfant reçoit son code via vous. En donnant le code ou en le saisissant vous-même, vous acceptez l'app et le texte sur la vie privée.</p>" },
       { e: "Étape 5", t: "Garder tes données en sécurité",
@@ -1476,6 +1567,25 @@ if (typeof module !== "undefined") module.exports = A4;
   $("gateOk").addEventListener("click", submitGate);
   $("gateIn").addEventListener("keydown", function (e) { if (e.key === "Enter") submitGate(); });
   $("gateIn").addEventListener("input", function () { $("gateErr").hidden = true; $("gateIn").classList.remove("bad"); });
+  /* iOS: na het sluiten van het toetsenbord blijft een vaste balk soms te hoog staan en
+     verbergt hij de knop Volgende. Tijdens het typen verbergen we de tabbalk; daarna zetten we alles terug. */
+  (function () {
+    function isField(el) { return el && (el.tagName === "TEXTAREA" || el.tagName === "SELECT" || (el.tagName === "INPUT" && !/^(checkbox|radio|file|button)$/i.test(el.type))); }
+    var t = null;
+    document.addEventListener("focusin", function (e) { if (isField(e.target)) { clearTimeout(t); document.body.classList.add("typing"); } });
+    document.addEventListener("focusout", function (e) {
+      if (!isField(e.target)) return;
+      clearTimeout(t);
+      t = setTimeout(function () {
+        if (isField(document.activeElement)) return;
+        document.body.classList.remove("typing");
+        window.scrollTo(window.scrollX, window.scrollY);
+      }, 120);
+    });
+    if (window.visualViewport) window.visualViewport.addEventListener("resize", function () {
+      if (!isField(document.activeElement)) { document.body.classList.remove("typing"); window.scrollTo(window.scrollX, window.scrollY); }
+    });
+  })();
   function refreshAll() {
     var wasLocked = document.body.classList.contains("locked");
     if (!updateGate() && wasLocked) { go("start"); maybeGuide(); return; }
@@ -1664,9 +1774,10 @@ if (typeof module !== "undefined") module.exports = A4;
     p.innerHTML = h;
   }
   function counterRow(id, label, val, isMin) {
-    return '<div class="srow"><span>' + esc(label) + '</span><div class="stepper" data-id="' + id + '">' +
+    return '<div class="srow"><span>' + esc(label) + (isMin ? '<small class="minhint">' + esc(T("stats.minHint")) + "</small>" : "") + '</span><div class="stepper" data-id="' + id + '">' +
       '<button type="button" data-d="-1" aria-label="' + esc(T("stats.less", { l: label.toLowerCase() })) + '">−</button>' +
-      '<output aria-live="polite">' + (val == null ? (isMin ? "–" : "0") : val) + "</output>" +
+      (isMin ? '<input class="minin" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="120" placeholder="–" value="' + (val == null ? "" : val) + '" aria-label="' + esc(label) + '">'
+             : '<output aria-live="polite">' + (val == null ? "0" : val) + "</output>") +
       '<button type="button" data-d="1" aria-label="' + esc(T("stats.more", { l: label.toLowerCase() })) + '">+</button></div></div>';
   }
   function renderStats(d) {
@@ -1710,12 +1821,19 @@ if (typeof module !== "undefined") module.exports = A4;
         var next = (cur == null ? 0 : cur) + step * (+b.dataset.d);
         next = Math.max(0, Math.min(max, next));
         d.stats[id] = next; d.statsTouched = true;
-        st.querySelector("output").textContent = next;
+        if (isMin) st.querySelector("input").value = next; else st.querySelector("output").textContent = next;
       } else if (bo) {
         d.stats[bo.dataset.bool] = b.dataset.v === "1"; d.statsTouched = true;
         bo.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
       }
       save();
+    });
+    $("statRows").addEventListener("input", function (e) {
+      var inp = e.target.closest(".minin"); if (!inp) return;
+      var v = inp.value.trim();
+      if (v === "") { d.stats.min = null; }
+      else { var n = Math.max(0, Math.min(120, Math.round(+v || 0))); d.stats.min = n; if (String(n) !== v) inp.value = n; }
+      d.statsTouched = true; save();
     });
     drawRows();
   }
@@ -1755,25 +1873,160 @@ if (typeof module !== "undefined") module.exports = A4;
     $("seasonNote").textContent = T("season.note", { p: POS[pos].l.toLowerCase() });
   }
 
+  /* ====== VRAGEN VOOR DE TRAINER ======
+     Open vragen blijven op het startscherm tot de speler "Gesteld" tikt.
+     Staat er vandaag een training in de planning, dan krijgt hij een herinnering. */
+  function openAsks() { return (store.asks || []).filter(function (q) { return !q.done; }); }
+  function renderAsks(now) {
+    var open = openAsks(), h = "";
+    $("askCount").textContent = open.length ? plural(open.length, "ask.open1", "ask.openN") : "";
+    if (open.length && planOf(iso(now)) === "training") h += '<p class="asknow">' + T("ask.today") + "</p>";
+    if (!open.length) h += '<p class="legend" style="margin:0">' + T("ask.empty") + "</p>";
+    else h += '<ul class="asklist">' + open.map(function (q) {
+      return '<li><div><p>' + esc(q.text) + "</p><small>" + T("ask.from", { d: fmt(parse(q.date), { weekday: "short", day: "numeric", month: "short" }) }) +
+        '</small></div><button type="button" class="askdone" data-ask="' + q.id + '">' + T("ask.done") + "</button></li>";
+    }).join("") + "</ul>";
+    $("askBody").innerHTML = h;
+  }
+  $("askBody").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-ask]"); if (!b) return;
+    (store.asks || []).forEach(function (q) { if (q.id === b.dataset.ask) { q.done = true; q.doneOn = iso(today()); } });
+    save(); renderStart(); toast(T("ask.asked"));
+  });
+  $("askAdd").addEventListener("click", function () { $("askIn").value = ""; $("askOv").hidden = false; setTimeout(function () { $("askIn").focus(); }, 30); });
+  $("askOk").addEventListener("click", function () {
+    var t = $("askIn").value.trim(); if (!t) { $("askIn").focus(); return; }
+    if (!store.asks) store.asks = [];
+    store.asks.push({ id: "q" + Date.now(), text: t, date: iso(today()), done: false });
+    save(); $("askOv").hidden = true; renderStart(); toast(T("ask.saved"));
+  });
+  $("askCancel").addEventListener("click", function () { $("askOv").hidden = true; });
+  $("askOv").addEventListener("click", function (e) { if (e.target === $("askOv")) $("askOv").hidden = true; });
+
+  /* ====== MIJN EVOLUTIE: vergelijken met jezelf ======
+     Geen verzonnen normen: de lijn is het eigen gemiddelde van de speler op die positie, dit seizoen.
+     Groen = duidelijk boven, blauw = rond, rood = duidelijk onder dat gemiddelde. Altijd ook in woorden. */
+  var TREND_MAX = 8;
+  function num1(x) { return String(Math.round(x * 10) / 10).replace(".", ","); }
+  function trendClass(v, avg) {
+    var thr = Math.max(0.75, avg * 0.25);
+    return v >= avg + thr ? "up" : v <= avg - thr ? "down" : "mid";
+  }
+  function trendSvg(vals, dates, avg) {
+    var W = 300, H = 74, top = 14, base = H - 14, n = vals.length;
+    var max = Math.max(1, avg * 1.4, Math.max.apply(null, vals));
+    var slot = W / TREND_MAX, bw = Math.min(26, slot - 8), x0 = (W - slot * n) / 2;
+    function y(v) { return base - (base - top) * (v / max); }
+    var out = ['<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-hidden="true">'];
+    out.push('<line x1="0" x2="' + W + '" y1="' + base + '" y2="' + base + '" stroke="var(--line)" stroke-width="1"/>');
+    vals.forEach(function (v, k) {
+      var cls = trendClass(v, avg), x = x0 + slot * k + (slot - bw) / 2, yy = Math.min(y(v), base - 3), h = base - yy, r = Math.min(4, h, bw / 2);
+      var d = "M" + x + " " + base + "V" + (yy + r) + "Q" + x + " " + yy + " " + (x + r) + " " + yy + "H" + (x + bw - r) + "Q" + (x + bw) + " " + yy + " " + (x + bw) + " " + (yy + r) + "V" + base + "Z";
+      out.push('<path d="' + d + '" fill="var(--' + cls + ')"><title>' + esc(dates[k]) + ": " + v + "</title></path>");
+      if (k === n - 1) out.push('<text x="' + (x + bw / 2) + '" y="' + (yy - 4) + '" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">' + v + "</text>");
+    });
+    var ay = y(avg);
+    out.push('<line x1="0" x2="' + W + '" y1="' + ay + '" y2="' + ay + '" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4"/>');
+    out.push('<text x="0" y="' + (H - 1) + '" font-size="11" fill="var(--muted)">' + esc(dates[0]) + "</text>");
+    if (n > 1) out.push('<text x="' + W + '" y="' + (H - 1) + '" text-anchor="end" font-size="11" fill="var(--muted)">' + esc(dates[n - 1]) + "</text>");
+    out.push("</svg>");
+    return out.join("");
+  }
+  function trendSvgPending(vals, dates) {
+    var W = 300, H = 74, top = 14, base = H - 14, slots = 3, n = vals.length;
+    var max = Math.max(1, Math.max.apply(null, vals.concat([0])) * 1.4);
+    var slot = W / TREND_MAX, bw = Math.min(26, slot - 8), x0 = (W - slot * slots) / 2;
+    var out = ['<svg viewBox="0 0 ' + W + " " + H + '" class="tr-pend" role="img" aria-hidden="true">'];
+    out.push('<line x1="0" x2="' + W + '" y1="' + base + '" y2="' + base + '" stroke="var(--line)" stroke-width="1"/>');
+    for (var k = 0; k < slots; k++) {
+      var x = x0 + slot * k + (slot - bw) / 2;
+      if (k < n) {
+        var v = vals[k], yy = Math.min(base - (base - top) * (v / max), base - 3);
+        out.push('<path d="M' + x + " " + base + "V" + yy + "H" + (x + bw) + "V" + base + 'Z" fill="var(--muted)" fill-opacity=".45"><title>' + esc(dates[k]) + ": " + v + "</title></path>");
+        out.push('<text x="' + (x + bw / 2) + '" y="' + (yy - 4) + '" text-anchor="middle" font-size="12" font-weight="700" fill="var(--muted)">' + v + "</text>");
+      } else out.push('<rect x="' + x + '" y="' + (base - 22) + '" width="' + bw + '" height="22" rx="4"/>');
+    }
+    out.push("</svg>");
+    return out.join("");
+  }
+  function renderTrendPending(pos, ms) {
+    var ids = pos ? POS[pos].stats.filter(function (id) { return !STATS[id].bool; }) : ["goals", "assists", "duels"];
+    var dates = ms.map(function (s) { var d = parse(s.date); return d.getDate() + "/" + (d.getMonth() + 1); });
+    var h = '<p class="legend" style="margin:0 0 6px">' + esc(pos ? T("trend.pending", { p: POS[pos].l.toLowerCase(), k: 3 - ms.length }) : T("trend.pendingNoPos")) + "</p>";
+    ids.forEach(function (id) {
+      var vals = ms.map(function (s) { return +s.stats.v[id] || 0; });
+      h += '<div class="tr"><div class="tr-h"><b>' + esc(STATS[id].l) + "</b><span>" + ms.length + " / 3</span></div>" + trendSvgPending(vals, dates) + "</div>";
+    });
+    $("trendLbl").textContent = pos ? T("trend.sub", { p: POS[pos].l.toLowerCase(), n: ms.length }).split(" · ")[0] : "";
+    $("trendBody").innerHTML = h;
+  }
+  function renderTrend(now) {
+    var card = $("trendCard"); if (!card) return;
+    var st = iso(seasonStart(now));
+    var all = store.sessions.filter(function (s) { return s.type === "match" && s.date >= st && s.stats && POS[s.stats.pos]; });
+    card.hidden = false;
+    if (!all.length) { renderTrendPending((store.position && POS[store.position]) ? store.position : "", []); return; }
+    var pos = (store.position && POS[store.position]) ? store.position : all[all.length - 1].stats.pos;
+    var ms = all.filter(function (s) { return s.stats.pos === pos; }).sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.created - b.created; });
+    card.hidden = false;
+    var pl = POS[pos].l.toLowerCase();
+    if (ms.length < 3) { renderTrendPending(pos, ms); return; }
+    var recent = ms.slice(-TREND_MAX);
+    $("trendLbl").textContent = T("trend.sub", { p: pl, n: recent.length });
+    var dates = recent.map(function (s) { var d = parse(s.date); return d.getDate() + "/" + (d.getMonth() + 1); });
+    var h = '<div class="trend-legend"><span><i style="background:var(--up)"></i>' + T("trend.up") + '</span><span><i style="background:var(--mid)"></i>' + T("trend.mid") +
+      '</span><span><i style="background:var(--down)"></i>' + T("trend.down") + "</span></div>";
+    var best = null, worst = null;
+    POS[pos].stats.forEach(function (id) {
+      var S = STATS[id]; if (S.bool) return;
+      var vAll = ms.map(function (s) { return +s.stats.v[id] || 0; });
+      var avg = vAll.reduce(function (a, b) { return a + b; }, 0) / vAll.length;
+      var vals = vAll.slice(-TREND_MAX), last = vals[vals.length - 1], cls = trendClass(last, avg);
+      h += '<div class="tr"><div class="tr-h"><b>' + esc(S.l) + "</b><span>" + T("trend.avg", { a: num1(avg) }) + "</span></div>" +
+        trendSvg(vals, dates, avg) +
+        '<p class="tr-last">' + T("trend.last", { v: last }) + ' · <em style="color:var(--' + cls + ')">' + (cls === "up" ? "↑ " : cls === "down" ? "↓ " : "≈ ") + "</em>" + T("trend." + cls) + "</p></div>";
+      if (vAll.length >= 5) {
+        var r = vAll.slice(-3), b = vAll.slice(0, -3);
+        var rm = r.reduce(function (a, x) { return a + x; }, 0) / 3, bm = b.reduce(function (a, x) { return a + x; }, 0) / b.length;
+        var thr = Math.max(0.75, bm * 0.25), dlt = rm - bm, rel = dlt / Math.max(1, bm);
+        var it = { s: S.l.toLowerCase(), r: num1(rm), b: num1(bm), rel: rel };
+        if (dlt >= thr && (!best || rel > best.rel)) best = it;
+        if (dlt <= -thr && (!worst || rel < worst.rel)) worst = it;
+      }
+    });
+    var tips = [];
+    if (best) tips.push(T("trend.tipUp", best));
+    if (worst) tips.push(T("trend.tipDown", worst));
+    var mins = ms.filter(function (s) { return s.stats.min != null; }).map(function (s) { return s.stats.min; });
+    var lastMin = ms[ms.length - 1].stats.min;
+    if (lastMin != null && mins.length >= 3) {
+      var am = mins.reduce(function (a, x) { return a + x; }, 0) / mins.length;
+      if (lastMin < am * 0.6) tips.push(T("trend.tipMin", { m: lastMin, a: Math.round(am) }));
+    }
+    if (!tips.length && ms.length >= 5) tips.push(T("trend.tipFlat"));
+    if (tips.length) h += '<div class="tips"><div class="eyebrow">' + T("trend.tips") + "</div>" + tips.map(function (t) { return "<p>" + esc(t) + "</p>"; }).join("") + "</div>";
+    h += '<p class="legend" style="margin:10px 0 0">' + esc(T("trend.note", { p: pl })) + "</p>";
+    $("trendBody").innerHTML = h;
+  }
+
   /* ====== SNELKEUZES VRAAG 4: voor iedereen + per positie ====== */
   var FOCUS = {
-    algemeen:     ["Scannen voor ik de bal krijg", "Tweebenigheid", "Balaanname", "Vrijlopen en aanspeelbaar zijn", "Terugsprinten na balverlies", "Druk zetten", "Snel omschakelen", "Praten en coachen op het veld"],
-    doelman:      ["Positie kiezen bij schoten", "Uitkomen bij voorzetten", "Opbouwen met de voet", "Mijn verdediging coachen"],
-    verdediger:   ["Positie houden in de lijn", "Kopduels winnen", "Rustig opbouwen van achteruit", "De diepte afschermen"],
-    back:         ["Op tijd mee opkomen", "Voorzetten op de juiste plek", "Mijn tegenstander op de flank stoppen", "Snel terug in positie"],
-    middenvelder: ["Draaien met de bal", "Het tempo van het spel bepalen", "Aanspeelbaar zijn tussen de linies", "Defensief juist positie kiezen"],
-    flank:        ["Het 1-tegen-1 durven aangaan", "Diepgaan achter de verdediging", "Juiste keuze: voorzet of naar binnen", "Mee terugverdedigen"],
-    aanvaller:    ["Afwerken in één tijd", "Bal vasthouden met de rug naar doel", "Diepgaande loopacties", "Als eerste verdediger storen"]
+    doelman:      ["Positie kiezen bij schoten", "Uitkomen bij voorzetten", "Opbouwen met de voet", "Mijn verdediging coachen", "Snel en juist uitgooien of uittrappen", "Het 1-tegen-1 tegen de spits", "Diepe ballen achter mijn verdediging onderscheppen", "Rustig blijven na een fout"],
+    verdediger:   ["Positie houden in de lijn", "Kopduels winnen", "Rustig opbouwen van achteruit", "De diepte afschermen", "Kort op mijn man staan", "Op tijd ingrijpen en onderscheppen", "Scannen voor ik de bal krijg", "Praten en coachen achteraan"],
+    back:         ["Op tijd mee opkomen", "Voorzetten op de juiste plek", "Mijn tegenstander op de flank stoppen", "Snel terug in positie", "Proberen scoren als de kans er is", "Combineren met mijn flankspeler", "Scannen voor ik de bal krijg", "Terugsprinten na balverlies"],
+    middenvelder: ["Draaien met de bal", "Het tempo van het spel bepalen", "Aanspeelbaar zijn tussen de linies", "Defensief juist positie kiezen", "Scannen voor ik de bal krijg", "Tweebenig spelen", "Druk zetten na balverlies", "Durven trappen van op afstand"],
+    flank:        ["Het 1-tegen-1 durven aangaan", "Diepgaan achter de verdediging", "Juiste keuze: voorzet of naar binnen", "Mee terugverdedigen", "Afwerken aan de tweede paal", "Balaanname in de loop", "Tweebenig spelen", "Snel omschakelen na balwinst"],
+    aanvaller:    ["Afwerken in één tijd", "Bal vasthouden met de rug naar doel", "Diepgaande loopacties", "Als eerste verdediger storen", "Vrijlopen in de zestien", "Koppen op doel", "Rustig blijven voor doel", "Combineren met de middenvelders"]
   };
   function chipsHTML(pos) {
     function row(list) { return '<div class="chips">' + list.map(function (c) { return '<button type="button" data-v="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + "</div>"; }
     var own = POS[pos] ? pos : "";
-    var h = '<div id="chips" class="chipwrap"><p class="field-l">' + T("chips.title") + ' <span>max. 2</span></p>' +
-      '<p class="chipgrp">' + T("chips.all") + '</p>' + row(FOCUS.algemeen);
-    if (own) h += '<p class="chipgrp">' + T("chips.own", { p: POS[own].l.toLowerCase() }) + "</p>" + row(FOCUS[own]);
-    h += '<details class="morepos"><summary>' + (own ? T("chips.others") : T("chips.perPos")) + "</summary>" +
-      Object.keys(POS).filter(function (k) { return k !== own; }).map(function (k) { return '<p class="chipgrp">' + POS[k].l + "</p>" + row(FOCUS[k]); }).join("") +
-      "</details></div>";
+    var h = '<div id="chips" class="chipwrap"><p class="field-l">' + T("chips.title") + ' <span>max. 2</span></p>';
+    var others = Object.keys(POS).filter(function (k) { return k !== own; }).map(function (k) { return '<p class="chipgrp">' + POS[k].l + "</p>" + row(FOCUS[k]); }).join("");
+    if (own) h += '<p class="chipgrp">' + T("chips.own", { p: POS[own].l.toLowerCase() }) + "</p>" + row(FOCUS[own]) +
+      '<details class="morepos"><summary>' + T("chips.others") + "</summary>" + others + "</details>";
+    else h += others;
+    h += "</div>";
     return h;
   }
 
@@ -1914,9 +2167,13 @@ if (typeof module !== "undefined") module.exports = A4;
 
   function renderPhotoStep(d) {
     if (!d.photos) d.photos = [];
-    $("stepBody").innerHTML = '<div class="stack"><div class="qhead"><div class="eyebrow">' + T("ph.eyebrow") + '</div><h2>' + T("ph.title") + '</h2>' +
+    $("stepBody").innerHTML = '<div class="stack">' +
+      '<div class="qhead"><div class="eyebrow">' + T("ask.stepEyebrow") + '</div><h2>' + T("ask.stepTitle") + '</h2><p class="hint">' + T("ask.stepHint") + '</p></div>' +
+      '<div class="answer"><textarea class="plain" id="askTxt" maxlength="300" placeholder="' + esc(T("ask.ph")) + '">' + esc(d.ask || "") + "</textarea></div>" +
+      '<div class="qhead" style="margin-top:8px"><h2 style="font-size:24px">' + T("ph.title") + '</h2>' +
       '<p class="hint">' + T("ph.hint") + '</p></div>' +
       '<div id="phStep"></div></div>';
+    $("askTxt").addEventListener("input", function (e) { d.ask = e.target.value; save(); });
     photoEditor($("phStep"), d.photos, function (ids) { d.photos = ids; save(); });
   }
 
@@ -2010,7 +2267,7 @@ if (typeof module !== "undefined") module.exports = A4;
     { e: "Stap 3", t: "Typen of inspreken",
       h: "<p>Typ je antwoord gewoon in het tekstvak.</p><p><b>Liever inspreken?</b> Tik in het tekstvak en druk op het <b>microfoontje van je toetsenbord</b>. Je telefoon zet je stem om in tekst. Dat werkt op iPhone en Android.</p><p>Daarna kan je de tekst nog aanpassen.</p>" },
     { e: "Stap 4", t: "Je weekverslag",
-      h: "<p>In <b>Verslag</b> kies je de week en vink je aan welke check-ins erin komen. Kies daar ook één keer <b>je ploeg</b> (U-categorie), die komt bovenaan je verslag.</p><p>Daarna <b>Download PDF</b> of <b>Print</b>: een nette A4 voor jou en je trainer, met plaats voor notities. Foto's komen niet op papier.</p>" },
+      h: "<p>In <b>Verslag</b> kies je de week en vink je aan welke check-ins erin komen. Je <b>ploeg</b> (U-categorie) kies je op het startscherm, onder je naam. Die komt bovenaan je verslag.</p><p>Daarna <b>Download PDF</b> of <b>Print</b>: een nette A4 voor jou en je trainer, met plaats voor notities. Foto's komen niet op papier.</p>" },
     { e: "Voor ouders", t: "Zo volg je mee",
       h: "<p>De app heeft <b>geen server en geen account</b>. Alles wat je kind invult, staat alleen op zijn eigen telefoon.</p><p>Open je de app op je eigen telefoon, dan is die leeg, ook met de code van je kind. Dat is geen fout: zo blijven de antwoorden privé.</p><p><b>Zo volg je mee:</b></p><ul><li><b>Het weekverslag:</b> je kind downloadt de PDF in Verslag en stuurt hem naar jou.</li><li><b>Na elke check-in:</b> je kind kan met één tik zijn antwoorden naar jou sturen via WhatsApp of mail. Je kind kiest zelf.</li><li><b>Samen kijken</b> op de telefoon van je kind.</li></ul><p><b>Akkoord:</b> je kind krijgt zijn code via jou. Door de code te geven of zelf in te geven, ga je akkoord met de app en de privacytekst.</p>" },
     { e: "Stap 5", t: "Veilig bewaren",
@@ -2117,12 +2374,15 @@ if (typeof module !== "undefined") module.exports = A4;
     $("wkrange").textContent = rangeOf(mon);
     $("greet").textContent = nameNow() ? T("start.greetName", { n: nameNow() }) : T("start.greet");
     $("codeBtn").hidden = !!profile;
+    $("teamBtn").textContent = teamLabel(); $("teamBtn").classList.toggle("empty", !store.team);
     $("startLbl").textContent = store.draft ? T("start.resume") : T("start.start");
 
     var ws = sessionsIn(mon);
     $("days").innerHTML = dayCells(mon, ws, iso(now));
     $("greetSub").textContent = todayLine(iso(now));
     renderSeason(now);
+    renderTrend(now);
+    renderAsks(now);
     renderMoments();
 
     if (!ws.length) {
@@ -2255,10 +2515,11 @@ if (typeof module !== "undefined") module.exports = A4;
     var newS = {
       id: "s" + Date.now(), created: Date.now(), date: d.date, type: d.type, energy: d.energy,
       pain: d.pain, painText: d.pain ? d.painText.trim() : "", score: d.score, sleepH: d.sleepH || "", sleepQ: d.sleepQ || "",
-      stats: statsForSave(d), photos: (d.photos || []).slice(),
+      stats: statsForSave(d), photos: (d.photos || []).slice(), ask: (d.ask || "").trim(),
       a: d.a.map(function (x) { return x.trim(); })
     };
     store.sessions.push(newS);
+    if (newS.ask) { if (!store.asks) store.asks = []; store.asks.push({ id: "q" + Date.now(), text: newS.ask, date: newS.date, done: false }); }
     store.draft = null; save();
     go("start");
     openShare(newS);
@@ -2288,7 +2549,7 @@ if (typeof module !== "undefined") module.exports = A4;
       stats: statsLine(s),
       qa: QS.map(function (qq, i) {
         return { q: (i + 1) + ". " + qq.short, a: i === 0 ? (T("rep.score", { s: s.score }) + (s.a[0] ? " " + s.a[0] : "")) : s.a[i] };
-      })
+      }).concat(s.ask ? [{ q: T("ask.label"), a: s.ask }] : [])
     };
   }
 
@@ -2369,13 +2630,23 @@ if (typeof module !== "undefined") module.exports = A4;
     updateReport();
   }
   var TEAMS = ["U6", "U7", "U8", "U9", "U10", "U11", "U12", "U13", "U14", "U15", "U16", "U17", "U18", "U19", "U21"];
-  function drawTeams() {
+  function drawTeams(selId) {
     var cur = store.team || "", opts = ['<option value="">' + esc(T("my.teamPick")) + "</option>"];
     TEAMS.forEach(function (t) { opts.push('<option value="' + t + '"' + (t === cur ? " selected" : "") + ">" + t + "</option>"); });
     var other = T("my.other"), isOther = cur && TEAMS.indexOf(cur) === -1;
     opts.push('<option value="__other"' + (isOther ? " selected" : "") + ">" + esc(isOther ? cur : other) + "</option>");
-    $("teamSel").innerHTML = opts.join("");
+    $(selId || "teamSel").innerHTML = opts.join("");
   }
+  function teamLabel() { return store.team ? T("team.is", { t: store.team }) : T("team.pick"); }
+  $("teamBtn").addEventListener("click", function () { drawTeams("teamSel2"); $("teamOv").hidden = false; setTimeout(function () { $("teamSel2").focus(); }, 30); });
+  $("teamOk").addEventListener("click", function () {
+    var v = $("teamSel2").value;
+    store.team = v === "__other" ? T("my.other") : v;
+    save(); $("teamOv").hidden = true; renderStart();
+    if (store.team) toast(T("team.saved", { t: store.team }));
+  });
+  $("teamCancel").addEventListener("click", function () { $("teamOv").hidden = true; });
+  $("teamOv").addEventListener("click", function (e) { if (e.target === $("teamOv")) $("teamOv").hidden = true; });
   $("teamSel").addEventListener("change", function (e) {
     var v = e.target.value;
     store.team = v === "__other" ? T("my.other") : v;
