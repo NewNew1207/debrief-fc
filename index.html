@@ -60,7 +60,7 @@ html{touch-action:manipulation;overscroll-behavior:none}
 body{overscroll-behavior-y:none}
 *{-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;padding-inline:16px;padding-block:0;-webkit-text-size-adjust:100%}
-.app{max-width:460px;margin:0 auto;padding-block:16px calc(112px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:18px}
+.app{max-width:460px;margin:0 auto;padding-block:16px calc(190px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:18px}
 .app.wide{max-width:720px}
 .stack{display:flex;flex-direction:column;gap:18px}
 button,input{font:inherit;color:inherit}
@@ -1723,7 +1723,8 @@ if (typeof module !== "undefined") module.exports = A4;
         var c = b.dataset.v, v = ta.value;
         if (has(c)) { v = tidy(v.split(c).join("")); }
         else {
-          var n = btns.filter(function (x) { return has(x.dataset.v); }).length;
+          var picked = {}; btns.forEach(function (x) { if (has(x.dataset.v)) picked[x.dataset.v] = 1; });
+          var n = Object.keys(picked).length;  // dezelfde keuze kan bij meerdere posities staan
           if (n >= MAX_CHIPS) { toast(T("chips.max")); return; }
           v = tidy(v); v = v ? v.replace(/[\s.]+$/, "") + ", " + c : c;
         }
