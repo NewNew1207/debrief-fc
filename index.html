@@ -55,6 +55,9 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;min-height:100%}
+html{touch-action:manipulation;overscroll-behavior:none}
+body{overscroll-behavior-y:none}
+*{-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;padding-inline:16px;padding-block:0;-webkit-text-size-adjust:100%}
 .app{max-width:460px;margin:0 auto;padding-block:16px calc(112px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:18px}
 .app.wide{max-width:720px}
@@ -149,6 +152,8 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .focus .ic{width:46px;height:46px;border-radius:12px;background:var(--blue-soft);display:grid;place-items:center;flex:none;color:var(--blue-ink)}
 .focus .ic svg{width:24px;height:24px}
 .focus p{margin:0;font-weight:600;font-size:17px}
+.focusbtn{width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.focusbtn .chev-r{width:22px;height:22px;flex:none;color:var(--muted)}
 
 /* check-in */
 .ck-top{display:flex;align-items:center;gap:10px}
@@ -174,9 +179,10 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .jersey{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 .jersey button{aspect-ratio:1/1;max-width:100%;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-family:var(--display);font-weight:800;font-size:30px;line-height:1}
 .answer{position:relative}
-.answer textarea{width:100%;min-height:150px;resize:vertical;border:1.5px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);font:inherit;font-size:17px;line-height:1.45;padding:14px 72px 14px 14px}
+.answer textarea{width:100%;min-height:150px;resize:vertical;border:1.5px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);font:inherit;font-size:17px;line-height:1.45;padding:14px 14px 14px 14px}
 .answer textarea.plain{min-height:96px;padding-right:14px}
 .answer textarea::placeholder{color:var(--muted)}
+.kbtip{margin:6px 2px 0;font-size:14px;line-height:1.4;color:var(--muted)}
 .mic{position:absolute;right:10px;bottom:12px;width:52px;height:52px;border-radius:50%;border:0;background:var(--blue);color:var(--on-blue);display:grid;place-items:center;box-shadow:0 4px 14px rgba(10,63,156,.35)}
 .mic svg{width:24px;height:24px}
 .mic.rec{background:var(--rec)}
@@ -265,7 +271,7 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .phimg{padding:0;border:0;border-radius:12px;overflow:hidden;aspect-ratio:1/1;background:var(--line);display:block;width:100%;max-width:100%}
 .phimg img{width:100%;height:100%;object-fit:cover;display:block}
 .phdel{position:absolute;top:6px;right:6px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(6,18,42,.72);color:#fff;font-size:20px;line-height:1;display:grid;place-items:center;padding:0}
-.phcap{width:100%;min-width:0;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:6px 8px;font-size:14px}
+.phcap{width:100%;min-width:0;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:6px 8px;font-size:16px}
 .phadd{aspect-ratio:1/1;max-width:100%;border:2px dashed var(--line);border-radius:12px;display:grid;place-items:center;cursor:pointer;color:var(--blue-ink);font-weight:700;background:var(--surface);position:relative}
 .phadd:hover,.phadd:focus-within{border-color:var(--blue-ink)}
 .phadd.busy span::after{content:" …"}
@@ -386,19 +392,19 @@ body.locked #app,body.locked .tabbar{display:none}
       </div>
       <div class="greet">
         <h2 id="greet">Ciao. Klaar voor je check-in?</h2>
-        <p class="muted" id="greetSub">Vier vragen, twee minuten. Inspreken mag.</p>
+        <p class="muted" id="greetSub">Vier vragen, twee minuten.</p>
         <button class="linkbtn" id="codeBtn" data-i18n="code.enter">Persoonlijke code ingeven</button>
       </div>
-      <button class="btn btn-primary" id="startBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>
-        <span id="startLbl">Start check-in</span>
-      </button>
       <div class="card">
         <div class="sec-h"><h3 data-i18n="start.thisWeek">Deze week</h3><span class="muted" id="wkrange" style="font-size:14px"></span></div>
         <div class="days" id="days"></div>
         <p class="legend" data-i18n="start.legend">Tik op een dag om training, match of rust te plannen. Volle bol = check-in gedaan, rood = geannuleerd.</p>
         <ul class="sess" id="sessList"></ul>
       </div>
+      <button class="btn btn-primary" id="startBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M9 13.5l2 2 4-4.5"/></svg>
+        <span id="startLbl">Start check-in</span>
+      </button>
       <div class="card" id="seasonCard" hidden>
         <div class="sec-h"><h3 data-i18n="season.title">Seizoen</h3><span class="muted" id="seasonLbl" style="font-size:14px"></span></div>
         <div class="tiles" id="seasonTiles"></div>
@@ -408,10 +414,11 @@ body.locked #app,body.locked .tabbar{display:none}
         <div class="sec-h"><h3 data-i18n="ph.moments">Fotomomenten</h3><span class="muted" id="momentsCount" style="font-size:14px"></span></div>
         <div class="strip" id="momentsStrip"></div>
       </div>
-      <div class="card focus">
+      <button type="button" class="card focus focusbtn" id="focusCard">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></div>
-        <div style="min-width:0"><div class="eyebrow" data-i18n="start.focus">Jouw focus</div><p id="focusText"></p></div>
-      </div>
+        <div style="min-width:0;flex:1"><div class="eyebrow" data-i18n="start.focus">Jouw focus</div><p id="focusText"></p></div>
+        <svg class="chev-r" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
       <footer class="foot">
         <p class="motto">“The top of the mountain is the bottom of the next, so keep climbing.”</p>
         <button type="button" class="linkbtn" id="helpLink" data-i18n="help.how">Hoe werkt de app?</button>
@@ -514,7 +521,7 @@ body.locked #app,body.locked .tabbar{display:none}
       <div class="stack">
         <p class="muted" style="margin:0" data-i18n="gate.desc">Geef je code in. Dat doe je maar één keer, daarna onthoudt dit toestel je.</p>
         <label for="gateIn" class="field-l" style="margin:4px 0 -4px" data-i18n="code.label">Code</label>
-        <input id="gateIn" class="codein" type="text" placeholder="NAAM-XXXX-XXXX" data-i18n-ph="code.ph" maxlength="40"
+        <input id="gateIn" class="codein" type="text" placeholder="RF-XXXX-XXXX" data-i18n-ph="code.ph" maxlength="40"
           autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
         <p class="err" id="gateErr" role="alert" hidden></p>
         <button class="btn btn-primary" id="gateOk" data-i18n="code.unlock">Ontgrendel</button>
@@ -533,7 +540,7 @@ body.locked #app,body.locked .tabbar{display:none}
 <div class="tabbar">
   <nav data-i18n-aria="nav.menu" aria-label="Hoofdmenu">
     <button class="tab" data-go="start" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span data-i18n="nav.start">Start</span></button>
-    <button class="tab" data-go="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg><span data-i18n="nav.check">Check-in</span></button>
+    <button class="tab" data-go="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M9 13.5l2 2 4-4.5"/></svg><span data-i18n="nav.check">Check-in</span></button>
     <button class="tab" data-go="export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></svg><span data-i18n="nav.report">Verslag</span></button>
   </nav>
 </div>
@@ -569,7 +576,6 @@ body.locked #app,body.locked .tabbar{display:none}
       <button type="button" data-v="match" data-plan-l="match">Match</button>
       <button type="button" data-v="rust" data-plan-l="rust">Rust</button>
       <button type="button" data-v="geannuleerd" data-plan-l="geannuleerd">Geannuleerd</button>
-      <button type="button" data-v="" class="span2" data-i18n="plan.none">Niets</button>
     </div>
     <label class="chk"><input type="checkbox" id="planRepeat"> <span id="planRepeatLbl">Elke week zo</span></label>
     <button class="btn btn-primary" id="planOk" data-i18n="common.save">Bewaar</button>
@@ -584,7 +590,7 @@ body.locked #app,body.locked .tabbar{display:none}
     <div class="stack" id="codeStep" style="gap:12px">
       <p class="muted" style="margin:0" data-i18n="code.desc">Dat doe je maar één keer. Daarna onthoudt dit toestel je naam.</p>
       <label for="codeIn" class="field-l" style="margin:4px 0 -4px" data-i18n="code.label">Code</label>
-      <input id="codeIn" class="codein" type="text" placeholder="NAAM-XXXX-XXXX" data-i18n-ph="code.ph" maxlength="40"
+      <input id="codeIn" class="codein" type="text" placeholder="RF-XXXX-XXXX" data-i18n-ph="code.ph" maxlength="40"
         autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
       <p class="err" id="codeErr" role="alert" hidden></p>
       <button class="btn btn-primary" id="codeOk" data-i18n="code.unlock">Ontgrendel</button>
@@ -825,7 +831,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "today.cancel": "Je {w} van vandaag is geannuleerd. Een check-in hoeft niet.",
       "today.cancelAny": "Je activiteit van vandaag is geannuleerd. Een check-in hoeft niet.",
       "today.rest": "Vandaag rust. Herstel hoort bij de training. Een check-in mag, maar hoeft niet.",
-      "today.default": "Vier vragen, twee minuten. Inspreken mag.",
+      "today.default": "Vier vragen, twee minuten.",
       "day.planned": "{w} gepland", "day.nothing": "niets gepland", "day.done": ", check-in gedaan", "day.tap": ". Tik om te plannen.",
       "plan.eyebrow": "Planning", "plan.group": "Wat staat er op deze dag?", "plan.none": "Niets",
       "plan.every": "Elke {d} zo", "plan.onlyDay": "Geldt alleen voor deze dag", "plan.cancelWord": "geannuleerd",
@@ -833,9 +839,9 @@ if (typeof module !== "undefined") module.exports = A4;
       "season.title": "Seizoen", "season.match1": "{n} match", "season.matchN": "{n} matchen", "season.cs": "Clean sheets",
       "season.note": "Totalen als {p}, sinds 1 augustus. Vergelijk met jezelf, niet met anderen.",
       "code.enter": "Persoonlijke code ingeven", "code.eyebrow": "Persoonlijke code", "code.title": "Geef je code in",
-      "code.desc": "Dat doe je maar één keer. Daarna onthoudt dit toestel je naam.", "code.label": "Code", "code.ph": "NAAM-XXXX-XXXX",
+      "code.desc": "Dat doe je maar één keer. Daarna onthoudt dit toestel je naam.", "code.label": "Code", "code.ph": "RF-XXXX-XXXX",
       "code.unlock": "Ontgrendel", "code.checking": "Even controleren…", "code.hello": "Ciao {n}!",
-      "code.wrong": "Deze code klopt niet. Kijk ze nog eens na.", "code.format": "Een code ziet eruit als NAAM-XXXX-XXXX.",
+      "code.wrong": "Deze code klopt niet. Kijk ze nog eens na.", "code.format": "Een code ziet eruit als RF-XXXX-XXXX.",
       "code.https": "Een code ingeven werkt alleen als de app via https:// geopend is.",
       "name.title": "Naam op dit toestel", "name.state": "De naam {n} staat op het scherm en op het verslag.",
       "name.hide": "Afmelden op dit toestel", "name.hidden": "Afgemeld. Je check-ins blijven op dit toestel bewaard.",
@@ -851,7 +857,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "q.pain": "Pijn of last ergens?", "q.painWhere": "Waar, wat voor pijn, en hoeveel op 10?",
       "q.painPh": "Bijvoorbeeld: rechterenkel, stekend, 4/10, sinds de match",
       "q.painNote": "<b>Belangrijk:</b> meld pijn ook altijd meteen aan je trainer of ouders. Deze app vervangt geen medisch advies.",
-      "q.score": "Jouw cijfer", "q.scoreN": "Cijfer {n}", "q.answer": "Jouw antwoord", "q.answerHow": "typen of inspreken",
+      "q.score": "Jouw cijfer", "q.scoreN": "Cijfer {n}", "q.answer": "Jouw antwoord", "q.answerHow": "typen of inspreken", "q.kbTip": "Liever inspreken? Tik in het tekstvak en druk op het microfoontje van je toetsenbord.",
       "q.resetAria": "De reset-knop", "q.r1": "Accepteer", "q.r1s": "emotie mag er zijn", "q.r2": "Reset", "q.r2s": "adem, kousen, flush it",
       "q.r3": "Actie", "q.r3s": "volgende actie",
       "mic.start": "Spreek je antwoord in", "mic.stop": "Stop met inspreken",
@@ -937,7 +943,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "today.cancel": "Ton {w} d'aujourd'hui est annulé. Pas besoin de check-in.",
       "today.cancelAny": "L'activité d'aujourd'hui est annulée. Pas besoin de check-in.",
       "today.rest": "Repos aujourd'hui. La récupération fait partie de l'entraînement. Un check-in est possible, mais pas obligatoire.",
-      "today.default": "Quatre questions, deux minutes. Tu peux dicter.",
+      "today.default": "Quatre questions, deux minutes.",
       "day.planned": "{w} prévu", "day.nothing": "rien de prévu", "day.done": ", check-in fait", "day.tap": ". Touche pour planifier.",
       "plan.eyebrow": "Planning", "plan.group": "Qu'est-ce qui est prévu ce jour-là" + NB + "?", "plan.none": "Rien",
       "plan.every": "Chaque {d}", "plan.onlyDay": "Uniquement pour ce jour", "plan.cancelWord": "annulé",
@@ -945,9 +951,9 @@ if (typeof module !== "undefined") module.exports = A4;
       "season.title": "Saison", "season.match1": "{n} match", "season.matchN": "{n} matchs", "season.cs": "Clean sheets",
       "season.note": "Totaux en tant que {p}, depuis le 1er août. Compare-toi à toi-même, pas aux autres.",
       "code.enter": "Saisir mon code personnel", "code.eyebrow": "Code personnel", "code.title": "Saisis ton code",
-      "code.desc": "Tu ne le fais qu'une fois. Ensuite, cet appareil se souvient de ton nom.", "code.label": "Code", "code.ph": "NOM-XXXX-XXXX",
+      "code.desc": "Tu ne le fais qu'une fois. Ensuite, cet appareil se souvient de ton nom.", "code.label": "Code", "code.ph": "RF-XXXX-XXXX",
       "code.unlock": "Déverrouiller", "code.checking": "Vérification…", "code.hello": "Ciao {n}" + NB + "!",
-      "code.wrong": "Ce code n'est pas correct. Vérifie-le.", "code.format": "Un code ressemble à NOM-XXXX-XXXX.",
+      "code.wrong": "Ce code n'est pas correct. Vérifie-le.", "code.format": "Un code ressemble à RF-XXXX-XXXX.",
       "code.https": "Saisir un code ne fonctionne que si l'app est ouverte via https://.",
       "name.title": "Nom sur cet appareil", "name.state": "Le nom {n} apparaît à l'écran et dans le rapport.",
       "name.hide": "Se déconnecter de cet appareil", "name.hidden": "Déconnecté. Tes check-ins restent enregistrés sur cet appareil.",
@@ -963,7 +969,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "q.pain": "Douleur ou gêne quelque part" + NB + "?", "q.painWhere": "Où, quel type de douleur, et combien sur 10" + NB + "?",
       "q.painPh": "Par exemple" + NB + ": cheville droite, douleur vive, 4/10, depuis le match",
       "q.painNote": "<b>Important" + NB + ":</b> signale toujours aussi une douleur à ton entraîneur ou à tes parents. Cette app ne remplace pas un avis médical.",
-      "q.score": "Ta note", "q.scoreN": "Note {n}", "q.answer": "Ta réponse", "q.answerHow": "écrire ou dicter",
+      "q.score": "Ta note", "q.scoreN": "Note {n}", "q.answer": "Ta réponse", "q.answerHow": "écrire ou dicter", "q.kbTip": "Tu préfères dicter" + NB + "? Touche la zone de texte et appuie sur le micro de ton clavier.",
       "q.resetAria": "Le bouton reset", "q.r1": "Accepte", "q.r1s": "l'émotion a sa place", "q.r2": "Reset", "q.r2s": "respire, chaussettes, flush it",
       "q.r3": "Action", "q.r3s": "action suivante",
       "mic.start": "Dicte ta réponse", "mic.stop": "Arrêter la dictée",
@@ -1086,8 +1092,8 @@ if (typeof module !== "undefined") module.exports = A4;
         h: "<p>Touche un jour dans <b>Cette semaine</b> et choisis <b>entraînement</b>, <b>match</b>, <b>repos</b> ou <b>annulé</b>.</p><p>Coche <b>Chaque …</b> pour tes jours d'entraînement fixes. Tu ne dois les régler qu'une fois. Les jours de match reçoivent des étoiles.</p>" },
       { e: "Étape 2", t: "Fais ton check-in",
         h: "<ul><li><b>Check rapide" + NB + ":</b> énergie, sommeil et douleur.</li><li><b>Après un match" + NB + ":</b> ton poste et tes stats, comme les buts, les duels et les récupérations.</li><li><b>Quatre questions" + NB + ":</b> ta note, ton highlight, ton moment reset et ton point d'attention.</li><li><b>Si tu veux,</b> une photo du jour.</li></ul><p>Un check-in commencé reste enregistré. Tu peux le terminer plus tard.</p>" },
-      { e: "Étape 3", t: "Dicter au lieu d'écrire",
-        h: "<p>Touche le <b>micro</b> bleu à côté de la zone de texte et parle calmement. Touche à nouveau pour arrêter.</p><p><b>La ponctuation se met toute seule" + NB + ":</b> après chaque courte pause, un point et une majuscule. Dis <b>virgule</b>, <b>point d'interrogation</b>, <b>point d'exclamation</b> ou <b>à la ligne</b> si tu en veux.</p><p>Le micro ne marche pas sur ton appareil" + NB + "? Touche la zone de texte et utilise le micro de ton clavier.</p>" },
+      { e: "Étape 3", t: "Écrire ou dicter",
+        h: "<p>Écris simplement ta réponse dans la zone de texte.</p><p><b>Tu préfères dicter" + NB + "?</b> Touche la zone de texte et appuie sur le <b>micro de ton clavier</b>. Ton téléphone transforme ta voix en texte. Ça marche sur iPhone et Android.</p><p>Tu peux ensuite encore modifier le texte.</p>" },
       { e: "Étape 4", t: "Ton rapport hebdomadaire",
         h: "<p>Dans <b>Rapport</b>, choisis la semaine et coche les check-ins à inclure. Choisis-y aussi une fois <b>ton équipe</b> (catégorie U), elle apparaît en haut de ton rapport.</p><p>Ensuite <b>Télécharger le PDF</b> ou <b>Imprimer</b>" + NB + ": une page A4 soignée pour toi et ton entraîneur, avec de la place pour des notes. Les photos ne sont pas imprimées.</p>" },
       { e: "Pour les parents", t: "Comment suivre",
@@ -1117,7 +1123,7 @@ if (typeof module !== "undefined") module.exports = A4;
         "<h3>Ce que l'app ne fait pas</h3><p>Pas de compte, pas de suivi, pas de publicité. Tes réponses ne sont envoyées ni à Sofia ni à un serveur.</p>" +
         "<h3>Services de tiers</h3><p>Pour bien fonctionner, l'app utilise quelques services externes. Comme pour tout site web, ils voient ton adresse IP" + NB + ":</p>" +
         "<ul><li><b>GitHub Pages</b> met l'app en ligne.</li><li><b>Google Fonts</b> fournit les polices.</li><li><b>jsDelivr</b> fournit le module PDF et, uniquement pour une photo iPhone sur Android, un convertisseur.</li></ul>" +
-        "<p><b>Dictée" + NB + ":</b> si tu utilises le micro, ta voix est envoyée à Google (dans Chrome) ou à Apple (dans Safari) pour être transformée en texte. Si tu ne le souhaites pas, écris ta réponse.</p>" +
+        "<p><b>Dictée" + NB + ":</b> l'app n'utilise pas elle-même le micro. Si tu dictes une réponse avec le micro de ton clavier, ton téléphone transforme ta voix en texte. Cela peut passer par Google ou Apple. Si tu ne le souhaites pas, écris ta réponse.</p>" +
         "<h3>Sauvegarde</h3><p>Un fichier de sauvegarde contient toutes tes données, y compris tes photos et tes douleurs signalées. Garde-le en lieu sûr, par exemple dans Fichiers sur ton téléphone, et ne l'envoie pas à n'importe qui.</p>" +
         "<h3>Effacer tes données</h3><p>Dans <b>Rapport</b>, tout en bas, tu trouves <b>Enregistrer une sauvegarde</b>, <b>Restaurer une sauvegarde</b> et <b>Tout effacer</b>. Ce dernier bouton supprime tout de cet appareil, y compris les photos et le nom.</p>" +
         '<h3>Questions ou plaintes</h3><p>Envoie un e-mail à l\'adresse ci-dessus. Tu peux aussi t\'adresser à l\'Autorité de protection des données' + NB + ': <a href="https://www.autoriteprotectiondonnees.be" target="_blank" rel="noopener">autoriteprotectiondonnees.be</a>.</p>' +
@@ -1131,6 +1137,7 @@ if (typeof module !== "undefined") module.exports = A4;
      Het nummer achter elke regel komt overeen met de codelijst (Excel). Code intrekken = regel weghalen. */
   var KNOWN_CODES_HASHED = [
     "1ff88992f3e42ce6de44cd484a81ea279013bda35cc157cd7009a24f98115102", // PRESSY (persoonlijke code)
+    "c875814a63827419b946bb10df002d1ec0bb148b69c0525d1c3bd996ee51496a", // FABRICE (persoonlijke code)
     "18ecaa5ac751c15af3fd5ed546cedd8ec0b58a45363e2995a9af7a5f86a48eeb", // 001
     "72682f09dd11e2a4ec1988e44d1c734ef55269aea5e344687a82280ae7f37792", // 002
     "930c8e2c4fc45b41be5c8a105869cbcc49cf3c6065a6b18100b12ba9f3470732", // 003
@@ -1470,6 +1477,7 @@ if (typeof module !== "undefined") module.exports = A4;
   }
   document.querySelectorAll(".tab").forEach(function (b) { b.addEventListener("click", function () { go(b.dataset.go); }); });
   $("startBtn").addEventListener("click", function () { go("check"); });
+  $("focusCard").addEventListener("click", function () { go("check"); });
 
   /* ====== PLANNING: training / match / rust ======
      store.template = vaste week (0 = maandag ... 6 = zondag)
@@ -1534,6 +1542,7 @@ if (typeof module !== "undefined") module.exports = A4;
     if (c) cb.checked = false; else if (cb.dataset.auto === "1") cb.checked = planWasRepeat;
     cb.dataset.auto = c ? "1" : "";
     $("planRepeatLbl").textContent = c ? T("plan.onlyDay") : T("plan.every", { d: DAGEN[wdOf(planKey)] });
+    $("planOk").disabled = !planSel;
   }
   function openPlan(k) {
     planStore(); planKey = k; planSel = planOf(k);
@@ -1548,6 +1557,7 @@ if (typeof module !== "undefined") module.exports = A4;
   }
   function closePlan() { $("planOv").hidden = true; }
   function savePlan() {
+    if (!planSel) return;
     planStore(); var wd = wdOf(planKey);
     if (planSel === "geannuleerd") {
       store.plan[planKey] = "geannuleerd";                    // vaste week blijft gewoon staan
@@ -1976,8 +1986,8 @@ if (typeof module !== "undefined") module.exports = A4;
       h: "<p>Tik op een dag in <b>Deze week</b> en kies <b>training</b>, <b>match</b>, <b>rust</b> of <b>geannuleerd</b>.</p><p>Vink <b>Elke … zo</b> aan voor je vaste trainingsdagen. Dan hoef je ze maar één keer in te stellen. Matchdagen krijgen sterretjes.</p>" },
     { e: "Stap 2", t: "Doe je check-in",
       h: "<ul><li><b>Snelle check:</b> energie, slaap en pijn.</li><li><b>Bij een match:</b> je positie en je cijfers, zoals goals, duels en recuperaties.</li><li><b>Vier vragen:</b> je cijfer, je highlight, je reset-moment en je focus.</li><li><b>Eventueel</b> een foto van de dag.</li></ul><p>Een half ingevulde check-in blijft bewaard. Je kan later verderdoen.</p>" },
-    { e: "Stap 3", t: "Inspreken in plaats van typen",
-      h: "<p>Tik op de blauwe <b>microfoon</b> naast het tekstvak en praat rustig. Tik opnieuw om te stoppen.</p><p><b>Leestekens komen vanzelf:</b> na elke korte pauze een punt en een hoofdletter. Zeg <b>komma</b>, <b>vraagteken</b>, <b>uitroepteken</b> of <b>nieuwe regel</b> als je die wil.</p><p>Werkt de microfoon niet op jouw toestel? Tik in het tekstvak en gebruik het microfoontje van je toetsenbord.</p>" },
+    { e: "Stap 3", t: "Typen of inspreken",
+      h: "<p>Typ je antwoord gewoon in het tekstvak.</p><p><b>Liever inspreken?</b> Tik in het tekstvak en druk op het <b>microfoontje van je toetsenbord</b>. Je telefoon zet je stem om in tekst. Dat werkt op iPhone en Android.</p><p>Daarna kan je de tekst nog aanpassen.</p>" },
     { e: "Stap 4", t: "Je weekverslag",
       h: "<p>In <b>Verslag</b> kies je de week en vink je aan welke check-ins erin komen. Kies daar ook één keer <b>je ploeg</b> (U-categorie), die komt bovenaan je verslag.</p><p>Daarna <b>Download PDF</b> of <b>Print</b>: een nette A4 voor jou en je trainer, met plaats voor notities. Foto's komen niet op papier.</p>" },
     { e: "Voor ouders", t: "Zo volg je mee",
@@ -2043,7 +2053,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "<h3>Wat doet de app niet?</h3><p>Geen account, geen tracking, geen advertenties. Je antwoorden gaan niet naar Sofia en niet naar een server.</p>" +
       "<h3>Diensten van anderen</h3><p>Om goed te werken, gebruikt de app een paar externe diensten. Die zien, zoals bij elke website, je IP-adres:</p>" +
       "<ul><li><b>GitHub Pages</b> zet de app online.</li><li><b>Google Fonts</b> levert de lettertypes.</li><li><b>jsDelivr</b> levert de PDF-module, en alleen bij een iPhone-foto op Android ook een omzetter.</li></ul>" +
-      "<p><b>Inspreken:</b> gebruik je de microfoon, dan wordt je stem naar Google (in Chrome) of Apple (in Safari) gestuurd om er tekst van te maken. Wil je dat niet, typ dan je antwoord.</p>" +
+      "<p><b>Inspreken:</b> de app gebruikt zelf geen microfoon. Spreek je een antwoord in met de microfoon van je toetsenbord, dan zet je telefoon je stem om in tekst. Dat kan via Google of Apple gebeuren. Wil je dat niet, typ dan je antwoord.</p>" +
       "<h3>Back-up</h3><p>Een back-upbestand bevat al je gegevens, ook je foto's en pijnmeldingen. Bewaar het op een veilige plek, bijvoorbeeld in Bestanden op je telefoon, en stuur het niet zomaar door.</p>" +
       '<h3>Je gegevens wissen</h3><p>In <b>Verslag</b>, helemaal onderaan, vind je <b>Back-up opslaan</b>, <b>Back-up terugzetten</b> en <b>Alles wissen</b>. Met die laatste verwijder je alles van dit toestel, ook de foto\'s en de naam.</p>' +
       '<h3>Vragen of klachten</h3><p>Mail gerust naar het adres hierboven. Je kan ook terecht bij de Gegevensbeschermingsautoriteit: <a href="https://www.gegevensbeschermingsautoriteit.be" target="_blank" rel="noopener">gegevensbeschermingsautoriteit.be</a>.</p>' +
@@ -2144,7 +2154,6 @@ if (typeof module !== "undefined") module.exports = A4;
       b.addEventListener("click", function () { cb(b.dataset.v); setPressed(sel, b.dataset.v); save(); });
     });
   }
-  var MIC_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>';
 
   function renderStep() {
     var d = store.draft, keys = stepKeys(d), body = "";
@@ -2192,9 +2201,8 @@ if (typeof module !== "undefined") module.exports = A4;
       [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (n) { return '<button data-v="' + n + '" aria-label="' + T("q.scoreN", { n: n }) + '">' + n + "</button>"; }).join("") + "</div></div>";
     if (q.reset) body += '<div class="reset" aria-label="' + T("q.resetAria") + '"><div><b>' + T("q.r1") + '</b><small>' + T("q.r1s") + '</small></div><div><b>' + T("q.r2") + '</b><small>' + T("q.r2s") + '</small></div><div><b>' + T("q.r3") + '</b><small>' + T("q.r3s") + '</small></div></div>';
     body += '<div class="answer"><label class="field-l" for="ans">' + T("q.answer") + ' <span>' + T("q.answerHow") + '</span></label>' +
-      '<textarea id="ans" placeholder="' + esc(q.ph) + '">' + esc(d.a[i]) + "</textarea>" +
-      '<button class="mic" id="mic" aria-label="' + T("mic.start") + '" aria-pressed="false">' + MIC_SVG + "</button></div>" +
-      '<p class="miclabel" id="micState" role="status"></p><p class="note" id="dictNote" hidden></p>';
+      '<textarea id="ans" placeholder="' + esc(q.ph) + '">' + esc(d.a[i]) + "</textarea></div>" +
+      '<p class="kbtip">' + T("q.kbTip") + "</p>";
     if (q.chips) body += chipsHTML(d.type === "match" && d.pos ? d.pos : store.position);
     body += "</div>";
     $("stepBody").innerHTML = body;
@@ -2202,8 +2210,6 @@ if (typeof module !== "undefined") module.exports = A4;
     if (i === 0) { setPressed("#gScore", d.score); bindSeg("#gScore", function (v) { d.score = +v; }); }
     var ta = $("ans");
     ta.addEventListener("input", function () { d.a[i] = ta.value; save(); });
-    $("mic").addEventListener("click", function () { toggleMic(ta, i); });
-    if (!SR) { showDictation(T("mic.noSR")); }
     if (q.chips) {
       bindChips(ta, function (v) { d.a[i] = v; save(); });
       var mp = document.querySelector(".morepos"); if (mp && mp.querySelector('[aria-pressed="true"]')) mp.open = true;
@@ -2233,97 +2239,9 @@ if (typeof module !== "undefined") module.exports = A4;
     go("start");
   });
 
-  /* Automatische leestekens bij inspreken:
-     - elke zin (afgesloten door een pauze) krijgt een hoofdletter en een punt;
-     - gesproken "komma", "vraagteken", "uitroepteken" en "nieuwe regel" worden het teken zelf.
-     "Punt" als commando zit er bewust niet in: in het voetbal is "een punt halen" een gewone zin. */
-  function tidySpeech(t) {
-    t = String(t || "").replace(/\s+/g, " ").trim();
-    if (!t) return "";
-    if (LANG === "fr") {
-      t = t.replace(/\s*(nouvelle ligne|à la ligne)\s*/gi, "\n")
-           .replace(/\s*point d['’]interrogation/gi, "?")
-           .replace(/\s*point d['’]exclamation/gi, "!")
-           .replace(/\s*\bvirgule\b/gi, ",");
-    }
-    t = t.replace(/\s*\bnieuwe (regel|lijn)\b\s*/gi, "\n")
-         .replace(/\s*\bkomma\b/gi, ",")
-         .replace(/\s*\bvraagteken\b/gi, "?")
-         .replace(/\s*\buitroepteken\b/gi, "!")
-         .replace(/([,?!])(?=[^\s\n])/g, "$1 ")
-         .replace(/^[\s,]+/, "").replace(/[ \t]+$/, "");
-    t = t.replace(/(^|[.?!]\s+|\n)([a-zà-ÿ])/g, function (m, pre, ch) { return pre + ch.toUpperCase(); });
-    if (!/[.?!,:;]$/.test(t) && !/\n$/.test(t)) t += ".";
-    if (LANG === "fr") t = t.replace(/\s*([?!:;])/g, NB + "$1");
-    return t;
-  }
-
-  /* ====== SPRAAK NAAR TEKST (Web Speech API) ======
-     Werkt in Chrome, Edge (desktop + Android) en Safari (macOS, iOS 14.5+). Niet in Firefox.
-     Vereist HTTPS en toestemming voor de microfoon.
-     Bewuste keuze: continuous = false met automatische herstart. Chrome op Android
-     herhaalt tekst in continuous-modus; zo vermijden we dubbele zinnen. */
-  var SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
-  var rec = null, listening = false, lang = "nl-BE", stopTimer = null, sess = null;
-  function speechLang() { return LANG === "fr" ? "fr-BE" : "nl-BE"; }
-  function speechFallback() { return LANG === "fr" ? "fr-FR" : "nl-NL"; }
-
-  function showDictation(reason) {
-    var n = $("dictNote"); if (!n) return;
-    n.innerHTML = T("mic.kb", { r: esc(reason) });
-    n.hidden = false;
-  }
-  function setMicUI(on, msg) {
-    var m = $("mic"), s = $("micState");
-    if (m) { m.classList.toggle("rec", on); m.setAttribute("aria-pressed", String(on)); m.setAttribute("aria-label", on ? T("mic.stop") : T("mic.start")); }
-    if (s) s.textContent = msg || "";
-  }
-  function stopMic() {
-    listening = false; clearTimeout(stopTimer);
-    if (rec) { try { rec.stop(); } catch (e) {} }
-    setMicUI(false, "");
-  }
-  function startRec() {
-    rec = new SR();
-    rec.lang = lang; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
-    rec.onresult = function (e) {
-      var interim = "";
-      for (var k = e.resultIndex; k < e.results.length; k++) {
-        var r = e.results[k];
-        if (r.isFinal) { var ft = tidySpeech(r[0].transcript); if (ft) sess.final += (sess.final && !/\s$/.test(sess.final) ? " " : "") + ft; }
-        else interim += r[0].transcript;
-      }
-      sess.ta.value = sess.base + sess.final + (interim ? (sess.final ? " " : "") + interim : "");
-      store.draft.a[sess.i] = sess.ta.value; save();
-    };
-    rec.onerror = function (e) {
-      if (e.error === "language-not-supported" && lang !== speechFallback()) { lang = speechFallback(); return; } // onend herstart in de terugvaltaal
-      if (e.error === "no-speech" || e.error === "aborted") return;
-      listening = false;
-      var why = (e.error === "not-allowed" || e.error === "service-not-allowed") ? T("mic.denied") :
-                e.error === "audio-capture" ? T("mic.noMic") :
-                e.error === "network" ? T("mic.net") : T("mic.fail");
-      setMicUI(false, ""); showDictation(why);
-    };
-    rec.onend = function () {
-      if (listening) { try { startRec(); return; } catch (err) { listening = false; } }
-      setMicUI(false, sess && sess.final ? T("mic.done") : "");
-    };
-    rec.start();
-  }
-  function toggleMic(ta, i) {
-    if (listening) { stopMic(); return; }
-    if (!SR) { showDictation(T("mic.noSR")); ta.focus(); return; }
-    if (!window.isSecureContext) { showDictation(T("mic.https")); ta.focus(); return; }
-    lang = speechLang();
-    sess = { ta: ta, i: i, base: ta.value.trim() ? ta.value.replace(/\s*$/, "").replace(/([A-Za-zÀ-ÿ0-9])$/, "$1.") + " " : "", final: "" };
-    try {
-      listening = true; startRec();
-      setMicUI(true, T("mic.listening"));
-      stopTimer = setTimeout(stopMic, CONFIG.maxListenMs);
-    } catch (err) { stopMic(); showDictation(T("mic.cantStart")); }
-  }
-  document.addEventListener("visibilitychange", function () { if (document.hidden) stopMic(); });
+  /* Inspreken gebeurt met de microfoon van het toetsenbord (iPhone en Android).
+     De app zelf gebruikt geen microfoon: zo kan je altijd typen en loopt niets vast. */
+  function stopMic() {}
 
   /* ====== VERSLAG ====== */
   var excluded = {}, exportMon = monday(today()), lastPages = null, lastData = null;
