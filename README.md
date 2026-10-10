@@ -19,7 +19,7 @@ Een app die aanvoelt als een debrief na de sessie. Twee minuten, vier vragen, in
 ## Wat de app doet
 
 - **Vier vragen, twee minuten.** Een cijfer, een highlight, een reset-moment en een focuspunt. Laagdrempelig, niet schools.
-- **Inspreken in plaats van typen.** Tik op de microfoon en praat. De leestekens komen er vanzelf bij.
+- **Typen of inspreken.** Typ je antwoord, of spreek het in met de microfoon van je toetsenbord.
 - **Matchcijfers per positie.** Van doelman tot spits: goals, assists, duels, recuperaties, reddingen.
 - **Het lichaam in het oog.** Energie, slaap en pijn bij elke check-in.
 - **Weekplanning.** Training, match, rust of geannuleerd. Matchdagen springen eruit.
