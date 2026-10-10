@@ -343,6 +343,14 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .dialog{background:var(--surface);color:var(--ink);border-radius:20px;padding:22px;width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 50px rgba(6,18,42,.35)}
 .dialog h2{font-family:var(--display);font-weight:800;font-size:28px;line-height:1.05}
 .dialog p{margin:0}
+/* toegangsscherm: de app opent pas na een geldige code */
+.gate{position:fixed;inset:0;z-index:15;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;padding-inline:16px}
+.gate .gate-in{padding-block:calc(16px + env(safe-area-inset-top,0px)) calc(28px + env(safe-area-inset-bottom,0px))}
+.gate .hero blockquote{max-width:12ch}
+.gate .card h2{font-family:var(--display);font-weight:800;font-size:26px;line-height:1.05;margin:0 0 6px;text-transform:uppercase}
+.gate .card .stack{gap:12px}
+.gate .hint{margin:0;font-size:15px;color:var(--muted);text-align:center}
+body.locked #app,body.locked .tabbar{display:none}
 .codein{width:100%;min-height:56px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;padding:10px 14px}
 .codein.bad{border-color:var(--warn)}
 .err{color:var(--warn);font-size:14px;font-weight:600}
@@ -489,6 +497,37 @@ h1,h2,h3{text-wrap:balance;margin:0}
   </section>
 </div>
 
+<div class="gate" id="gate" hidden role="dialog" aria-modal="true" data-i18n-aria="gate.aria" aria-label="Toegang">
+  <div class="app gate-in">
+    <div class="top">
+      <div class="mark"><svg class="mk-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.6" fill="none" stroke="currentColor" stroke-width="2.4"/><line x1="12" y1="1.5" x2="12" y2="22.5" stroke="currentColor" stroke-width="2.4"/><circle cx="12" cy="12" r="2.4" fill="currentColor"/></svg><span class="mk"><b>DEBRIEF FC</b><small>FOOTBALL JOURNAL</small></span></div>
+      <div class="topr"><div class="langsw" role="group" data-i18n-aria="lang.group" aria-label="Taal · Langue"><button type="button" data-lang="nl">NL</button><button type="button" data-lang="fr">FR</button></div></div>
+    </div>
+    <div class="hero">
+      <div class="eyebrow" data-i18n="gate.eyebrow">Welkom</div>
+      <blockquote data-i18n="gate.big">Train. Reflecteer. Groei.</blockquote>
+      <p class="src" data-i18n="gate.sub">Twee minuten na elke training of match.</p>
+    </div>
+    <div class="card">
+      <h2 data-i18n="gate.title">Jouw persoonlijke code</h2>
+      <div class="stack">
+        <p class="muted" style="margin:0" data-i18n="gate.desc">Geef je code in. Dat doe je maar één keer, daarna onthoudt dit toestel je.</p>
+        <label for="gateIn" class="field-l" style="margin:4px 0 -4px" data-i18n="code.label">Code</label>
+        <input id="gateIn" class="codein" type="text" placeholder="NAAM-XXXX-XXXX" data-i18n-ph="code.ph" maxlength="40"
+          autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+        <p class="err" id="gateErr" role="alert" hidden></p>
+        <button class="btn btn-primary" id="gateOk" data-i18n="code.unlock">Ontgrendel</button>
+      </div>
+    </div>
+    <p class="hint" data-i18n="gate.none">Nog geen code? Vraag ze aan Sofia la Bianca.</p>
+    <footer class="foot">
+      <p class="motto">“The top of the mountain is the bottom of the next, so keep climbing.”</p>
+      <button type="button" class="linkbtn" id="gHelp" data-i18n="help.how">Hoe werkt de app?</button>
+      <p class="copy" data-i18n="common.copy">© 2026 Sofia la Bianca · Alle rechten voorbehouden</p>
+      <p class="legal"><button type="button" class="linkbtn" id="gDisc" data-i18n="legal.disc">Disclaimer</button><span aria-hidden="true">·</span><button type="button" class="linkbtn" id="gPriv" data-i18n="legal.priv">Privacy (GDPR)</button></p>
+    </footer>
+  </div>
+</div>
 <div class="tabbar">
   <nav data-i18n-aria="nav.menu" aria-label="Hoofdmenu">
     <button class="tab" data-go="start" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span data-i18n="nav.start">Start</span></button>
@@ -797,7 +836,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "code.wrong": "Deze code klopt niet. Kijk ze nog eens na.", "code.format": "Een code ziet eruit als NAAM-XXXX-XXXX.",
       "code.https": "Een code ingeven werkt alleen als de app via https:// geopend is.",
       "name.title": "Naam op dit toestel", "name.state": "De naam {n} staat op het scherm en op het verslag.",
-      "name.hide": "Naam verbergen op dit toestel", "name.hidden": "Naam verborgen. Je kan de code opnieuw ingeven op het startscherm.",
+      "name.hide": "Afmelden op dit toestel", "name.hidden": "Afgemeld. Je check-ins blijven op dit toestel bewaard.",
       "toast.saveFail": "Opslaan lukt niet op dit toestel (privévenster?).",
       "ck.backStart": "Terug naar start", "ck.backStep": "Vorige stap", "ck.save": "Opslaan",
       "ck.needQuick": "Kies je energie en of je ergens pijn hebt.", "ck.needScore": "Kies eerst een cijfer van 1 tot 10.",
@@ -841,6 +880,10 @@ if (typeof module !== "undefined") module.exports = A4;
       "code.nameTitle": "Hoe heet je?", "code.nameLabel": "Naam", "code.namePh": "LUCAS", "code.nameSave": "Bewaar mijn naam",
       "code.nameDesc": "Zoals op je shirt of zoals je trainer je noemt. Heeft een ploegmaat dezelfde naam? Zet dan de eerste letters van je familienaam erachter, bijvoorbeeld LUCASVDB.",
       "code.nameNeed": "Geef minstens 2 letters.",
+      "gate.aria": "Toegang", "gate.eyebrow": "Welkom bij Debrief FC", "gate.big": "Train. Reflecteer. Groei.",
+      "gate.sub": "Twee minuten na elke training of match.", "gate.title": "Jouw persoonlijke code",
+      "gate.desc": "Geef je code in. Dat doe je maar één keer, daarna onthoudt dit toestel je.",
+      "gate.none": "Nog geen code? Vraag ze aan Sofia la Bianca.",
       "guide.close": "Uitleg sluiten", "guide.go": "Aan de slag",
       "exp.eyebrow": "A4-export", "exp.title": "Weekverslag", "exp.prev": "Vorige week", "exp.next": "Volgende week", "exp.week": "Week {w}",
       "exp.what": "Wat komt in het verslag?", "exp.allOff": "Alles uit", "exp.allOn": "Alles aan",
@@ -865,7 +908,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "bk.nCheck": "{n} check-in(s)", "bk.and": " en ", "bk.restored": "{m} teruggezet.", "bk.already": "Alles uit de back-up stond er al.",
       "bk.invalid": "Dit bestand is geen geldige back-up van deze app.", "bk.file": "DebriefFC_backup_",
       "wipe.title": "Alles wissen",
-      "wipe.desc": "Wist alle check-ins, de planning en de naam op dit toestel. Bijvoorbeeld voor een nieuw seizoen of als de telefoon naar iemand anders gaat. Dit kan je niet ongedaan maken.",
+      "wipe.desc": "Wist alle check-ins, de planning en de naam op dit toestel. Bijvoorbeeld voor een nieuw seizoen of als de telefoon naar iemand anders gaat. Daarna vraagt de app opnieuw een code. Dit kan je niet ongedaan maken.",
       "wipe.start": "Alles wissen…", "wipe.note": "<b>Eerst een back-up?</b> Dan kan je alles later terugzetten met \"Back-up terugzetten\".",
       "wipe.sure": "Ja, ik wil echt alles wissen", "wipe.go": "Wis alles definitief", "wipe.done": "Alles gewist. Klaar voor een nieuwe start."
     },
@@ -904,7 +947,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "code.wrong": "Ce code n'est pas correct. Vérifie-le.", "code.format": "Un code ressemble à NOM-XXXX-XXXX.",
       "code.https": "Saisir un code ne fonctionne que si l'app est ouverte via https://.",
       "name.title": "Nom sur cet appareil", "name.state": "Le nom {n} apparaît à l'écran et dans le rapport.",
-      "name.hide": "Masquer le nom sur cet appareil", "name.hidden": "Nom masqué. Tu peux ressaisir le code sur l'écran d'accueil.",
+      "name.hide": "Se déconnecter de cet appareil", "name.hidden": "Déconnecté. Tes check-ins restent enregistrés sur cet appareil.",
       "toast.saveFail": "Impossible d'enregistrer sur cet appareil (fenêtre privée" + NB + "?).",
       "ck.backStart": "Retour à l'accueil", "ck.backStep": "Étape précédente", "ck.save": "Enregistrer",
       "ck.needQuick": "Choisis ton énergie et indique si tu as mal quelque part.", "ck.needScore": "Choisis d'abord une note de 1 à 10.",
@@ -948,6 +991,10 @@ if (typeof module !== "undefined") module.exports = A4;
       "code.nameTitle": "Comment t'appelles-tu" + NB + "?", "code.nameLabel": "Prénom", "code.namePh": "LUCAS", "code.nameSave": "Enregistrer mon prénom",
       "code.nameDesc": "Comme sur ton maillot ou comme ton entraîneur t'appelle. Un coéquipier a le même prénom" + NB + "? Ajoute alors les premières lettres de ton nom de famille, par exemple LUCASVDB.",
       "code.nameNeed": "Au moins 2 lettres.",
+      "gate.aria": "Accès", "gate.eyebrow": "Bienvenue sur Debrief FC", "gate.big": "Joue. Réfléchis. Progresse.",
+      "gate.sub": "Deux minutes après chaque entraînement ou match.", "gate.title": "Ton code personnel",
+      "gate.desc": "Saisis ton code. Tu ne le fais qu'une fois, ensuite cet appareil se souvient de toi.",
+      "gate.none": "Pas encore de code" + NB + "? Demande-le à Sofia la Bianca.",
       "guide.close": "Fermer l'explication", "guide.go": "C'est parti",
       "exp.eyebrow": "Export A4", "exp.title": "Rapport hebdomadaire", "exp.prev": "Semaine précédente", "exp.next": "Semaine suivante", "exp.week": "Semaine {w}",
       "exp.what": "Que mettre dans le rapport" + NB + "?", "exp.allOff": "Tout décocher", "exp.allOn": "Tout cocher",
@@ -972,7 +1019,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "bk.nCheck": "{n} check-in(s)", "bk.and": " et ", "bk.restored": "{m} restauré(s).", "bk.already": "Tout le contenu de la sauvegarde était déjà là.",
       "bk.invalid": "Ce fichier n'est pas une sauvegarde valide de cette app.", "bk.file": "DebriefFC_sauvegarde_",
       "wipe.title": "Tout effacer",
-      "wipe.desc": "Efface tous les check-ins, le planning et le nom sur cet appareil. Par exemple pour une nouvelle saison ou si le téléphone change de main. C'est irréversible.",
+      "wipe.desc": "Efface tous les check-ins, le planning et le nom sur cet appareil. Par exemple pour une nouvelle saison ou si le téléphone change de main. Ensuite, l'app redemande un code. C'est irréversible.",
       "wipe.start": "Tout effacer…", "wipe.note": "<b>D'abord une sauvegarde" + NB + "?</b> Tu pourras tout restaurer plus tard avec «" + NB + "Restaurer une sauvegarde" + NB + "».",
       "wipe.sure": "Oui, je veux vraiment tout effacer", "wipe.go": "Tout effacer définitivement", "wipe.done": "Tout est effacé. Prêt pour un nouveau départ."
     }
@@ -1042,7 +1089,7 @@ if (typeof module !== "undefined") module.exports = A4;
       { e: "Pour les parents", t: "Comment suivre",
         h: "<p>L'app n'a <b>ni serveur ni compte</b>. Tout ce que votre enfant encode reste uniquement sur son propre téléphone.</p><p>Si vous ouvrez l'app sur votre propre téléphone, elle est vide, même avec le code de votre enfant. Ce n'est pas une erreur" + NB + ": les réponses restent ainsi privées.</p><p><b>Pour suivre" + NB + ":</b></p><ul><li><b>Le rapport hebdomadaire" + NB + ":</b> votre enfant télécharge le PDF dans Rapport et vous l'envoie.</li><li><b>Regarder ensemble</b> sur le téléphone de votre enfant.</li></ul>" },
       { e: "Étape 5", t: "Garder tes données en sécurité",
-        h: "<p>Tout reste uniquement sur cet appareil. Personne d'autre ne peut le voir.</p><p>Fais de temps en temps une <b>sauvegarde</b> (Rapport, tout en bas), surtout sur iPhone. Tu as reçu un <b>code personnel</b>" + NB + "? Saisis-le sur l'écran d'accueil, ton nom apparaîtra.</p>" }
+        h: "<p>Tout reste uniquement sur cet appareil. Personne d'autre ne peut le voir.</p><p>Fais de temps en temps une <b>sauvegarde</b> (Rapport, tout en bas), surtout sur iPhone. Tu changes de téléphone" + NB + "? Restaure ta sauvegarde et saisis à nouveau ton <b>code personnel</b>.</p>" }
     ],
     LEGAL: {
       disclaimer:
@@ -1363,9 +1410,43 @@ if (typeof module !== "undefined") module.exports = A4;
   $("nameIn").addEventListener("keydown", function (e) { if (e.key === "Enter") saveName(); if (e.key === "Escape") closeCode(); });
   $("codeOv").addEventListener("click", function (e) { if (e.target === $("codeOv")) closeCode(); });
   $("nameBtn").addEventListener("click", function () {
-    if (profile) { forgetName(); refreshAll(); toast(T("name.hidden")); }
+    if (profile) { forgetName(); go("start"); updateGate(); $("gateIn").value = ""; toast(T("name.hidden")); }
   });
+  /* Toegang: zonder geldige code blijft de app op slot. Een drempel, geen kluis (de controle gebeurt in de browser). */
+  function updateGate() {
+    var lock = !profile;
+    $("gate").hidden = !lock;
+    document.body.classList.toggle("locked", lock);
+    return lock;
+  }
+  function maybeGuide() {
+    var seen = false; try { seen = localStorage.getItem("reflectie.uitlegGezien") === "1"; } catch (e) { seen = true; }
+    if (!seen && !store.sessions.length) openGuide();
+  }
+  var gateBusy = false;
+  function gateError(raw) {
+    $("gateErr").textContent = !cryptoOk() ? T("code.https") : (netteCode(raw) ? T("code.wrong") : T("code.format"));
+    $("gateErr").hidden = false; $("gateIn").classList.add("bad");
+  }
+  async function submitGate() {
+    if (gateBusy) return;
+    var raw = $("gateIn").value.trim(); if (!raw) { $("gateIn").focus(); return; }
+    if (!cryptoOk()) { gateError(raw); return; }
+    gateBusy = true; var btn = $("gateOk"); btn.disabled = true; btn.textContent = T("code.checking");
+    $("gateErr").hidden = true; $("gateIn").classList.remove("bad");
+    var ok = false;
+    try { ok = await tryCode(raw); } catch (e) { ok = false; }
+    gateBusy = false; btn.disabled = false; btn.textContent = T("code.unlock");
+    if (ok === "generic") showNameStep();
+    else if (ok) { refreshAll(); toast(T("code.hello", { n: nameNow() })); }
+    else gateError(raw);
+  }
+  $("gateOk").addEventListener("click", submitGate);
+  $("gateIn").addEventListener("keydown", function (e) { if (e.key === "Enter") submitGate(); });
+  $("gateIn").addEventListener("input", function () { $("gateErr").hidden = true; $("gateIn").classList.remove("bad"); });
   function refreshAll() {
+    var wasLocked = document.body.classList.contains("locked");
+    if (!updateGate() && wasLocked) { go("start"); maybeGuide(); return; }
     if (!$("v-start").hidden) renderStart();
     if (!$("v-export").hidden) renderExport();
   }
@@ -1898,7 +1979,7 @@ if (typeof module !== "undefined") module.exports = A4;
     { e: "Voor ouders", t: "Zo volg je mee",
       h: "<p>De app heeft <b>geen server en geen account</b>. Alles wat je kind invult, staat alleen op zijn eigen telefoon.</p><p>Open je de app op je eigen telefoon, dan is die leeg, ook met de code van je kind. Dat is geen fout: zo blijven de antwoorden privé.</p><p><b>Zo volg je mee:</b></p><ul><li><b>Het weekverslag:</b> je kind downloadt de PDF in Verslag en stuurt hem naar jou.</li><li><b>Samen kijken</b> op de telefoon van je kind.</li></ul>" },
     { e: "Stap 5", t: "Veilig bewaren",
-      h: "<p>Alles staat alleen op dit toestel. Niemand anders kan het zien.</p><p>Maak af en toe een <b>back-up</b> (Verslag, onderaan), zeker op iPhone. Kreeg je een <b>persoonlijke code</b>? Geef die in op het startscherm, dan komt je naam erop.</p>" }
+      h: "<p>Alles staat alleen op dit toestel. Niemand anders kan het zien.</p><p>Maak af en toe een <b>back-up</b> (Verslag, onderaan), zeker op iPhone. Wissel je van telefoon? Zet je back-up terug en geef je <b>persoonlijke code</b> opnieuw in.</p>" }
   ];
   var gIdx = 0, gReturn = null;
   function drawGuide() {
@@ -2367,7 +2448,7 @@ if (typeof module !== "undefined") module.exports = A4;
     store = { sessions: [], draft: null, plan: {}, template: {}, position: "", team: "" };
     forgetName(); excluded = {}; openId = null; delArm = null; phClear().catch(function () {});
     save(); wipeReset();
-    go("start"); toast(T("wipe.done"));
+    go("start"); updateGate(); $("gateIn").value = ""; toast(T("wipe.done"));
   });
 
   /* ====== BACK-UP ====== */
@@ -2455,20 +2536,23 @@ if (typeof module !== "undefined") module.exports = A4;
 
   /* ====== start ====== */
   renderStart();
-  (function () {
-    var seen = false; try { seen = localStorage.getItem("reflectie.uitlegGezien") === "1"; } catch (e) { seen = true; }
-    if (!seen && !store.sessions.length) openGuide();
-  })();
+  if (!updateGate()) maybeGuide();
+  $("gHelp").addEventListener("click", openGuide);
+  $("gDisc").addEventListener("click", function () { openLegal("disclaimer"); });
+  $("gPriv").addEventListener("click", function () { openLegal("privacy"); });
   // Staat er een code in de link (?code=NAAM-XXXX-XXXX)? Dan meteen ontgrendelen en de code uit de adresbalk halen.
   (function () {
     var q; try { q = new URLSearchParams(location.search); } catch (e) { return; }
     var c = q.get("code"); if (!c) return;
     try { q.delete("code"); var rest = q.toString(); history.replaceState(null, "", location.pathname + (rest ? "?" + rest : "") + location.hash); } catch (e) {}
-    if (profile || !cryptoOk()) return;
+    if (profile) return;
+    $("gateIn").value = c;
+    if (!cryptoOk()) { gateError(c); return; }
     tryCode(c).then(function (ok) {
       if (ok === "generic") showNameStep();
       else if (ok) { refreshAll(); toast(T("code.hello", { n: nameNow() })); }
-    }).catch(function () {});
+      else gateError(c);
+    }).catch(function () { gateError(c); });
   })();
 })();
 </script>
