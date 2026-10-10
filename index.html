@@ -403,7 +403,7 @@ body.locked #app,body.locked .tabbar{display:none}
   body>*:not(#printArea){display:none!important}
   #printArea{display:block!important}
 }
-#printArea{font-family:Arial,Helvetica,sans-serif;font-size:14pt;line-height:1.42;color:#111827;background:#fff}#printArea .lbl{font-size:12pt;font-weight:700;color:#0A3F9C;letter-spacing:.06em;margin:0}#printArea h1{font-size:22pt;margin:2pt 0 0;line-height:1.2}#printArea .meta{margin:0}#printArea .small{font-size:12pt;color:#5a667a;margin:0}#printArea hr{border:0;border-top:1.4pt solid #0A3F9C;margin:12pt 0 18pt}#printArea hr.thin{border-top:.7pt solid #cdd6e4}#printArea .quote{font-size:18pt;font-weight:700;color:#0A3F9C;margin:3pt 0 2pt;line-height:1.25}#printArea h2{font-size:16pt;margin:0;line-height:1.3}#printArea .q{font-weight:700;margin:12pt 0 2pt}#printArea .a{margin:0;white-space:pre-wrap}#printArea .empty{font-style:italic;color:#5a667a}#printArea .qa{break-inside:avoid;page-break-inside:avoid}#printArea .notes{border:1pt solid #0A3F9C;min-height:65mm;padding:5mm 6mm;margin-top:20pt;break-inside:avoid;page-break-inside:avoid}#printArea .notes p{font-weight:700;color:#0A3F9C;margin:0}#printArea .notes .ln{height:9mm;border-bottom:.5pt solid #cdd6e4}
+#printArea{font-family:Arial,Helvetica,sans-serif;font-size:14pt;line-height:1.42;color:#111827;background:#fff}#printArea .lbl{font-size:12pt;font-weight:700;color:#0A3F9C;letter-spacing:.06em;margin:0}#printArea h1{font-size:22pt;margin:2pt 0 0;line-height:1.2}#printArea .meta{margin:0}#printArea .small{font-size:12pt;color:#5a667a;margin:0}#printArea hr{border:0;border-top:1.4pt solid #0A3F9C;margin:12pt 0 18pt}#printArea hr.thin{border-top:.7pt solid #cdd6e4}#printArea .quote{font-size:18pt;font-weight:700;color:#0A3F9C;margin:3pt 0 2pt;line-height:1.25}#printArea h2{font-size:16pt;margin:0;line-height:1.3}#printArea .q{font-weight:700;margin:12pt 0 2pt}#printArea .a{margin:0;white-space:pre-wrap}#printArea .empty{font-style:italic;color:#5a667a}#printArea .qa{break-inside:avoid;page-break-inside:avoid}#printArea .notes{border:1pt solid #0A3F9C;min-height:65mm;padding:5mm 6mm;margin-top:20pt;break-inside:avoid;page-break-inside:avoid}#printArea .notes p{font-weight:700;color:#0A3F9C;margin:0}#printArea .notes p.nh{font-weight:400;color:#5a667a;font-size:12pt;margin:3pt 0 2pt}#printArea .notes .ln{height:9mm;border-bottom:.5pt solid #cdd6e4}
 </style>
 </head>
 <body>
@@ -498,6 +498,7 @@ body.locked #app,body.locked .tabbar{display:none}
       <ul class="pick" id="pickList"></ul>
       <p class="incl" id="inclText" role="status"></p>
       <div class="stack" style="gap:10px">
+        <p class="note" data-i18n-html="exp.handNote"></p>
         <button class="btn btn-primary" id="dlPdf">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
           <span data-i18n="exp.pdf">Download PDF</span>
@@ -687,7 +688,7 @@ var A4 = (function () {
   var BLUE = [10, 63, 156], INK = [17, 24, 39], GREY = [90, 102, 122], RULE = [205, 214, 228];
 
   var LDEF = { title: "WEEKVERSLAG", week: "Week", printed: "Afgedrukt op", quote: "QUOTE VAN DE WEEK", plan: "Planning: ",
-    noAnswer: "Geen antwoord ingevuld.", empty: "Nog geen check-ins in deze periode.", notes: "Vrije ruimte / Notities", html: "Weekverslag week", qo: "\"", qc: "\"" };
+    noAnswer: "Geen antwoord ingevuld.", empty: "Nog geen check-ins in deze periode.", notes: "Vrije ruimte / Notities", notesHint: "Schrijf hier met de hand: het antwoord op je vraag en de feedback van je trainer voor je volgende training of match.", html: "Weekverslag week", qo: "\"", qc: "\"" };
   function L(data, k) { return (data.L && data.L[k]) || LDEF[k]; }
   function clean(s) {
     return String(s == null ? "" : s)
@@ -768,7 +769,10 @@ var A4 = (function () {
     page().push({ k: "rect", x: M, y: top, w: W, h: h, lw: 0.35, c: BLUE });
     y = top + 4;
     page().push({ k: "text", x: M + 6, y: top + 6 + 14 * PT * 0.95, s: 14, st: "bold", c: BLUE, t: clean(L(data, "notes")) });
-    for (var ly = top + 22; ly < top + h - 6; ly += 10) {
+    doc.setFont("helvetica", "normal"); doc.setFontSize(12);
+    var hint = doc.splitTextToSize(clean(L(data, "notesHint")), W - 12), hy = top + 13;
+    hint.forEach(function (ln) { page().push({ k: "text", x: M + 6, y: hy + 12 * PT * 0.95, s: 12, st: "normal", c: GREY, t: ln }); hy += lh(12); });
+    for (var ly = hy + 8; ly < top + h - 6; ly += 10) {
       page().push({ k: "line", x1: M + 6, y1: ly, x2: M + W - 6, y2: ly, w: 0.2, c: RULE });
     }
     return pages;
@@ -823,7 +827,7 @@ var A4 = (function () {
       s + ' .a{margin:0;white-space:pre-wrap}' + s + ' .empty{font-style:italic;color:#5a667a}' +
       s + ' .qa{break-inside:avoid;page-break-inside:avoid}' +
       s + ' .notes{border:1pt solid #0A3F9C;min-height:65mm;padding:5mm 6mm;margin-top:20pt;break-inside:avoid;page-break-inside:avoid}' +
-      s + ' .notes p{font-weight:700;color:#0A3F9C;margin:0}' +
+      s + ' .notes p{font-weight:700;color:#0A3F9C;margin:0}' + s + ' .notes p.nh{font-weight:400;color:#5a667a;font-size:12pt;margin:3pt 0 2pt}' +
       s + ' .notes .ln{height:9mm;border-bottom:.5pt solid #cdd6e4}');
   }
   function toHTML(data) {
@@ -845,7 +849,7 @@ var A4 = (function () {
       });
       h.push('</section>' + (i < data.sessions.length - 1 ? '<hr class="thin">' : ''));
     });
-    h.push('<div class="notes"><p>' + esc(L(data, 'notes')) + '</p>' + new Array(7).join('<div class="ln"></div>') + '</div>');
+    h.push('<div class="notes"><p>' + esc(L(data, 'notes')) + '</p><p class="nh">' + esc(L(data, 'notesHint')) + '</p>' + new Array(7).join('<div class="ln"></div>') + '</div>');
     return h.join("");
   }
 
@@ -1001,7 +1005,8 @@ if (typeof module !== "undefined") module.exports = A4;
       "exp.file": "DebriefFC_Weekverslag_Week", "exp.pageOf": "Pagina {i} van {n}", "dl.unavailable": "Downloaden kan niet in deze weergave.",
       "rep.title": "DEBRIEF FC  |  WEEKVERSLAG", "rep.week": "Week", "rep.printed": "Afgedrukt op", "rep.quote": "QUOTE VAN DE WEEK",
       "rep.plan": "Planning: ", "rep.noAnswer": "Geen antwoord ingevuld.", "rep.empty": "Nog geen check-ins in deze periode.",
-      "rep.notes": "Vrije ruimte / Notities", "rep.html": "Weekverslag week", "rep.energy": "Energie {e}/5", "rep.pain": " · Pijn: ",
+      "rep.notes": "Vrije ruimte / Notities", "rep.notesHint": "Schrijf hier met de hand: het antwoord op je vraag en de feedback van je trainer voor je volgende training of match.",
+      "exp.handNote": "<b>Neem je verslag mee naar je trainer.</b> Onderaan staat een kader om met de hand in te vullen: het antwoord op je vraag en zijn feedback voor je volgende training of match.", "rep.html": "Weekverslag week", "rep.energy": "Energie {e}/5", "rep.pain": " · Pijn: ",
       "rep.score": "Cijfer {s}/10.", "rep.sleep": " · Slaap ", "rep.qo": "\u201C", "rep.qc": "\u201D",
       "bk.title": "Back-up", "bk.desc": "Je check-ins staan alleen op dit toestel. Bewaar af en toe een back-up, zeker op iPhone.",
       "bk.save": "Back-up opslaan", "bk.restore": "Back-up terugzetten", "bk.busy": "Back-up wordt gemaakt…",
@@ -1134,7 +1139,8 @@ if (typeof module !== "undefined") module.exports = A4;
       "exp.file": "DebriefFC_Rapport_Semaine", "exp.pageOf": "Page {i} sur {n}", "dl.unavailable": "Le téléchargement n'est pas possible dans cet affichage.",
       "rep.title": "DEBRIEF FC  |  RAPPORT HEBDOMADAIRE", "rep.week": "Semaine", "rep.printed": "Imprimé le", "rep.quote": "CITATION DE LA SEMAINE",
       "rep.plan": "Planning" + NB + ": ", "rep.noAnswer": "Pas de réponse.", "rep.empty": "Pas encore de check-in pour cette période.",
-      "rep.notes": "Espace libre / Notes", "rep.html": "Rapport semaine", "rep.energy": "Énergie {e}/5", "rep.pain": " · Douleur" + NB + ": ",
+      "rep.notes": "Espace libre / Notes", "rep.notesHint": "Écris ici à la main" + NB + ": la réponse à ta question et le retour de ton entraîneur pour ton prochain entraînement ou match.",
+      "exp.handNote": "<b>Emporte ton rapport chez ton entraîneur.</b> En bas, un cadre est prévu pour écrire à la main" + NB + ": la réponse à ta question et son retour pour ton prochain entraînement ou match.", "rep.html": "Rapport semaine", "rep.energy": "Énergie {e}/5", "rep.pain": " · Douleur" + NB + ": ",
       "rep.score": "Note {s}/10.", "rep.sleep": " · Sommeil ", "rep.qo": "«" + NB, "rep.qc": NB + "»",
       "bk.title": "Sauvegarde", "bk.desc": "Tes check-ins sont uniquement sur cet appareil. Fais une sauvegarde de temps en temps, surtout sur iPhone.",
       "bk.save": "Enregistrer une sauvegarde", "bk.restore": "Restaurer une sauvegarde", "bk.busy": "Sauvegarde en cours…",
@@ -1207,7 +1213,7 @@ if (typeof module !== "undefined") module.exports = A4;
       { e: "Étape 3", t: "Écrire ou dicter",
         h: "<p>Écris simplement ta réponse dans la zone de texte.</p><p><b>Tu préfères dicter" + NB + "?</b> Touche la zone de texte et appuie sur le <b>micro de ton clavier</b>. Ton téléphone transforme ta voix en texte. Ça marche sur iPhone et Android.</p><p>Tu peux ensuite encore modifier le texte.</p>" },
       { e: "Étape 4", t: "Ton rapport hebdomadaire",
-        h: "<p>Dans <b>Rapport</b>, choisis la semaine et coche les check-ins à inclure. Ton <b>équipe</b> (catégorie U) se choisit sur l'écran d'accueil, sous ton nom. Elle apparaît en haut de ton rapport.</p><p>Ensuite <b>Télécharger le PDF</b> ou <b>Imprimer</b>" + NB + ": une page A4 soignée pour toi et ton entraîneur, avec de la place pour des notes. Les photos ne sont pas imprimées.</p>" },
+        h: "<p>Dans <b>Rapport</b>, choisis la semaine et coche les check-ins à inclure. Ton <b>équipe</b> (catégorie U) se choisit sur l'écran d'accueil, sous ton nom. Elle apparaît en haut de ton rapport.</p><p>Ensuite <b>Télécharger le PDF</b> ou <b>Imprimer</b>" + NB + ": une page A4 soignée pour toi et ton entraîneur. En bas, un cadre est prévu pour écrire <b>à la main</b>" + NB + ": emporte la feuille et note le retour de ton entraîneur pour ton prochain entraînement ou match. Les photos ne sont pas imprimées.</p>" },
       { e: "Pour les parents", t: "Comment suivre",
         h: "<p>L'app n'a <b>ni serveur ni compte</b>. Tout ce que votre enfant encode reste uniquement sur son propre téléphone.</p><p>Si vous ouvrez l'app sur votre propre téléphone, elle est vide, même avec le code de votre enfant. Ce n'est pas une erreur" + NB + ": les réponses restent ainsi privées.</p><p><b>Pour suivre" + NB + ":</b></p><ul><li><b>Le rapport hebdomadaire" + NB + ":</b> votre enfant télécharge le PDF dans Rapport et vous l'envoie.</li><li><b>Après chaque check-in" + NB + ":</b> votre enfant peut vous envoyer ses réponses en un clic via WhatsApp ou mail. C'est lui qui choisit.</li><li><b>Regarder ensemble</b> sur le téléphone de votre enfant.</li></ul><p><b>Accord" + NB + ":</b> votre enfant reçoit son code via vous. En donnant le code ou en le saisissant vous-même, vous acceptez l'app et le texte sur la vie privée.</p>" },
       { e: "Étape 5", t: "Garder tes données en sécurité",
@@ -2268,7 +2274,7 @@ if (typeof module !== "undefined") module.exports = A4;
     { e: "Stap 3", t: "Typen of inspreken",
       h: "<p>Typ je antwoord gewoon in het tekstvak.</p><p><b>Liever inspreken?</b> Tik in het tekstvak en druk op het <b>microfoontje van je toetsenbord</b>. Je telefoon zet je stem om in tekst. Dat werkt op iPhone en Android.</p><p>Daarna kan je de tekst nog aanpassen.</p>" },
     { e: "Stap 4", t: "Je weekverslag",
-      h: "<p>In <b>Verslag</b> kies je de week en vink je aan welke check-ins erin komen. Je <b>ploeg</b> (U-categorie) kies je op het startscherm, onder je naam. Die komt bovenaan je verslag.</p><p>Daarna <b>Download PDF</b> of <b>Print</b>: een nette A4 voor jou en je trainer, met plaats voor notities. Foto's komen niet op papier.</p>" },
+      h: "<p>In <b>Verslag</b> kies je de week en vink je aan welke check-ins erin komen. Je <b>ploeg</b> (U-categorie) kies je op het startscherm, onder je naam. Die komt bovenaan je verslag.</p><p>Daarna <b>Download PDF</b> of <b>Print</b>: een nette A4 voor jou en je trainer. Onderaan staat een kader om <b>met de hand</b> in te vullen: neem het blad mee en noteer de feedback van je trainer voor je volgende training of match. Foto's komen niet op papier.</p>" },
     { e: "Voor ouders", t: "Zo volg je mee",
       h: "<p>De app heeft <b>geen server en geen account</b>. Alles wat je kind invult, staat alleen op zijn eigen telefoon.</p><p>Open je de app op je eigen telefoon, dan is die leeg, ook met de code van je kind. Dat is geen fout: zo blijven de antwoorden privé.</p><p><b>Zo volg je mee:</b></p><ul><li><b>Het weekverslag:</b> je kind downloadt de PDF in Verslag en stuurt hem naar jou.</li><li><b>Na elke check-in:</b> je kind kan met één tik zijn antwoorden naar jou sturen via WhatsApp of mail. Je kind kiest zelf.</li><li><b>Samen kijken</b> op de telefoon van je kind.</li></ul><p><b>Akkoord:</b> je kind krijgt zijn code via jou. Door de code te geven of zelf in te geven, ga je akkoord met de app en de privacytekst.</p>" },
     { e: "Stap 5", t: "Veilig bewaren",
@@ -2537,7 +2543,7 @@ if (typeof module !== "undefined") module.exports = A4;
     return {
       week: wk, range: rangeOf(exportMon), player: [nameNow(), store.team || ""].filter(Boolean).join(", "), plan: planLine(exportMon),
       L: { title: T("rep.title"), week: T("rep.week"), printed: T("rep.printed"), quote: T("rep.quote"), plan: T("rep.plan"),
-           noAnswer: T("rep.noAnswer"), empty: T("rep.empty"), notes: T("rep.notes"), html: T("rep.html"), qo: T("rep.qo"), qc: T("rep.qc") },
+           noAnswer: T("rep.noAnswer"), empty: T("rep.empty"), notes: T("rep.notes"), notesHint: T("rep.notesHint"), html: T("rep.html"), qo: T("rep.qo"), qc: T("rep.qc") },
       printed: fmt(today(), { day: "numeric", month: "long", year: "numeric" }),
       quote: { text: q.t, src: q.s },
       sessions: ws.map(sessReport)
