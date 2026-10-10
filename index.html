@@ -1,0 +1,2473 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A3F9C">
+<meta name="author" content="Sofia la Bianca">
+<meta name="copyright" content="© 2026 Sofia la Bianca">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Debrief FC">
+<title>Debrief FC</title>
+<!--
+  DEBRIEF FC - football journal - single-file web app
+  © 2026 Sofia la Bianca. Alle rechten voorbehouden.
+  ---------------------------------------
+  Hosten: zet dit bestand op een HTTPS-adres (bv. Netlify Drop, GitHub Pages, Cloudflare Pages).
+  Zonder HTTPS geeft de browser geen toegang tot de microfoon.
+  Externe bestanden: Google Fonts (lettertype), jsPDF 2.5.1 via jsDelivr (PDF-export) en, alleen bij
+  een iPhone-foto (HEIC) op Android, heic2any 0.0.4 via jsDelivr.
+  Data: alleen lokaal in de browser (localStorage). Maak regelmatig een back-up via Verslag > Back-up.
+  Aanpassen: zie CONFIG bovenaan het script.
+  Naam: staat NIET in dit bestand. Die zit in de persoonlijke code (NAAM-XXXX-XXXX).
+  Hier staan alleen onomkeerbare afdrukken van die codes (KNOWN_CODES_HASHED).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+/* ====== THEMA: blauw-wit ====== */
+:root{
+  --bg:#EDF2F9; --surface:#FFFFFF; --ink:#0B1A33; --muted:#56678A; --line:#D3DDEC;
+  --blue:#0A3F9C; --blue-ink:#0A3F9C; --blue-soft:#E2EBF9; --on-blue:#FFFFFF;
+  --hero:#0A3F9C; --hero-2:#0C4BB5;
+  --warn:#A64B07; --warn-soft:#FBE9DA; --rec:#C62828; --cancel:#C62828; --cancel-soft:#FDECEC; --star:#D99A00;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Barlow",Arial,Helvetica,sans-serif;
+  --r:14px;
+  color-scheme:light;
+  padding-top:env(safe-area-inset-top,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#06122A; --surface:#0D1E3C; --ink:#E7EEFA; --muted:#9CACCB; --line:#1D345C;
+  --blue:#2C6BE0; --blue-ink:#8FB5FF; --blue-soft:#132C57;
+  --hero:#0B3A8F; --hero-2:#0F47A8; --warn:#F2A766; --warn-soft:#3A2410; --cancel:#FF8A80; --cancel-soft:#3B1515; --star:#FFD54A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#06122A; --surface:#0D1E3C; --ink:#E7EEFA; --muted:#9CACCB; --line:#1D345C;
+  --blue:#2C6BE0; --blue-ink:#8FB5FF; --blue-soft:#132C57;
+  --hero:#0B3A8F; --hero-2:#0F47A8; --warn:#F2A766; --warn-soft:#3A2410; --cancel:#FF8A80; --cancel-soft:#3B1515; --star:#FFD54A; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;padding-inline:16px;padding-block:0;-webkit-text-size-adjust:100%}
+.app{max-width:460px;margin:0 auto;padding-block:16px calc(112px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:18px}
+.app.wide{max-width:720px}
+.stack{display:flex;flex-direction:column;gap:18px}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--blue-ink);outline-offset:2px}
+h1,h2,h3{text-wrap:balance;margin:0}
+.eyebrow{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue-ink)}
+.muted{color:var(--muted)}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mark{font-family:var(--display);font-weight:800;font-size:clamp(17px,5.2vw,22px);letter-spacing:.07em;display:flex;align-items:center;gap:8px;min-width:0;white-space:nowrap}
+.mark i{width:22px;height:22px;border-radius:50%;border:3px solid var(--blue);display:inline-block;position:relative}
+.mark i::after{content:"";position:absolute;inset:6px;border-radius:50%;background:var(--blue)}
+.chip{font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.08em;padding:5px 11px;border-radius:999px;background:var(--blue-soft);color:var(--blue-ink);white-space:nowrap}
+
+/* hero met middencirkel */
+.hero{position:relative;overflow:hidden;border-radius:20px;background:linear-gradient(160deg,var(--hero-2),var(--hero) 60%);color:#fff;padding:26px 22px 24px;isolation:isolate}
+.hero::before{content:"";position:absolute;width:260px;height:260px;border-radius:50%;border:2px solid rgba(255,255,255,.14);right:-110px;top:50%;transform:translateY(-50%);z-index:-1}
+.hero::after{content:"";position:absolute;top:0;bottom:0;right:20px;border-left:2px solid rgba(255,255,255,.14);z-index:-1}
+.hero .eyebrow{color:rgba(255,255,255,.78)}
+.hero blockquote{margin:12px 0 14px;font-family:var(--display);font-weight:800;font-size:clamp(30px,8.4vw,40px);line-height:1.02;text-transform:uppercase;max-width:15ch}
+.hero .src{font-size:14px;color:rgba(255,255,255,.75);margin:0}
+.hero .wk{position:absolute;right:16px;top:16px;font-family:var(--display);font-weight:800;font-size:56px;line-height:1;color:rgba(255,255,255,.1)}
+
+.greet h2{font-family:var(--display);font-weight:700;font-size:26px;line-height:1.1}
+.greet p{margin:4px 0 0}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:var(--r);padding:15px 18px;font-weight:700;font-size:17px;min-height:52px;text-align:center}
+.btn-primary{background:var(--blue);color:var(--on-blue);width:100%;font-family:var(--display);font-size:clamp(18px,5vw,21px);letter-spacing:.05em;text-transform:uppercase}
+.btn-ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink);width:100%}
+.btn-soft{background:var(--blue-soft);color:var(--blue-ink);width:100%}
+.btn svg{width:22px;height:22px;flex:none}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
+.sec-h h3{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.02em}
+
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:12px}
+.day{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.dot{width:30px;height:30px;border-radius:50%;border:1.5px dashed var(--line);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:15px;color:var(--muted)}
+.day{font-family:inherit;background:none;border:0;padding:4px 0;border-radius:10px;cursor:pointer}
+.day:hover .dot{border-color:var(--blue-ink)}
+.day.plan-training .dot,.day.plan-match .dot{border:2px solid var(--blue-ink);color:var(--blue-ink)}
+.day.plan-rust .dot{border:0;background:var(--line);color:var(--muted)}
+.day.plan-geannuleerd .dot{border:2px solid var(--cancel);background:var(--cancel-soft);color:var(--cancel);font-size:20px}
+.day.plan-geannuleerd{color:var(--cancel)}
+/* matchdag: flikkerende sterretjes */
+.dot{position:relative}
+.day.is-match .dot{border-width:2px}
+.day.plan-match .dot{background:var(--blue-soft)}
+.spark{position:absolute;width:13px;height:13px;background:var(--star);pointer-events:none;
+  clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:twinkle 1.9s ease-in-out infinite}
+.spark.a{top:-8px;right:-7px}
+.spark.b{bottom:-3px;right:-10px;width:9px;height:9px;animation-delay:.65s}
+.spark.c{top:1px;left:-11px;width:9px;height:9px;animation-delay:1.3s}
+@keyframes twinkle{0%,100%{transform:scale(.35) rotate(0deg);opacity:.3}50%{transform:scale(1) rotate(45deg);opacity:1}}
+@media (prefers-reduced-motion: reduce){.spark{animation:none;opacity:1;transform:none}}
+#planOpts .span2{grid-column:1/-1}
+#planOpts button[data-v="geannuleerd"][aria-pressed="true"]{background:var(--cancel);border-color:var(--cancel);color:#fff}
+.chk input:disabled + span{color:var(--muted)}
+.day.done .dot{border:0;background:var(--blue);color:var(--on-blue)}
+.day.today{color:var(--blue-ink)}
+.day.today .dot{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--blue-ink)}
+.legend{margin:-4px 0 12px;font-size:13px;color:var(--muted)}
+.chk{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px;min-height:44px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--blue);margin:0}
+
+.sess{list-style:none;margin:0;padding:0}
+.sess>li{border-top:1px solid var(--line)}
+.sess>li:first-child{border-top:0}
+.sess-row{width:100%;display:grid;grid-template-columns:44px 1fr 20px;gap:12px;align-items:center;padding:11px 0;background:none;border:0;text-align:left}
+.score{font-family:var(--display);font-weight:800;font-size:28px;line-height:1;text-align:center;color:var(--blue-ink)}
+.sess .t{font-weight:600;min-width:0}
+.sess .t small{display:block;font-weight:400;color:var(--muted);font-size:14px}
+.chev{width:20px;height:20px;color:var(--muted);transition:transform .2s}
+.sess-row[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.detail{padding:0 0 14px 56px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.detail p{margin:0;font-size:15px;overflow-wrap:anywhere}
+.detail b{display:block;font-size:13px;color:var(--muted);font-weight:600}
+.del{align-self:flex-start;border:1.5px solid var(--line);background:none;border-radius:10px;padding:7px 12px;font-size:14px;font-weight:600;color:var(--warn)}
+.tag{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:var(--blue-soft);color:var(--blue-ink)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.tags:empty{display:none}
+.empty{color:var(--muted);margin:0}
+
+.focus{display:flex;gap:14px;align-items:center}
+.focus .ic{width:46px;height:46px;border-radius:12px;background:var(--blue-soft);display:grid;place-items:center;flex:none;color:var(--blue-ink)}
+.focus .ic svg{width:24px;height:24px}
+.focus p{margin:0;font-weight:600;font-size:17px}
+
+/* check-in */
+.ck-top{display:flex;align-items:center;gap:10px}
+.iconbtn{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);display:grid;place-items:center;flex:none}
+.iconbtn svg{width:20px;height:20px}
+.progress{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.progress span{height:6px;border-radius:3px;background:var(--line)}
+.progress span.on{background:var(--blue)}
+.stepnum{font-family:var(--display);font-weight:700;font-size:15px;color:var(--muted);white-space:nowrap}
+.qhead .n{font-family:var(--display);font-weight:800;font-size:64px;line-height:.85;color:var(--blue-ink)}
+.qhead h2{font-family:var(--display);font-weight:700;font-size:28px;line-height:1.08;margin-top:6px}
+.hint{margin:8px 0 0;color:var(--muted);font-size:15px}
+.seg{display:grid;gap:8px}
+.seg.c2{grid-template-columns:1fr 1fr}
+.seg.c5{grid-template-columns:repeat(5,1fr)}
+.seg.c3{grid-template-columns:repeat(3,1fr)}
+.seg button{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;min-height:50px;font-weight:700;font-size:16px;padding:8px}
+.seg button[aria-pressed="true"],.jersey button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
+.seg.c5 button{font-family:var(--display);font-size:24px;font-weight:800}
+.field-l{font-weight:700;font-size:15px;margin:0 0 8px;display:flex;justify-content:space-between;gap:8px}
+.field-l span{font-weight:500;color:var(--muted)}
+.dateinput{width:100%;min-height:50px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);padding:10px 12px;font-size:16px}
+.jersey{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.jersey button{aspect-ratio:1/1;max-width:100%;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-family:var(--display);font-weight:800;font-size:30px;line-height:1}
+.answer{position:relative}
+.answer textarea{width:100%;min-height:150px;resize:vertical;border:1.5px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);font:inherit;font-size:17px;line-height:1.45;padding:14px 72px 14px 14px}
+.answer textarea.plain{min-height:96px;padding-right:14px}
+.answer textarea::placeholder{color:var(--muted)}
+.mic{position:absolute;right:10px;bottom:12px;width:52px;height:52px;border-radius:50%;border:0;background:var(--blue);color:var(--on-blue);display:grid;place-items:center;box-shadow:0 4px 14px rgba(10,63,156,.35)}
+.mic svg{width:24px;height:24px}
+.mic.rec{background:var(--rec)}
+.mic.rec::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--rec);animation:pulse 1.2s ease-out infinite}
+@keyframes pulse{from{transform:scale(.9);opacity:1}to{transform:scale(1.25);opacity:0}}
+@media (prefers-reduced-motion: reduce){.mic.rec::after{animation:none}.chev{transition:none}}
+.miclabel{font-size:14px;color:var(--muted);margin:8px 0 0;min-height:1.2em}
+.note{border-radius:12px;padding:12px 14px;background:var(--blue-soft);color:var(--ink);font-size:15px;margin:0}
+.note b{color:var(--blue-ink)}
+.reset{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.reset div{border-radius:10px;background:var(--blue-soft);padding:10px 8px;text-align:center}
+.reset b{display:block;font-family:var(--display);font-size:18px;letter-spacing:.04em;text-transform:uppercase;color:var(--blue-ink)}
+.reset small{color:var(--muted);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 13px;font-size:15px;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chipwrap{display:flex;flex-direction:column;gap:8px}
+.chipwrap .field-l{margin:0}
+.chipgrp{margin:6px 0 0;font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.morepos{border-top:1px solid var(--line);margin-top:8px;padding-top:4px}
+.morepos summary{cursor:pointer;font-weight:700;color:var(--blue-ink);padding:10px 0;min-height:44px;list-style-position:inside}
+.morepos[open] summary{margin-bottom:2px}
+.morepos .chips{margin-bottom:6px}
+.chips button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
+
+/* verslag */
+.toggle{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.toggle button{border:0;background:transparent;border-radius:9px;padding:10px;font-weight:700}
+.toggle button[aria-pressed="true"]{background:var(--blue);color:var(--on-blue)}
+.weeknav{display:grid;grid-template-columns:44px 1fr 44px;gap:10px;align-items:center;text-align:center}
+.weeknav b{font-family:var(--display);font-size:22px;font-weight:800;display:block;line-height:1.1}
+.weeknav small{color:var(--muted);font-size:14px}
+.specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.spec{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface)}
+.spec b{display:block;font-family:var(--display);font-size:22px;font-weight:800;color:var(--blue-ink);line-height:1.1}
+.spec small{color:var(--muted);font-size:13px}
+.sheets{display:flex;flex-direction:column;gap:14px;align-items:center}
+.sheet{width:100%;max-width:560px;aspect-ratio:210/297;background:#fff;border-radius:4px;box-shadow:0 1px 2px rgba(11,26,51,.12),0 8px 24px rgba(11,26,51,.12);overflow:hidden}
+.sheet svg{width:100%;height:100%;display:block}
+.pglbl{font-size:13px;color:var(--muted);margin-top:-6px}
+.status{font-size:14px;color:var(--muted);margin:0;min-height:1.4em}
+
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);padding:8px 16px calc(8px + env(safe-area-inset-bottom,0px))}
+.tabbar nav{max-width:460px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.tab{border:0;background:transparent;border-radius:12px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.tab svg{width:24px;height:24px}
+.tab[aria-current="page"]{color:var(--blue-ink);background:var(--blue-soft)}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;z-index:20;max-width:calc(100% - 32px)}
+
+/* verslag: wat zit erin */
+.pick{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.pick li{border-top:1px solid var(--line)}
+.pick li:first-child{border-top:0}
+.pick label{display:grid;grid-template-columns:24px 1fr auto;gap:12px;align-items:center;padding:12px 14px;min-height:56px;cursor:pointer}
+.pick input{width:22px;height:22px;accent-color:var(--blue);margin:0}
+.pick .t{font-weight:600;min-width:0}
+.pick .t small{display:block;color:var(--muted);font-weight:400;font-size:14px}
+.pick .sc{font-family:var(--display);font-weight:800;font-size:24px;color:var(--blue-ink)}
+.pick label:has(input:not(:checked)) .t,.pick label:has(input:not(:checked)) .sc{opacity:.45}
+.pick-empty{margin:0;padding:14px;color:var(--muted)}
+.pick-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:-8px}
+.pick-h h3{font-family:var(--display);font-weight:700;font-size:20px}
+.pick-h button{background:none;border:0;padding:4px 0;color:var(--blue-ink);font-weight:700;font-size:15px;text-decoration:underline;text-underline-offset:3px}
+
+.incl{margin:-6px 0 0;font-size:15px;color:var(--muted)}
+.incl b{color:var(--ink)}
+/* matchcijfers + seizoen */
+#statRows{display:flex;flex-direction:column;gap:8px}
+.sgroup{font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:10px 0 0}
+#statRows .sgroup:first-child{margin-top:0}
+.srows{display:flex;flex-direction:column;gap:8px}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 8px 8px 14px;font-weight:600}
+.stepper{display:grid;grid-template-columns:44px 52px 44px;align-items:center}
+.stepper button{width:44px;height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font-size:24px;font-weight:700;line-height:1;padding:0}
+.stepper output{text-align:center;font-family:var(--display);font-weight:800;font-size:26px;color:var(--blue-ink);font-variant-numeric:tabular-nums}
+.seg.mini{grid-template-columns:64px 64px}
+.seg.mini button{min-height:44px;font-size:15px}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center;background:var(--bg)}
+.tile b{display:block;font-family:var(--display);font-weight:800;font-size:30px;line-height:1;color:var(--blue-ink);font-variant-numeric:tabular-nums}
+.tile small{display:block;font-size:12px;line-height:1.25;color:var(--muted);margin-top:5px;hyphens:manual}
+/* foto's */
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+.phgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ph{margin:0;position:relative;display:flex;flex-direction:column;gap:6px;min-width:0}
+.phimg{padding:0;border:0;border-radius:12px;overflow:hidden;aspect-ratio:1/1;background:var(--line);display:block;width:100%;max-width:100%}
+.phimg img{width:100%;height:100%;object-fit:cover;display:block}
+.phdel{position:absolute;top:6px;right:6px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(6,18,42,.72);color:#fff;font-size:20px;line-height:1;display:grid;place-items:center;padding:0}
+.phcap{width:100%;min-width:0;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:6px 8px;font-size:14px}
+.phadd{aspect-ratio:1/1;max-width:100%;border:2px dashed var(--line);border-radius:12px;display:grid;place-items:center;cursor:pointer;color:var(--blue-ink);font-weight:700;background:var(--surface);position:relative}
+.phadd:hover,.phadd:focus-within{border-color:var(--blue-ink)}
+.phadd.busy span::after{content:" …"}
+.phdetail{display:flex;flex-direction:column;gap:8px}
+.phdetail>b{display:block;font-size:13px;color:var(--muted);font-weight:600}
+.strip{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.strip button{flex:0 0 96px;height:96px;border:0;padding:0;border-radius:12px;overflow:hidden;scroll-snap-align:start;background:var(--line)}
+.strip img{width:100%;height:100%;object-fit:cover;display:block}
+.viewer{position:fixed;inset:0;z-index:40;background:rgba(3,10,24,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(60px + env(safe-area-inset-top,0px)) 12px calc(20px + env(safe-area-inset-bottom,0px))}
+.vstage{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+.vstage img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
+.vcap{color:#fff;margin:12px 0 0;text-align:center;max-width:40ch;min-height:1.4em}
+.vcap small{display:block;color:rgba(255,255,255,.7);margin-top:2px}
+.vclose{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:12px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font-size:26px;line-height:1}
+.vnav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:64px;border:0;border-radius:12px;background:rgba(255,255,255,.14);color:#fff;font-size:32px;line-height:1}
+.vprev{left:8px}
+.vnext{right:8px}
+/* taalkeuze */
+.langsw{display:inline-grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface)}
+.langsw button{border:0;background:transparent;color:var(--muted);font-family:var(--display);font-weight:800;font-size:14px;letter-spacing:.06em;padding:7px 9px;min-height:34px;line-height:1}
+.langsw button[aria-pressed="true"]{background:var(--blue);color:var(--on-blue)}
+.gtopr{display:flex;gap:8px;align-items:center}
+/* uitleg + voet */
+.topr{display:flex;gap:6px;align-items:center;flex:none}
+@media (max-width:479px){#wkchip{display:none}}
+.mark i{flex:none}
+.mk{display:flex;flex-direction:column;line-height:1}
+.mk b{font-weight:800;font-size:1em;letter-spacing:.08em}
+.mk small{font-family:var(--display);font-weight:700;font-size:.48em;letter-spacing:.24em;color:var(--blue-ink);margin-top:3px}
+.mk-ic{width:24px;height:24px;flex:none;color:var(--blue)}
+.infobtn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);color:var(--blue-ink);font-family:var(--display);font-weight:800;font-size:19px;line-height:1;padding:0}
+.guide .dialog{max-height:calc(100% - 16px);overflow:auto;gap:14px}
+.gtop{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.gx{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-size:24px;line-height:1;padding:0}
+.gbody{font-size:16px;line-height:1.5;min-height:9.5em}
+.guide .gbody p{margin:0 0 10px}
+.guide .gbody ul{margin:0 0 10px;padding-left:20px}
+.gbody li{margin:0 0 6px}
+.gbody b{color:var(--blue-ink)}
+.gmotto{font-family:var(--display);font-weight:700;font-size:20px;line-height:1.15;text-transform:uppercase;color:var(--blue-ink);margin-top:14px!important;text-wrap:balance}
+.gdots{display:flex;gap:6px;justify-content:center}
+.gdots span{width:8px;height:8px;border-radius:4px;background:var(--line);transition:width .2s}
+.gdots span.on{width:22px;background:var(--blue)}
+.guide .gstep{margin:-6px 0 0;text-align:center;font-size:13px;color:var(--muted)}
+.gnav{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gnav .btn{font-size:17px;padding-inline:10px}
+.foot{display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;padding-block:10px 4px}
+.motto{font-family:var(--display);font-weight:700;font-size:21px;line-height:1.15;text-transform:uppercase;color:var(--blue-ink);margin:0 0 4px;max-width:24ch;text-wrap:balance}
+.copy{margin:0;font-size:13px;color:var(--muted);text-align:center}
+@media (prefers-reduced-motion: reduce){.gdots span{transition:none}}
+/* disclaimer + privacy */
+.legal{margin:2px 0 0;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.legal .linkbtn{padding:6px 0;font-size:14px}
+.lpage{position:fixed;inset:0;z-index:45;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.lbar{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px}
+.lbar .btn{width:100%;max-width:640px;display:flex;margin:0 auto}
+.lcontent{max-width:640px;margin:0 auto;padding:22px 16px calc(48px + env(safe-area-inset-bottom,0px));font-size:16px;line-height:1.6}
+.lcontent h2{font-family:var(--display);font-weight:800;font-size:34px;line-height:1.05;margin:0}
+.lcontent .lsub{margin:4px 0 18px;font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.lcontent h3{font-family:var(--display);font-weight:700;font-size:21px;color:var(--blue-ink);margin:22px 0 4px}
+.lcontent p{margin:0 0 10px}
+.lcontent ul{margin:0 0 10px;padding-left:20px}
+.lcontent a{color:var(--blue-ink)}
+.lbox{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:12px;padding:14px 16px;margin:0 0 6px}
+.lbox b{color:var(--blue-ink)}
+.lmailbtn{width:auto;min-height:44px;padding:10px 16px;font-size:15px}
+.lmail{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-weight:600}
+.lfoot{margin-top:26px!important;font-size:13px;color:var(--muted)}
+/* alles wissen */
+.danger-btn{color:var(--cancel);border-color:var(--cancel)}
+.danger-solid{background:var(--cancel);color:var(--surface);width:100%}
+/* persoonlijke code */
+.linkbtn{background:none;border:0;padding:8px 0 0;color:var(--blue-ink);font-weight:700;font-size:15px;text-decoration:underline;text-underline-offset:3px}
+.overlay{position:fixed;inset:0;z-index:30;background:rgba(6,18,42,.6);display:grid;place-items:center;padding:16px}
+.dialog{background:var(--surface);color:var(--ink);border-radius:20px;padding:22px;width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 50px rgba(6,18,42,.35)}
+.dialog h2{font-family:var(--display);font-weight:800;font-size:28px;line-height:1.05}
+.dialog p{margin:0}
+.codein{width:100%;min-height:56px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;padding:10px 14px}
+.codein.bad{border-color:var(--warn)}
+.err{color:var(--warn);font-size:14px;font-weight:600}
+
+/* ====== PRINT: alleen het verslag, A4, 25 mm marges ====== */
+#printArea{display:none}
+@media print{
+  @page{size:A4;margin:25mm}
+  :root{padding:0!important}
+  html,body{background:#fff!important;margin:0!important;padding:0!important}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important}
+}
+#printArea{font-family:Arial,Helvetica,sans-serif;font-size:14pt;line-height:1.42;color:#111827;background:#fff}#printArea .lbl{font-size:12pt;font-weight:700;color:#0A3F9C;letter-spacing:.06em;margin:0}#printArea h1{font-size:22pt;margin:2pt 0 0;line-height:1.2}#printArea .meta{margin:0}#printArea .small{font-size:12pt;color:#5a667a;margin:0}#printArea hr{border:0;border-top:1.4pt solid #0A3F9C;margin:12pt 0 18pt}#printArea hr.thin{border-top:.7pt solid #cdd6e4}#printArea .quote{font-size:18pt;font-weight:700;color:#0A3F9C;margin:3pt 0 2pt;line-height:1.25}#printArea h2{font-size:16pt;margin:0;line-height:1.3}#printArea .q{font-weight:700;margin:12pt 0 2pt}#printArea .a{margin:0;white-space:pre-wrap}#printArea .empty{font-style:italic;color:#5a667a}#printArea .qa{break-inside:avoid;page-break-inside:avoid}#printArea .notes{border:1pt solid #0A3F9C;min-height:65mm;padding:5mm 6mm;margin-top:20pt;break-inside:avoid;page-break-inside:avoid}#printArea .notes p{font-weight:700;color:#0A3F9C;margin:0}#printArea .notes .ln{height:9mm;border-bottom:.5pt solid #cdd6e4}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ===== START ===== -->
+  <section id="v-start" data-i18n-aria="nav.start" aria-label="Start">
+    <div class="stack">
+      <div class="top">
+        <div class="mark"><svg class="mk-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.6" fill="none" stroke="currentColor" stroke-width="2.4"/><line x1="12" y1="1.5" x2="12" y2="22.5" stroke="currentColor" stroke-width="2.4"/><circle cx="12" cy="12" r="2.4" fill="currentColor"/></svg><span class="mk"><b>DEBRIEF FC</b><small>FOOTBALL JOURNAL</small></span></div>
+        <div class="topr"><div class="langsw" role="group" data-i18n-aria="lang.group" aria-label="Taal · Langue"><button type="button" data-lang="nl">NL</button><button type="button" data-lang="fr">FR</button></div><button type="button" class="infobtn" id="helpBtn" data-i18n-aria="help.how" aria-label="Hoe werkt de app?">?</button><span class="chip" id="wkchip">WEEK</span></div>
+      </div>
+      <div class="hero">
+        <div class="wk" id="wkbig" aria-hidden="true"></div>
+        <div class="eyebrow" data-i18n="start.quoteLbl">Quote van de week</div>
+        <blockquote id="qtext"></blockquote>
+        <p class="src" id="qsrc"></p>
+      </div>
+      <div class="greet">
+        <h2 id="greet">Ciao. Klaar voor je check-in?</h2>
+        <p class="muted" id="greetSub">Vier vragen, twee minuten. Inspreken mag.</p>
+        <button class="linkbtn" id="codeBtn" data-i18n="code.enter">Persoonlijke code ingeven</button>
+      </div>
+      <button class="btn btn-primary" id="startBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>
+        <span id="startLbl">Start check-in</span>
+      </button>
+      <div class="card">
+        <div class="sec-h"><h3 data-i18n="start.thisWeek">Deze week</h3><span class="muted" id="wkrange" style="font-size:14px"></span></div>
+        <div class="days" id="days"></div>
+        <p class="legend" data-i18n="start.legend">Tik op een dag om training, match of rust te plannen. Volle bol = check-in gedaan, rood = geannuleerd.</p>
+        <ul class="sess" id="sessList"></ul>
+      </div>
+      <div class="card" id="seasonCard" hidden>
+        <div class="sec-h"><h3 data-i18n="season.title">Seizoen</h3><span class="muted" id="seasonLbl" style="font-size:14px"></span></div>
+        <div class="tiles" id="seasonTiles"></div>
+        <p class="legend" id="seasonNote" style="margin:10px 0 0"></p>
+      </div>
+      <div class="card" id="momentsCard" hidden>
+        <div class="sec-h"><h3 data-i18n="ph.moments">Fotomomenten</h3><span class="muted" id="momentsCount" style="font-size:14px"></span></div>
+        <div class="strip" id="momentsStrip"></div>
+      </div>
+      <div class="card focus">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></div>
+        <div style="min-width:0"><div class="eyebrow" data-i18n="start.focus">Jouw focus</div><p id="focusText"></p></div>
+      </div>
+      <footer class="foot">
+        <p class="motto">“The top of the mountain is the bottom of the next, so keep climbing.”</p>
+        <button type="button" class="linkbtn" id="helpLink" data-i18n="help.how">Hoe werkt de app?</button>
+        <p class="copy" data-i18n="common.copy">© 2026 Sofia la Bianca · Alle rechten voorbehouden</p>
+        <p class="legal"><button type="button" class="linkbtn" id="discBtn" data-i18n="legal.disc">Disclaimer</button><span aria-hidden="true">·</span><button type="button" class="linkbtn" id="privBtn" data-i18n="legal.priv">Privacy (GDPR)</button></p>
+      </footer>
+    </div>
+  </section>
+
+  <!-- ===== CHECK-IN ===== -->
+  <section id="v-check" data-i18n-aria="nav.reflect" aria-label="Reflectie" hidden>
+    <div class="stack" style="gap:20px">
+      <div class="ck-top">
+        <button class="iconbtn" id="ckBack" aria-label="Vorige stap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <div class="progress" id="progress" aria-hidden="true"></div>
+        <span class="stepnum" id="stepnum">1/5</span>
+      </div>
+      <div id="stepBody"></div>
+      <button class="btn btn-primary" id="ckNext">Volgende</button>
+    </div>
+  </section>
+
+  <!-- ===== VERSLAG ===== -->
+  <section id="v-export" data-i18n-aria="nav.report" aria-label="Verslag" hidden>
+    <div class="stack">
+      <div class="top">
+        <div><div class="eyebrow" data-i18n="exp.eyebrow">A4-export</div><h2 style="font-family:var(--display);font-size:30px;font-weight:800" data-i18n="exp.title">Weekverslag</h2></div>
+      </div>
+      <div class="weeknav">
+        <button class="iconbtn" id="wPrev" data-i18n-aria="exp.prev" aria-label="Vorige week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <div><b id="wLabel">Week</b><small id="wRange"></small></div>
+        <button class="iconbtn" id="wNext" data-i18n-aria="exp.next" aria-label="Volgende week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+      <div class="pick-h"><h3 data-i18n="exp.what">Wat komt in het verslag?</h3><button type="button" id="pickAll">Alles uit</button></div>
+      <ul class="pick" id="pickList"></ul>
+      <p class="incl" id="inclText" role="status"></p>
+      <div class="stack" style="gap:10px">
+        <button class="btn btn-primary" id="dlPdf">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+          <span data-i18n="exp.pdf">Download PDF</span>
+        </button>
+        <div class="row2">
+          <button class="btn btn-soft" id="printBtn" data-i18n="exp.print">Print</button>
+          <button class="btn btn-soft" id="dlHtml" data-i18n="exp.docs">Word / Docs</button>
+        </div>
+        <p class="status" id="dlStatus" role="status"></p>
+        <p class="muted" style="margin:-6px 0 0;font-size:14px" data-i18n="parents.tip">Ouders volgen mee via dit verslag: download de PDF en stuur hem door.</p>
+      </div>
+      <div class="sheets" id="sheets"></div>
+
+      <div class="card stack" style="gap:10px" id="myCard">
+        <h3 style="font-family:var(--display);font-size:20px" data-i18n="my.title">Mijn gegevens</h3>
+        <div><label class="field-l" for="teamSel"><strong data-i18n="my.team">Mijn ploeg</strong> <span data-i18n="my.teamNote">Komt bovenaan je verslag.</span></label>
+        <select id="teamSel" class="dateinput"></select></div>
+        <div class="stack" id="nameBox" style="gap:10px" hidden>
+          <p class="muted" style="margin:0;font-size:15px" id="nameState"></p>
+          <button class="btn btn-ghost" id="nameBtn"></button>
+        </div>
+      </div>
+
+      <div class="card stack" style="gap:10px">
+        <h3 style="font-family:var(--display);font-size:20px" data-i18n="bk.title">Back-up</h3>
+        <p class="muted" style="margin:0;font-size:15px" data-i18n="bk.desc">Je check-ins staan alleen op dit toestel. Bewaar af en toe een back-up, zeker op iPhone.</p>
+        <div class="row2">
+          <button class="btn btn-ghost" id="bkOut" data-i18n="bk.save">Back-up opslaan</button>
+          <button class="btn btn-ghost" id="bkIn" data-i18n="bk.restore">Back-up terugzetten</button>
+        </div>
+        <input type="file" id="bkFile" accept="application/json,.json" hidden>
+      </div>
+
+      <div class="card stack" style="gap:10px">
+        <h3 style="font-family:var(--display);font-size:20px" data-i18n="wipe.title">Alles wissen</h3>
+        <p class="muted" style="margin:0;font-size:15px" data-i18n="wipe.desc">Wist alle check-ins.</p>
+        <button class="btn btn-ghost danger-btn" id="wipeStart" data-i18n="wipe.start">Alles wissen…</button>
+        <div class="stack" id="wipeBox" style="gap:10px" hidden>
+          <p class="note" data-i18n-html="wipe.note"></p>
+          <button class="btn btn-soft" id="wipeBackup" data-i18n="bk.save">Back-up opslaan</button>
+          <label class="chk"><input type="checkbox" id="wipeSure"> <span data-i18n="wipe.sure">Ja, ik wil echt alles wissen</span></label>
+          <button class="btn danger-solid" id="wipeGo" disabled data-i18n="wipe.go">Wis alles definitief</button>
+          <button class="btn btn-ghost" id="wipeCancel" data-i18n="common.cancel">Annuleer</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="tabbar">
+  <nav data-i18n-aria="nav.menu" aria-label="Hoofdmenu">
+    <button class="tab" data-go="start" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span data-i18n="nav.start">Start</span></button>
+    <button class="tab" data-go="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg><span data-i18n="nav.check">Check-in</span></button>
+    <button class="tab" data-go="export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></svg><span data-i18n="nav.report">Verslag</span></button>
+  </nav>
+</div>
+<div class="toast" id="toast" hidden></div>
+<div class="lpage" id="legalPage" hidden role="dialog" aria-modal="true" data-i18n-aria="legal.aria" aria-label="Disclaimer en privacy">
+  <div class="lbar"><button type="button" class="btn btn-ghost" id="legalBack" data-i18n="legal.back">← Terug</button></div>
+  <div class="lcontent" id="legalBody"></div>
+</div>
+<div class="overlay guide" id="guideOv" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="gTitle">
+    <div class="gtop"><span class="eyebrow" id="gEyebrow">Welkom</span><span class="gtopr"><span class="langsw" role="group" data-i18n-aria="lang.group" aria-label="Taal · Langue"><button type="button" data-lang="nl">NL</button><button type="button" data-lang="fr">FR</button></span><button type="button" class="gx" id="gClose" data-i18n-aria="guide.close" aria-label="Uitleg sluiten">×</button></span></div>
+    <h2 id="gTitle">Hoe werkt de app?</h2>
+    <div class="gbody" id="gBody"></div>
+    <div class="gdots" id="gDots" aria-hidden="true"></div>
+    <p class="gstep" id="gStep" aria-live="polite"></p>
+    <div class="gnav"><button type="button" class="btn btn-ghost" id="gPrev" data-i18n="common.prev">Vorige</button><button type="button" class="btn btn-primary" id="gNext">Volgende</button></div>
+    <p class="copy" data-i18n="common.copy">© 2026 Sofia la Bianca · Alle rechten voorbehouden</p>
+  </div>
+</div>
+<div class="viewer" id="phView" hidden role="dialog" aria-modal="true" data-i18n-aria="ph.viewer" aria-label="Foto">
+  <button type="button" class="vclose" id="phClose" data-i18n-aria="ph.close" aria-label="Sluiten">×</button>
+  <button type="button" class="vnav vprev" id="phPrev" data-i18n-aria="ph.prev" aria-label="Vorige foto">‹</button>
+  <div class="vstage"><img id="phImg" alt=""></div>
+  <button type="button" class="vnav vnext" id="phNext" data-i18n-aria="ph.next" aria-label="Volgende foto">›</button>
+  <p class="vcap" id="phCap"></p>
+</div>
+<div class="overlay" id="planOv" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="planTitle">
+    <div class="eyebrow" data-i18n="plan.eyebrow">Planning</div>
+    <h2 id="planTitle">Dag</h2>
+    <div class="seg c2" id="planOpts" role="group" data-i18n-aria="plan.group" aria-label="Wat staat er op deze dag?">
+      <button type="button" data-v="training" data-plan-l="training">Training</button>
+      <button type="button" data-v="match" data-plan-l="match">Match</button>
+      <button type="button" data-v="rust" data-plan-l="rust">Rust</button>
+      <button type="button" data-v="geannuleerd" data-plan-l="geannuleerd">Geannuleerd</button>
+      <button type="button" data-v="" class="span2" data-i18n="plan.none">Niets</button>
+    </div>
+    <label class="chk"><input type="checkbox" id="planRepeat"> <span id="planRepeatLbl">Elke week zo</span></label>
+    <button class="btn btn-primary" id="planOk" data-i18n="common.save">Bewaar</button>
+    <button class="btn btn-ghost" id="planCancel" data-i18n="common.cancel">Annuleer</button>
+  </div>
+</div>
+
+<div class="overlay" id="codeOv" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="codeTitle">
+    <div class="eyebrow" data-i18n="code.eyebrow">Persoonlijke code</div>
+    <h2 id="codeTitle" data-i18n="code.title">Geef je code in</h2>
+    <div class="stack" id="codeStep" style="gap:12px">
+      <p class="muted" style="margin:0" data-i18n="code.desc">Dat doe je maar één keer. Daarna onthoudt dit toestel je naam.</p>
+      <label for="codeIn" class="field-l" style="margin:4px 0 -4px" data-i18n="code.label">Code</label>
+      <input id="codeIn" class="codein" type="text" placeholder="NAAM-XXXX-XXXX" data-i18n-ph="code.ph" maxlength="40"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+      <p class="err" id="codeErr" role="alert" hidden></p>
+      <button class="btn btn-primary" id="codeOk" data-i18n="code.unlock">Ontgrendel</button>
+    </div>
+    <div class="stack" id="nameStep" style="gap:12px" hidden>
+      <p class="muted" style="margin:0" data-i18n="code.nameDesc"></p>
+      <label for="nameIn" class="field-l" style="margin:4px 0 -4px" data-i18n="code.nameLabel">Naam</label>
+      <input id="nameIn" class="codein" type="text" maxlength="16" placeholder="LUCAS" data-i18n-ph="code.namePh"
+        autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+      <p class="err" id="nameErr" role="alert" hidden></p>
+      <button class="btn btn-primary" id="nameOk" data-i18n="code.nameSave">Bewaar mijn naam</button>
+    </div>
+    <button class="btn btn-ghost" id="codeCancel" data-i18n="common.cancel">Annuleer</button>
+  </div>
+</div>
+<div id="printArea" aria-hidden="true"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script>
+/* A4-layoutmotor: berekent pagina's één keer, tekent ze naar PDF én naar de schermpreview. */
+var A4 = (function () {
+  var PW = 210, PH = 297, M = 25, W = PW - 2 * M, BOTTOM = PH - M, PT = 0.3528;
+  var BLUE = [10, 63, 156], INK = [17, 24, 39], GREY = [90, 102, 122], RULE = [205, 214, 228];
+
+  var LDEF = { title: "WEEKVERSLAG", week: "Week", printed: "Afgedrukt op", quote: "QUOTE VAN DE WEEK", plan: "Planning: ",
+    noAnswer: "Geen antwoord ingevuld.", empty: "Nog geen check-ins in deze periode.", notes: "Vrije ruimte / Notities", html: "Weekverslag week", qo: "\"", qc: "\"" };
+  function L(data, k) { return (data.L && data.L[k]) || LDEF[k]; }
+  function clean(s) {
+    return String(s == null ? "" : s)
+      .replace(/[“”„]/g, '"').replace(/[‘’]/g, "'")
+      .replace(/[–—]/g, "-").replace(/…/g, "...")
+      .replace(/[^\x09\x0A\x0D\x20-\x7E -ÿ]/g, "");
+  }
+
+  function build(jsPDF, data) {
+    var doc = new jsPDF({ unit: "mm", format: "a4" });
+    var pages = [[]], y = M;
+    function page() { return pages[pages.length - 1]; }
+    function newPage() { pages.push([]); y = M; }
+    function lh(size) { return size * PT * 1.42; }
+    function wrap(txt, size, style) {
+      doc.setFont("helvetica", style); doc.setFontSize(size);
+      return doc.splitTextToSize(clean(txt), W);
+    }
+    function lines(arr, size, style, color) {
+      var h = lh(size);
+      arr.forEach(function (ln) {
+        if (y + h > BOTTOM) newPage();
+        page().push({ k: "text", x: M, y: y + size * PT * 0.95, s: size, st: style, c: color, t: ln });
+        y += h;
+      });
+    }
+    function rule(color, w) {
+      page().push({ k: "line", x1: M, y1: y, x2: M + W, y2: y, w: w, c: color });
+    }
+
+    // Kop: label, week, datum, quote
+    lines([clean(L(data, "title"))], 12, "bold", BLUE);
+    y += 1;
+    lines([clean(L(data, "week") + " " + data.week)], 22, "bold", INK);
+    lines(wrap(data.range + (data.player ? "   |   " + data.player : ""), 14, "normal"), 14, "normal", INK);
+    if (data.plan) lines(wrap(L(data, "plan") + data.plan, 12, "normal"), 12, "normal", GREY);
+    lines([clean(L(data, "printed") + " " + data.printed)], 12, "normal", GREY);
+    y += 4; rule(BLUE, 0.5); y += 7;
+    lines([clean(L(data, "quote"))], 12, "bold", BLUE);
+    y += 1;
+    lines(wrap(L(data, "qo") + data.quote.text + L(data, "qc"), 18, "bold"), 18, "bold", BLUE);
+    if (data.quote.src) { y += 1; lines(wrap(data.quote.src, 12, "normal"), 12, "normal", GREY); }
+    y += 6; rule(RULE, 0.25); y += 8;
+
+    // Midden: sessies met vragen en antwoorden
+    if (!data.sessions.length) {
+      lines(wrap(L(data, "empty"), 14, "italic"), 14, "italic", GREY);
+      y += 6;
+    }
+    data.sessions.forEach(function (s, i) {
+      var head = wrap(s.title, 16, "bold");
+      var meta = wrap(s.meta, 14, "normal");
+      if (s.stats) meta = meta.concat(wrap(s.stats, 14, "normal"));
+      var need = head.length * lh(16) + meta.length * lh(14) + 4 + lh(14) * 3;
+      if (y + need > BOTTOM) newPage();
+      lines(head, 16, "bold", INK);
+      lines(meta, 14, "normal", GREY);
+      y += 4;
+      s.qa.forEach(function (qa, j) {
+        var q = wrap(qa.q, 14, "bold");
+        var aStyle = qa.a ? "normal" : "italic";
+        var a = wrap(qa.a || L(data, "noAnswer"), 14, aStyle);
+        var keep = q.length * lh(14) + Math.min(2, a.length) * lh(14);
+        if (y + keep > BOTTOM) newPage();
+        lines(q, 14, "bold", INK);
+        y += 0.8;
+        lines(a, 14, aStyle, qa.a ? INK : GREY);
+        if (j < s.qa.length - 1) y += 4;
+      });
+      y += 7;
+      if (i < data.sessions.length - 1) { rule(RULE, 0.25); y += 8; }
+    });
+
+    // Onderaan: kader voor vrije ruimte en notities, vult de rest van de pagina
+    var MIN = 65;
+    if (BOTTOM - y < MIN) newPage();
+    var top = y, h = BOTTOM - top;
+    page().push({ k: "rect", x: M, y: top, w: W, h: h, lw: 0.35, c: BLUE });
+    y = top + 4;
+    page().push({ k: "text", x: M + 6, y: top + 6 + 14 * PT * 0.95, s: 14, st: "bold", c: BLUE, t: clean(L(data, "notes")) });
+    for (var ly = top + 22; ly < top + h - 6; ly += 10) {
+      page().push({ k: "line", x1: M + 6, y1: ly, x2: M + W - 6, y2: ly, w: 0.2, c: RULE });
+    }
+    return pages;
+  }
+
+  function toPDF(jsPDF, pages) {
+    var doc = new jsPDF({ unit: "mm", format: "a4" });
+    pages.forEach(function (ops, i) {
+      if (i) doc.addPage();
+      ops.forEach(function (o) {
+        if (o.k === "text") {
+          doc.setFont("helvetica", o.st); doc.setFontSize(o.s);
+          doc.setTextColor(o.c[0], o.c[1], o.c[2]); doc.text(o.t, o.x, o.y);
+        } else if (o.k === "line") {
+          doc.setDrawColor(o.c[0], o.c[1], o.c[2]); doc.setLineWidth(o.w); doc.line(o.x1, o.y1, o.x2, o.y2);
+        } else if (o.k === "rect") {
+          doc.setDrawColor(o.c[0], o.c[1], o.c[2]); doc.setLineWidth(o.lw); doc.rect(o.x, o.y, o.w, o.h, "S");
+        }
+      });
+    });
+    return doc;
+  }
+
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function rgb(c) { return "rgb(" + c.join(",") + ")"; }
+  function toSVG(ops) {
+    var out = ['<svg viewBox="0 0 210 297" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A4-pagina"><rect width="210" height="297" fill="#ffffff"/>'];
+    ops.forEach(function (o) {
+      if (o.k === "text") {
+        out.push('<text x="' + o.x + '" y="' + o.y.toFixed(2) + '" font-family="Helvetica, Arial, sans-serif" font-size="' + (o.s * PT).toFixed(3) +
+          '" font-weight="' + (o.st.indexOf("bold") > -1 ? 700 : 400) + '" font-style="' + (o.st.indexOf("italic") > -1 ? "italic" : "normal") +
+          '" fill="' + rgb(o.c) + '" xml:space="preserve">' + esc(o.t) + "</text>");
+      } else if (o.k === "line") {
+        out.push('<line x1="' + o.x1 + '" y1="' + o.y1.toFixed(2) + '" x2="' + o.x2 + '" y2="' + o.y2.toFixed(2) + '" stroke="' + rgb(o.c) + '" stroke-width="' + o.w + '"/>');
+      } else if (o.k === "rect") {
+        out.push('<rect x="' + o.x + '" y="' + o.y.toFixed(2) + '" width="' + o.w + '" height="' + o.h.toFixed(2) + '" fill="none" stroke="' + rgb(o.c) + '" stroke-width="' + o.lw + '"/>');
+      }
+    });
+    out.push("</svg>");
+    return out.join("");
+  }
+
+  /* Print-CSS, gescoped zodat ze ook binnen de app (#printArea) bruikbaar is. */
+  function css(s) {
+    return (s + '{font-family:Arial,Helvetica,sans-serif;font-size:14pt;line-height:1.42;color:#111827;background:#fff}' +
+      s + ' .lbl{font-size:12pt;font-weight:700;color:#0A3F9C;letter-spacing:.06em;margin:0}' +
+      s + ' h1{font-size:22pt;margin:2pt 0 0;line-height:1.2}' + s + ' .meta{margin:0}' +
+      s + ' .small{font-size:12pt;color:#5a667a;margin:0}' +
+      s + ' hr{border:0;border-top:1.4pt solid #0A3F9C;margin:12pt 0 18pt}' + s + ' hr.thin{border-top:.7pt solid #cdd6e4}' +
+      s + ' .quote{font-size:18pt;font-weight:700;color:#0A3F9C;margin:3pt 0 2pt;line-height:1.25}' +
+      s + ' h2{font-size:16pt;margin:0;line-height:1.3}' + s + ' .q{font-weight:700;margin:12pt 0 2pt}' +
+      s + ' .a{margin:0;white-space:pre-wrap}' + s + ' .empty{font-style:italic;color:#5a667a}' +
+      s + ' .qa{break-inside:avoid;page-break-inside:avoid}' +
+      s + ' .notes{border:1pt solid #0A3F9C;min-height:65mm;padding:5mm 6mm;margin-top:20pt;break-inside:avoid;page-break-inside:avoid}' +
+      s + ' .notes p{font-weight:700;color:#0A3F9C;margin:0}' +
+      s + ' .notes .ln{height:9mm;border-bottom:.5pt solid #cdd6e4}');
+  }
+  function toHTML(data) {
+    return '<!doctype html><html lang="nl"><head><meta charset="utf-8"><title>' + esc(L(data, "html")) + ' ' + esc(data.week) +
+      '</title><style>@page{size:A4;margin:25mm}html,body{margin:0}' + css("body") + '</style></head><body>' + body(data) + '</body></html>';
+  }
+  function body(data) {
+    var h = [];
+    h.push('<p class="lbl">' + esc(L(data, "title")) + '</p><h1>' + esc(L(data, "week")) + ' ' + esc(data.week) + '</h1>');
+    h.push('<p class="meta">' + esc(data.range) + (data.player ? ' | ' + esc(data.player) : '') + '</p>' + (data.plan ? '<p class="small">' + esc(L(data, "plan") + data.plan) + '</p>' : '') + '<p class="small">' + esc(L(data, "printed")) + ' ' + esc(data.printed) + '</p><hr>');
+    h.push('<p class="lbl">' + esc(L(data, "quote")) + '</p><p class="quote">' + esc(L(data, 'qo') + data.quote.text + L(data, 'qc')) + '</p>');
+    if (data.quote.src) h.push('<p class="small">' + esc(data.quote.src) + '</p>');
+    h.push('<hr class="thin">');
+    if (!data.sessions.length) h.push('<p class="empty">' + esc(L(data, "empty")) + '</p>');
+    data.sessions.forEach(function (s, i) {
+      h.push('<section><h2>' + esc(s.title) + '</h2><p class="small" style="font-size:14pt">' + esc(s.meta) + '</p>' + (s.stats ? '<p class="small" style="font-size:14pt">' + esc(s.stats) + '</p>' : ''));
+      s.qa.forEach(function (qa) {
+        h.push('<div class="qa"><p class="q">' + esc(qa.q) + '</p><p class="a' + (qa.a ? '' : ' empty') + '">' + esc(qa.a || L(data, 'noAnswer')) + '</p></div>');
+      });
+      h.push('</section>' + (i < data.sessions.length - 1 ? '<hr class="thin">' : ''));
+    });
+    h.push('<div class="notes"><p>' + esc(L(data, 'notes')) + '</p>' + new Array(7).join('<div class="ln"></div>') + '</div>');
+    return h.join("");
+  }
+
+  return { build: build, toPDF: toPDF, toSVG: toSVG, toHTML: toHTML, css: css, body: body };
+})();
+if (typeof module !== "undefined") module.exports = A4;
+
+</script>
+<script>
+(function () {
+  "use strict";
+
+  /* ====== CONFIG: pas hier naam, ploeg en quotes aan ====== */
+  var CONFIG = {
+    maxListenMs: 90000,           // spraak stopt vanzelf na 90 seconden
+    storageKey: "reflectie.v1",
+    nameKey: "reflectie.naam"
+  };
+  /* ====== PERSOONLIJKE CODES ======
+     Zelfde systeem als de 12 · 3 · 30-app: hieronder staan alleen onomkeerbare afdrukken.
+     De naam zit in de code zelf (NAAM-XXXX-XXXX) en staat nergens in dit bestand.
+     Nieuwe code nodig? Open de app, F12 > Console, en typ bv.:  nieuweCode("Naam")
+     Code intrekken? Haal de regel hieronder weg; op dat toestel verdwijnt de naam dan. */
+  /* ====== TAAL / LANGUE: NL + FR ======
+     Alle vaste teksten staan hier. T("sleutel") geeft de tekst in de gekozen taal.
+     Ontbreekt een Franse tekst, dan valt de app terug op het Nederlands. */
+  var LANG = "nl";
+  try {
+    var savedLang = localStorage.getItem("reflectie.taal");
+    if (savedLang === "nl" || savedLang === "fr") LANG = savedLang;
+    else if (/^fr/i.test(navigator.language || "")) LANG = "fr";
+  } catch (e) {}
+  var NB = " "; // vaste spatie voor Franse leestekens ( ? ! : )
+  var I18N = {
+    nl: {
+      "app.title": "Debrief FC", "lang.group": "Taal · Langue",
+      "help.how": "Hoe werkt de app?", "common.copy": "© 2026 Sofia la Bianca · Alle rechten voorbehouden",
+      "common.cancel": "Annuleer", "common.save": "Bewaar", "common.next": "Volgende", "common.prev": "Vorige",
+      "common.yes": "Ja", "common.no": "Nee", "common.yesL": "ja", "common.noL": "nee", "common.week": "WEEK {w}",
+      "nav.menu": "Hoofdmenu", "nav.start": "Start", "nav.check": "Check-in", "nav.report": "Verslag", "nav.reflect": "Reflectie",
+      "legal.disc": "Disclaimer", "legal.priv": "Privacy (GDPR)", "legal.back": "← Terug", "legal.aria": "Disclaimer en privacy",
+      "legal.copy": "Kopieer", "legal.copied": "E-mailadres gekopieerd.", "legal.hold": "Houd het adres ingedrukt om te kopiëren.",
+      "start.quoteLbl": "Quote van de week", "start.quoteOf": "Quote van week {w}",
+      "start.greet": "Ciao. Klaar voor je check-in?", "start.greetName": "Ciao {n}. Klaar voor je check-in?",
+      "start.start": "Start check-in", "start.resume": "Check-in verderzetten", "start.thisWeek": "Deze week",
+      "start.legend": "Tik op een dag om training, match of rust te plannen. Volle bol = check-in gedaan, rood = geannuleerd.",
+      "start.focus": "Jouw focus", "start.noFocus": "Nog geen focus gekozen. Die kies je bij vraag 4.",
+      "start.empty": "Nog geen check-ins deze week. Je eerste doe je na je volgende training of match.",
+      "start.energy": "energie {e}/5", "start.sleep": "{h} slaap",
+      "tag.pain": "Pijn gemeld", "detail.pain": "Pijn", "detail.del": "Verwijder deze check-in",
+      "detail.delSure": "Zeker? Tik nog eens om te verwijderen", "detail.deleted": "Check-in verwijderd.",
+      "today.training": "Vandaag training. Daarna: vier vragen, twee minuten.",
+      "today.match": "Vandaag match. Succes. Na het laatste fluitsignaal: vier vragen, twee minuten.",
+      "today.cancel": "Je {w} van vandaag is geannuleerd. Een check-in hoeft niet.",
+      "today.cancelAny": "Je activiteit van vandaag is geannuleerd. Een check-in hoeft niet.",
+      "today.rest": "Vandaag rust. Herstel hoort bij de training. Een check-in mag, maar hoeft niet.",
+      "today.default": "Vier vragen, twee minuten. Inspreken mag.",
+      "day.planned": "{w} gepland", "day.nothing": "niets gepland", "day.done": ", check-in gedaan", "day.tap": ". Tik om te plannen.",
+      "plan.eyebrow": "Planning", "plan.group": "Wat staat er op deze dag?", "plan.none": "Niets",
+      "plan.every": "Elke {d} zo", "plan.onlyDay": "Geldt alleen voor deze dag", "plan.cancelWord": "geannuleerd",
+      "plan.toastCancel": "Gemarkeerd als geannuleerd.", "plan.toastSet": "{w} gepland.", "plan.toastClear": "Planning gewist.",
+      "season.title": "Seizoen", "season.match1": "{n} match", "season.matchN": "{n} matchen", "season.cs": "Clean sheets",
+      "season.note": "Totalen als {p}, sinds 1 augustus. Vergelijk met jezelf, niet met anderen.",
+      "code.enter": "Persoonlijke code ingeven", "code.eyebrow": "Persoonlijke code", "code.title": "Geef je code in",
+      "code.desc": "Dat doe je maar één keer. Daarna onthoudt dit toestel je naam.", "code.label": "Code", "code.ph": "NAAM-XXXX-XXXX",
+      "code.unlock": "Ontgrendel", "code.checking": "Even controleren…", "code.hello": "Ciao {n}!",
+      "code.wrong": "Deze code klopt niet. Kijk ze nog eens na.", "code.format": "Een code ziet eruit als NAAM-XXXX-XXXX.",
+      "code.https": "Een code ingeven werkt alleen als de app via https:// geopend is.",
+      "name.title": "Naam op dit toestel", "name.state": "De naam {n} staat op het scherm en op het verslag.",
+      "name.hide": "Naam verbergen op dit toestel", "name.hidden": "Naam verborgen. Je kan de code opnieuw ingeven op het startscherm.",
+      "toast.saveFail": "Opslaan lukt niet op dit toestel (privévenster?).",
+      "ck.backStart": "Terug naar start", "ck.backStep": "Vorige stap", "ck.save": "Opslaan",
+      "ck.needQuick": "Kies je energie en of je ergens pijn hebt.", "ck.needScore": "Kies eerst een cijfer van 1 tot 10.",
+      "ck.saved": "Check-in opgeslagen. Sterk gedaan.",
+      "q.eyebrow": "Snelle check", "q.title": "Eerst even scannen: hoe sta je erbij?", "q.what": "Wat was het?", "q.date": "Datum",
+      "q.energy": "Energie", "q.energyScale": "1 = leeg · 5 = vol", "q.sleep": "Slaap afgelopen nacht", "q.hours": "aantal uur",
+      "q.h6": "6 uur of minder", "q.h10": "10 uur of meer",
+      "q.sleepHint": "Op jouw leeftijd is 8 tot 10 uur slaap de richtlijn. Slaap is herstel, en herstel is training.",
+      "q.sleepQ": "Hoe heb je geslapen?", "q.bad": "Slecht", "q.ok": "Oké", "q.good": "Goed",
+      "q.pain": "Pijn of last ergens?", "q.painWhere": "Waar, wat voor pijn, en hoeveel op 10?",
+      "q.painPh": "Bijvoorbeeld: rechterenkel, stekend, 4/10, sinds de match",
+      "q.painNote": "<b>Belangrijk:</b> meld pijn ook altijd meteen aan je trainer of ouders. Deze app vervangt geen medisch advies.",
+      "q.score": "Jouw cijfer", "q.scoreN": "Cijfer {n}", "q.answer": "Jouw antwoord", "q.answerHow": "typen of inspreken",
+      "q.resetAria": "De reset-knop", "q.r1": "Accepteer", "q.r1s": "emotie mag er zijn", "q.r2": "Reset", "q.r2s": "adem, kousen, flush it",
+      "q.r3": "Actie", "q.r3s": "volgende actie",
+      "mic.start": "Spreek je antwoord in", "mic.stop": "Stop met inspreken",
+      "mic.kb": "<b>Inspreken via je toetsenbord.</b> {r} Tik in het tekstvak en druk op het microfoontje van je toetsenbord. Dat werkt op iPhone en Android.",
+      "mic.noSR": "Deze browser heeft geen ingebouwde spraakherkenning.", "mic.https": "De microfoon werkt alleen als de app via https:// geopend is.",
+      "mic.denied": "De microfoon heeft geen toestemming.", "mic.noMic": "Er is geen microfoon gevonden.",
+      "mic.net": "Spraakherkenning heeft internet nodig.", "mic.fail": "Spraakherkenning lukte niet.", "mic.cantStart": "Spraakherkenning kon niet starten.",
+      "mic.listening": "Luistert… praat rustig. Tik opnieuw om te stoppen.", "mic.done": "Klaar. Je kan de tekst nog aanpassen.",
+      "stats.eyebrow": "Matchcijfers", "stats.title": "Wat liet je zien vandaag?",
+      "stats.hint": "Optioneel. Tel wat je je herinnert, een schatting is goed genoeg. Inzet telt even zwaar als goals.",
+      "stats.pos": "Positie", "stats.posNote": "de app onthoudt dit",
+      "stats.pickPos": "Kies eerst je positie. Dan krijg je de cijfers die bij jouw rol passen.",
+      "stats.gR": "Resultaat", "stats.gI": "Inzet", "stats.gC": "Context", "stats.minutes": "Minuten gespeeld",
+      "stats.less": "Minder {l}", "stats.more": "Meer {l}",
+      "chips.title": "Snel kiezen", "chips.all": "Voor iedereen", "chips.own": "Voor jou als {p}", "chips.others": "Andere posities",
+      "chips.perPos": "Tips per positie", "chips.max": "Max. twee. Hoe minder focuspunten, hoe scherper je traint.",
+      "ph.eyebrow": "Moment van de dag", "ph.title": "Een foto erbij?",
+      "ph.hint": "Optioneel: een winfie, de groep, het veld. Maximaal 3. De foto's blijven op dit toestel en komen niet in het A4-verslag.",
+      "ph.max": "Maximaal {n} foto's per check-in.", "ph.fail": "Deze foto kon niet gelezen of bewaard worden.",
+      "ph.heicBusy": "iPhone-foto wordt omgezet…",
+      "ph.heicFail": "Deze iPhone-foto kon niet omgezet worden. Controleer je internet of stuur ze eerst door via WhatsApp.",
+      "ph.view": "Foto groot bekijken", "ph.del": "Foto verwijderen", "ph.cap": "Onderschrift", "ph.add": "+ Foto",
+      "ph.noIdb": "Foto's bewaren lukt niet in deze browser (bijvoorbeeld in een privévenster).",
+      "ph.moments": "Fotomomenten", "ph.count1": "{n} foto", "ph.countN": "{n} foto's", "ph.of": "Foto van {m}", "ph.label": "Foto's",
+      "ph.viewer": "Foto", "ph.close": "Sluiten", "ph.prev": "Vorige foto", "ph.next": "Volgende foto",
+      "parents.tip": "Ouders volgen mee via dit verslag: download de PDF en stuur hem door.",
+      "my.title": "Mijn gegevens", "my.team": "Mijn ploeg", "my.teamPick": "Kies je ploeg", "my.other": "Andere", "my.teamNote": "Komt bovenaan je verslag.",
+      "code.nameTitle": "Hoe heet je?", "code.nameLabel": "Naam", "code.namePh": "LUCAS", "code.nameSave": "Bewaar mijn naam",
+      "code.nameDesc": "Zoals op je shirt of zoals je trainer je noemt. Heeft een ploegmaat dezelfde naam? Zet dan de eerste letters van je familienaam erachter, bijvoorbeeld LUCASVDB.",
+      "code.nameNeed": "Geef minstens 2 letters.",
+      "guide.close": "Uitleg sluiten", "guide.go": "Aan de slag",
+      "exp.eyebrow": "A4-export", "exp.title": "Weekverslag", "exp.prev": "Vorige week", "exp.next": "Volgende week", "exp.week": "Week {w}",
+      "exp.what": "Wat komt in het verslag?", "exp.allOff": "Alles uit", "exp.allOn": "Alles aan",
+      "exp.pdf": "Download PDF", "exp.print": "Print", "exp.docs": "Word / Docs",
+      "exp.emptyWeek": "Nog geen check-ins in deze week.", "exp.painShort": " · pijn gemeld",
+      "exp.onlyHead": "Het verslag toont dan alleen de kop, de quote en het notitiekader.",
+      "exp.nothing": "Niets aangeduid. Het verslag toont alleen de kop, de quote en het notitiekader.",
+      "exp.count1": "<b>{n} van {t}</b> check-in in het verslag.", "exp.countN": "<b>{n} van {t}</b> check-ins in het verslag.",
+      "exp.pages1": " Op papier: {n} A4-pagina.", "exp.pagesN": " Op papier: {n} A4-pagina's.",
+      "exp.noPdf": "<b>De PDF-module laadde niet.</b> Waarschijnlijk geen internet. Print en Word / Docs werken wel.",
+      "exp.pdfDone": "PDF gemaakt. Print op A4 met schaal 100% (niet 'passend maken').",
+      "exp.printTip": "Tip: zet 'Kop- en voetteksten' uit in het printvenster.",
+      "exp.htmlDone": "Opgeslagen. Open in Word, of upload naar Google Drive en kies Openen met Google Docs.",
+      "exp.file": "DebriefFC_Weekverslag_Week", "exp.pageOf": "Pagina {i} van {n}", "dl.unavailable": "Downloaden kan niet in deze weergave.",
+      "rep.title": "DEBRIEF FC  |  WEEKVERSLAG", "rep.week": "Week", "rep.printed": "Afgedrukt op", "rep.quote": "QUOTE VAN DE WEEK",
+      "rep.plan": "Planning: ", "rep.noAnswer": "Geen antwoord ingevuld.", "rep.empty": "Nog geen check-ins in deze periode.",
+      "rep.notes": "Vrije ruimte / Notities", "rep.html": "Weekverslag week", "rep.energy": "Energie {e}/5", "rep.pain": " · Pijn: ",
+      "rep.score": "Cijfer {s}/10.", "rep.sleep": " · Slaap ", "rep.qo": "\u201C", "rep.qc": "\u201D",
+      "bk.title": "Back-up", "bk.desc": "Je check-ins staan alleen op dit toestel. Bewaar af en toe een back-up, zeker op iPhone.",
+      "bk.save": "Back-up opslaan", "bk.restore": "Back-up terugzetten", "bk.busy": "Back-up wordt gemaakt…",
+      "bk.done": "Back-up opgeslagen{f}. Bewaar het bestand op een veilige plek.", "bk.with1": ", met {n} foto", "bk.withN": ", met {n} foto's",
+      "bk.nCheck": "{n} check-in(s)", "bk.and": " en ", "bk.restored": "{m} teruggezet.", "bk.already": "Alles uit de back-up stond er al.",
+      "bk.invalid": "Dit bestand is geen geldige back-up van deze app.", "bk.file": "DebriefFC_backup_",
+      "wipe.title": "Alles wissen",
+      "wipe.desc": "Wist alle check-ins, de planning en de naam op dit toestel. Bijvoorbeeld voor een nieuw seizoen of als de telefoon naar iemand anders gaat. Dit kan je niet ongedaan maken.",
+      "wipe.start": "Alles wissen…", "wipe.note": "<b>Eerst een back-up?</b> Dan kan je alles later terugzetten met \"Back-up terugzetten\".",
+      "wipe.sure": "Ja, ik wil echt alles wissen", "wipe.go": "Wis alles definitief", "wipe.done": "Alles gewist. Klaar voor een nieuwe start."
+    },
+    fr: {
+      "app.title": "Debrief FC",
+      "help.how": "Comment fonctionne l'app" + NB + "?", "common.copy": "© 2026 Sofia la Bianca · Tous droits réservés",
+      "common.cancel": "Annuler", "common.save": "Enregistrer", "common.next": "Suivant", "common.prev": "Précédent",
+      "common.yes": "Oui", "common.no": "Non", "common.yesL": "oui", "common.noL": "non", "common.week": "SEM. {w}",
+      "nav.menu": "Menu principal", "nav.start": "Accueil", "nav.check": "Check-in", "nav.report": "Rapport", "nav.reflect": "Réflexion",
+      "legal.disc": "Avertissement", "legal.priv": "Vie privée (RGPD)", "legal.back": "← Retour", "legal.aria": "Avertissement et vie privée",
+      "legal.copy": "Copier", "legal.copied": "Adresse e-mail copiée.", "legal.hold": "Maintiens l'adresse enfoncée pour la copier.",
+      "start.quoteLbl": "Citation de la semaine", "start.quoteOf": "Citation de la semaine {w}",
+      "start.greet": "Ciao. Prêt pour ton check-in" + NB + "?", "start.greetName": "Ciao {n}. Prêt pour ton check-in" + NB + "?",
+      "start.start": "Commencer le check-in", "start.resume": "Reprendre le check-in", "start.thisWeek": "Cette semaine",
+      "start.legend": "Touche un jour pour planifier entraînement, match ou repos. Cercle plein = check-in fait, rouge = annulé.",
+      "start.focus": "Ton point d'attention", "start.noFocus": "Pas encore de point d'attention. Tu le choisis à la question 4.",
+      "start.empty": "Pas encore de check-in cette semaine. Ton premier, ce sera après ton prochain entraînement ou match.",
+      "start.energy": "énergie {e}/5", "start.sleep": "{h} de sommeil",
+      "tag.pain": "Douleur signalée", "detail.pain": "Douleur", "detail.del": "Supprimer ce check-in",
+      "detail.delSure": "Sûr" + NB + "? Touche encore pour supprimer", "detail.deleted": "Check-in supprimé.",
+      "today.training": "Entraînement aujourd'hui. Ensuite" + NB + ": quatre questions, deux minutes.",
+      "today.match": "Match aujourd'hui. Bonne chance. Après le coup de sifflet final" + NB + ": quatre questions, deux minutes.",
+      "today.cancel": "Ton {w} d'aujourd'hui est annulé. Pas besoin de check-in.",
+      "today.cancelAny": "L'activité d'aujourd'hui est annulée. Pas besoin de check-in.",
+      "today.rest": "Repos aujourd'hui. La récupération fait partie de l'entraînement. Un check-in est possible, mais pas obligatoire.",
+      "today.default": "Quatre questions, deux minutes. Tu peux dicter.",
+      "day.planned": "{w} prévu", "day.nothing": "rien de prévu", "day.done": ", check-in fait", "day.tap": ". Touche pour planifier.",
+      "plan.eyebrow": "Planning", "plan.group": "Qu'est-ce qui est prévu ce jour-là" + NB + "?", "plan.none": "Rien",
+      "plan.every": "Chaque {d}", "plan.onlyDay": "Uniquement pour ce jour", "plan.cancelWord": "annulé",
+      "plan.toastCancel": "Marqué comme annulé.", "plan.toastSet": "{w} prévu.", "plan.toastClear": "Planning effacé.",
+      "season.title": "Saison", "season.match1": "{n} match", "season.matchN": "{n} matchs", "season.cs": "Clean sheets",
+      "season.note": "Totaux en tant que {p}, depuis le 1er août. Compare-toi à toi-même, pas aux autres.",
+      "code.enter": "Saisir mon code personnel", "code.eyebrow": "Code personnel", "code.title": "Saisis ton code",
+      "code.desc": "Tu ne le fais qu'une fois. Ensuite, cet appareil se souvient de ton nom.", "code.label": "Code", "code.ph": "NOM-XXXX-XXXX",
+      "code.unlock": "Déverrouiller", "code.checking": "Vérification…", "code.hello": "Ciao {n}" + NB + "!",
+      "code.wrong": "Ce code n'est pas correct. Vérifie-le.", "code.format": "Un code ressemble à NOM-XXXX-XXXX.",
+      "code.https": "Saisir un code ne fonctionne que si l'app est ouverte via https://.",
+      "name.title": "Nom sur cet appareil", "name.state": "Le nom {n} apparaît à l'écran et dans le rapport.",
+      "name.hide": "Masquer le nom sur cet appareil", "name.hidden": "Nom masqué. Tu peux ressaisir le code sur l'écran d'accueil.",
+      "toast.saveFail": "Impossible d'enregistrer sur cet appareil (fenêtre privée" + NB + "?).",
+      "ck.backStart": "Retour à l'accueil", "ck.backStep": "Étape précédente", "ck.save": "Enregistrer",
+      "ck.needQuick": "Choisis ton énergie et indique si tu as mal quelque part.", "ck.needScore": "Choisis d'abord une note de 1 à 10.",
+      "ck.saved": "Check-in enregistré. Bien joué.",
+      "q.eyebrow": "Check rapide", "q.title": "D'abord un petit scan" + NB + ": comment te sens-tu" + NB + "?", "q.what": "C'était quoi" + NB + "?", "q.date": "Date",
+      "q.energy": "Énergie", "q.energyScale": "1 = vide · 5 = plein", "q.sleep": "Sommeil la nuit dernière", "q.hours": "nombre d'heures",
+      "q.h6": "6 heures ou moins", "q.h10": "10 heures ou plus",
+      "q.sleepHint": "À ton âge, la référence est de 8 à 10 heures de sommeil. Dormir, c'est récupérer, et récupérer, c'est s'entraîner.",
+      "q.sleepQ": "Comment as-tu dormi" + NB + "?", "q.bad": "Mal", "q.ok": "Correct", "q.good": "Bien",
+      "q.pain": "Douleur ou gêne quelque part" + NB + "?", "q.painWhere": "Où, quel type de douleur, et combien sur 10" + NB + "?",
+      "q.painPh": "Par exemple" + NB + ": cheville droite, douleur vive, 4/10, depuis le match",
+      "q.painNote": "<b>Important" + NB + ":</b> signale toujours aussi une douleur à ton entraîneur ou à tes parents. Cette app ne remplace pas un avis médical.",
+      "q.score": "Ta note", "q.scoreN": "Note {n}", "q.answer": "Ta réponse", "q.answerHow": "écrire ou dicter",
+      "q.resetAria": "Le bouton reset", "q.r1": "Accepte", "q.r1s": "l'émotion a sa place", "q.r2": "Reset", "q.r2s": "respire, chaussettes, flush it",
+      "q.r3": "Action", "q.r3s": "action suivante",
+      "mic.start": "Dicte ta réponse", "mic.stop": "Arrêter la dictée",
+      "mic.kb": "<b>Dicter avec ton clavier.</b> {r} Touche la zone de texte et appuie sur le micro de ton clavier. Ça marche sur iPhone et Android.",
+      "mic.noSR": "Ce navigateur n'a pas de reconnaissance vocale intégrée.", "mic.https": "Le micro ne fonctionne que si l'app est ouverte via https://.",
+      "mic.denied": "Le micro n'a pas d'autorisation.", "mic.noMic": "Aucun micro trouvé.",
+      "mic.net": "La reconnaissance vocale a besoin d'internet.", "mic.fail": "La reconnaissance vocale n'a pas fonctionné.", "mic.cantStart": "La reconnaissance vocale n'a pas pu démarrer.",
+      "mic.listening": "J'écoute… parle calmement. Touche à nouveau pour arrêter.", "mic.done": "C'est fait. Tu peux encore modifier le texte.",
+      "stats.eyebrow": "Stats du match", "stats.title": "Qu'as-tu montré aujourd'hui" + NB + "?",
+      "stats.hint": "Facultatif. Compte ce dont tu te souviens, une estimation suffit. L'engagement compte autant que les buts.",
+      "stats.pos": "Poste", "stats.posNote": "l'app s'en souvient",
+      "stats.pickPos": "Choisis d'abord ton poste. Tu recevras les stats qui correspondent à ton rôle.",
+      "stats.gR": "Résultat", "stats.gI": "Engagement", "stats.gC": "Contexte", "stats.minutes": "Minutes jouées",
+      "stats.less": "Retirer 1" + NB + ": {l}", "stats.more": "Ajouter 1" + NB + ": {l}",
+      "chips.title": "Choix rapide", "chips.all": "Pour tout le monde", "chips.own": "Pour toi en tant que {p}", "chips.others": "Autres postes",
+      "chips.perPos": "Conseils par poste", "chips.max": "Deux maximum. Moins de points d'attention, plus de précision à l'entraînement.",
+      "ph.eyebrow": "Moment du jour", "ph.title": "Une photo en plus" + NB + "?",
+      "ph.hint": "Facultatif" + NB + ": un selfie de victoire, le groupe, le terrain. Maximum 3. Les photos restent sur cet appareil et n'apparaissent pas dans le rapport A4.",
+      "ph.max": "Maximum {n} photos par check-in.", "ph.fail": "Impossible de lire ou d'enregistrer cette photo.",
+      "ph.heicBusy": "Conversion de la photo iPhone…",
+      "ph.heicFail": "Impossible de convertir cette photo iPhone. Vérifie ta connexion internet ou envoie-la d'abord via WhatsApp.",
+      "ph.view": "Agrandir la photo", "ph.del": "Supprimer la photo", "ph.cap": "Légende", "ph.add": "+ Photo",
+      "ph.noIdb": "Impossible d'enregistrer des photos dans ce navigateur (par exemple en navigation privée).",
+      "ph.moments": "Moments photo", "ph.count1": "{n} photo", "ph.countN": "{n} photos", "ph.of": "Photo" + NB + ": {m}", "ph.label": "Photos",
+      "ph.viewer": "Photo", "ph.close": "Fermer", "ph.prev": "Photo précédente", "ph.next": "Photo suivante",
+      "parents.tip": "Les parents suivent via ce rapport" + NB + ": télécharge le PDF et envoie-le-leur.",
+      "my.title": "Mes infos", "my.team": "Mon équipe", "my.teamPick": "Choisis ton équipe", "my.other": "Autre", "my.teamNote": "Apparaît en haut de ton rapport.",
+      "code.nameTitle": "Comment t'appelles-tu" + NB + "?", "code.nameLabel": "Prénom", "code.namePh": "LUCAS", "code.nameSave": "Enregistrer mon prénom",
+      "code.nameDesc": "Comme sur ton maillot ou comme ton entraîneur t'appelle. Un coéquipier a le même prénom" + NB + "? Ajoute alors les premières lettres de ton nom de famille, par exemple LUCASVDB.",
+      "code.nameNeed": "Au moins 2 lettres.",
+      "guide.close": "Fermer l'explication", "guide.go": "C'est parti",
+      "exp.eyebrow": "Export A4", "exp.title": "Rapport hebdomadaire", "exp.prev": "Semaine précédente", "exp.next": "Semaine suivante", "exp.week": "Semaine {w}",
+      "exp.what": "Que mettre dans le rapport" + NB + "?", "exp.allOff": "Tout décocher", "exp.allOn": "Tout cocher",
+      "exp.pdf": "Télécharger le PDF", "exp.print": "Imprimer", "exp.docs": "Word / Docs",
+      "exp.emptyWeek": "Pas encore de check-in cette semaine.", "exp.painShort": " · douleur signalée",
+      "exp.onlyHead": "Le rapport ne contient alors que l'en-tête, la citation et le cadre de notes.",
+      "exp.nothing": "Rien de sélectionné. Le rapport ne contient que l'en-tête, la citation et le cadre de notes.",
+      "exp.count1": "<b>{n} sur {t}</b> check-in dans le rapport.", "exp.countN": "<b>{n} sur {t}</b> check-ins dans le rapport.",
+      "exp.pages1": " Sur papier" + NB + ": {n} page A4.", "exp.pagesN": " Sur papier" + NB + ": {n} pages A4.",
+      "exp.noPdf": "<b>Le module PDF n'a pas pu se charger.</b> Probablement pas d'internet. Imprimer et Word / Docs fonctionnent.",
+      "exp.pdfDone": "PDF créé. Imprime en A4 à l'échelle 100" + NB + "% (pas «" + NB + "ajuster" + NB + "»).",
+      "exp.printTip": "Astuce" + NB + ": désactive «" + NB + "En-têtes et pieds de page" + NB + "» dans la fenêtre d'impression.",
+      "exp.htmlDone": "Enregistré. Ouvre-le dans Word, ou dépose-le sur Google Drive et choisis Ouvrir avec Google Docs.",
+      "exp.file": "DebriefFC_Rapport_Semaine", "exp.pageOf": "Page {i} sur {n}", "dl.unavailable": "Le téléchargement n'est pas possible dans cet affichage.",
+      "rep.title": "DEBRIEF FC  |  RAPPORT HEBDOMADAIRE", "rep.week": "Semaine", "rep.printed": "Imprimé le", "rep.quote": "CITATION DE LA SEMAINE",
+      "rep.plan": "Planning" + NB + ": ", "rep.noAnswer": "Pas de réponse.", "rep.empty": "Pas encore de check-in pour cette période.",
+      "rep.notes": "Espace libre / Notes", "rep.html": "Rapport semaine", "rep.energy": "Énergie {e}/5", "rep.pain": " · Douleur" + NB + ": ",
+      "rep.score": "Note {s}/10.", "rep.sleep": " · Sommeil ", "rep.qo": "«" + NB, "rep.qc": NB + "»",
+      "bk.title": "Sauvegarde", "bk.desc": "Tes check-ins sont uniquement sur cet appareil. Fais une sauvegarde de temps en temps, surtout sur iPhone.",
+      "bk.save": "Enregistrer une sauvegarde", "bk.restore": "Restaurer une sauvegarde", "bk.busy": "Sauvegarde en cours…",
+      "bk.done": "Sauvegarde enregistrée{f}. Garde le fichier en lieu sûr.", "bk.with1": ", avec {n} photo", "bk.withN": ", avec {n} photos",
+      "bk.nCheck": "{n} check-in(s)", "bk.and": " et ", "bk.restored": "{m} restauré(s).", "bk.already": "Tout le contenu de la sauvegarde était déjà là.",
+      "bk.invalid": "Ce fichier n'est pas une sauvegarde valide de cette app.", "bk.file": "DebriefFC_sauvegarde_",
+      "wipe.title": "Tout effacer",
+      "wipe.desc": "Efface tous les check-ins, le planning et le nom sur cet appareil. Par exemple pour une nouvelle saison ou si le téléphone change de main. C'est irréversible.",
+      "wipe.start": "Tout effacer…", "wipe.note": "<b>D'abord une sauvegarde" + NB + "?</b> Tu pourras tout restaurer plus tard avec «" + NB + "Restaurer une sauvegarde" + NB + "».",
+      "wipe.sure": "Oui, je veux vraiment tout effacer", "wipe.go": "Tout effacer définitivement", "wipe.done": "Tout est effacé. Prêt pour un nouveau départ."
+    }
+  };
+  function T(k, v) {
+    var s = I18N[LANG] && I18N[LANG][k];
+    if (s == null) s = I18N.nl[k];
+    if (s == null) s = k;
+    if (v) s = s.replace(/\{(\w+)\}/g, function (m, n) { return v[n] != null ? v[n] : m; });
+    return s;
+  }
+  function plural(n, k1, kN, v) { v = v || {}; v.n = n; return T(n === 1 ? k1 : kN, v); }
+  function LOCALE() { return LANG === "fr" ? "fr-BE" : "nl-BE"; }
+
+  /* Franse versies van de lijsten (vragen, quotes, posities, snelkeuzes, uitleg, juridische teksten).
+     De Nederlandse staan verderop in de code; die dienen ook als terugval. */
+  var DATA_FR = {
+    QUOTES: [
+      { t: "Vise la perfection, mais n'attends pas un match parfait.", s: "" },
+      { t: "Une erreur" + NB + "? Accepte. Reset. Action.", s: "" },
+      { t: "C'est quand c'est difficile que j'apprends le plus.", s: "" },
+      { t: "Compare-toi à celui que tu étais la semaine dernière.", s: "" },
+      { t: "La prochaine action compte plus que la précédente.", s: "" },
+      { t: "Celui qui se cache ne touche pas le ballon. Demande-le.", s: "" },
+      { t: "Douter, c'est normal. Continue à demander le ballon.", s: "" },
+      { t: "Scanne. Décide. Ose.", s: "" }
+    ],
+    QS: [
+      { q: "Quelle note te donnes-tu aujourd'hui" + NB + "? Et pourquoi pas un point de plus" + NB + "?", short: "Quelle note te donnes-tu" + NB + "? Et pourquoi pas un point de plus" + NB + "?",
+        hint: "Choisis d'abord ta note. Dis ensuite ce qui manquait pour ce point en plus.", ph: "Je me donne un ... parce que ..." },
+      { q: "Quelle action de ta part mériterait d'être dans ta vidéo de highlights" + NB + "?", short: "Quelle action mériterait d'être dans ta vidéo de highlights" + NB + "?",
+        hint: "Rejoue le moment dans ta tête. Où étais-tu, qu'as-tu fait, qu'as-tu ressenti" + NB + "?", ph: "Cette action où ..." },
+      { q: "Quel a été ton moment le plus difficile, et comment as-tu appuyé sur le bouton reset" + NB + "?", short: "Ton moment le plus difficile, et comment as-tu appuyé sur le bouton reset" + NB + "?",
+        hint: "Que dirais-tu à un coéquipier qui vit la même chose" + NB + "?", ph: "Le moment le plus difficile, c'était ... Je me relance en ...", reset: true },
+      { q: "À quoi vas-tu faire attention au prochain entraînement" + NB + "?", short: "À quoi feras-tu attention au prochain entraînement" + NB + "?",
+        hint: "De préférence une seule chose, deux maximum. Choisis ci-dessous ou dis-le toi-même.", ph: "Au prochain entraînement, je fais attention à ...", chips: true }
+    ],
+    PLANL: { training: ["Entraînement", "E"], match: ["Match", "M"], rust: ["Repos", "R"], geannuleerd: ["Annulé", "×"] },
+    DAGEN: ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
+    DN: ["lu", "ma", "me", "je", "ve", "sa", "di"],
+    SLEEP_Q: { slecht: "mauvais", oke: "correct", goed: "bon" },
+    HOURS: { "6-": "6 h ou moins", "10+": "10 h ou plus", unit: " h" },
+    STATSL: { goals: "Buts", assists: "Passes décisives", preassists: "Passes pré-décisives", cleansheet: "Clean sheet",
+      recup: "Récupérations", duels: "Duels gagnés", intercept: "Interceptions", shots: "Tirs cadrés", saves: "Arrêts",
+      claims: "Ballons captés", crosses: "Bons centres", onevone: "1 contre 1 gagnés" },
+    POSL: { doelman: "Gardien", verdediger: "Défenseur central", back: "Arrière latéral", middenvelder: "Milieu de terrain", flank: "Ailier", aanvaller: "Attaquant" },
+    FOCUS: {
+      algemeen: ["Scanner avant de recevoir le ballon", "Jouer des deux pieds", "Contrôle du ballon", "Me démarquer et être disponible", "Revenir vite après une perte de balle", "Mettre la pression", "Transitions rapides", "Parler et coacher sur le terrain"],
+      doelman: ["Bon placement sur les tirs", "Sortir sur les centres", "Relancer au pied", "Coacher ma défense"],
+      verdediger: ["Tenir la ligne", "Gagner les duels aériens", "Relancer calmement de derrière", "Couvrir la profondeur"],
+      back: ["Monter au bon moment", "Centrer au bon endroit", "Stopper mon adversaire sur le côté", "Revenir vite en position"],
+      middenvelder: ["Me retourner avec le ballon", "Dicter le rythme du jeu", "Être disponible entre les lignes", "Bien me placer défensivement"],
+      flank: ["Oser le 1 contre 1", "Plonger dans le dos de la défense", "Bon choix" + NB + ": centrer ou repiquer", "Aider en défense"],
+      aanvaller: ["Finir en une touche", "Garder le ballon dos au but", "Appels en profondeur", "Presser en premier défenseur"]
+    },
+    GUIDE: [
+      { e: "Bienvenue", t: "Deux minutes après chaque séance",
+        h: "<p>Après chaque entraînement ou match, tu réponds à quatre petites questions. Tu vois ainsi toi-même où tu progresses, semaine après semaine.</p><p>Il n'y a pas de mauvaise réponse. Être honnête suffit.</p>" },
+      { e: "Étape 1", t: "Planifie ta semaine",
+        h: "<p>Touche un jour dans <b>Cette semaine</b> et choisis <b>entraînement</b>, <b>match</b>, <b>repos</b> ou <b>annulé</b>.</p><p>Coche <b>Chaque …</b> pour tes jours d'entraînement fixes. Tu ne dois les régler qu'une fois. Les jours de match reçoivent des étoiles.</p>" },
+      { e: "Étape 2", t: "Fais ton check-in",
+        h: "<ul><li><b>Check rapide" + NB + ":</b> énergie, sommeil et douleur.</li><li><b>Après un match" + NB + ":</b> ton poste et tes stats, comme les buts, les duels et les récupérations.</li><li><b>Quatre questions" + NB + ":</b> ta note, ton highlight, ton moment reset et ton point d'attention.</li><li><b>Si tu veux,</b> une photo du jour.</li></ul><p>Un check-in commencé reste enregistré. Tu peux le terminer plus tard.</p>" },
+      { e: "Étape 3", t: "Dicter au lieu d'écrire",
+        h: "<p>Touche le <b>micro</b> bleu à côté de la zone de texte et parle calmement. Touche à nouveau pour arrêter.</p><p><b>La ponctuation se met toute seule" + NB + ":</b> après chaque courte pause, un point et une majuscule. Dis <b>virgule</b>, <b>point d'interrogation</b>, <b>point d'exclamation</b> ou <b>à la ligne</b> si tu en veux.</p><p>Le micro ne marche pas sur ton appareil" + NB + "? Touche la zone de texte et utilise le micro de ton clavier.</p>" },
+      { e: "Étape 4", t: "Ton rapport hebdomadaire",
+        h: "<p>Dans <b>Rapport</b>, choisis la semaine et coche les check-ins à inclure. Choisis-y aussi une fois <b>ton équipe</b> (catégorie U), elle apparaît en haut de ton rapport.</p><p>Ensuite <b>Télécharger le PDF</b> ou <b>Imprimer</b>" + NB + ": une page A4 soignée pour toi et ton entraîneur, avec de la place pour des notes. Les photos ne sont pas imprimées.</p>" },
+      { e: "Pour les parents", t: "Comment suivre",
+        h: "<p>L'app n'a <b>ni serveur ni compte</b>. Tout ce que votre enfant encode reste uniquement sur son propre téléphone.</p><p>Si vous ouvrez l'app sur votre propre téléphone, elle est vide, même avec le code de votre enfant. Ce n'est pas une erreur" + NB + ": les réponses restent ainsi privées.</p><p><b>Pour suivre" + NB + ":</b></p><ul><li><b>Le rapport hebdomadaire" + NB + ":</b> votre enfant télécharge le PDF dans Rapport et vous l'envoie.</li><li><b>Regarder ensemble</b> sur le téléphone de votre enfant.</li></ul>" },
+      { e: "Étape 5", t: "Garder tes données en sécurité",
+        h: "<p>Tout reste uniquement sur cet appareil. Personne d'autre ne peut le voir.</p><p>Fais de temps en temps une <b>sauvegarde</b> (Rapport, tout en bas), surtout sur iPhone. Tu as reçu un <b>code personnel</b>" + NB + "? Saisis-le sur l'écran d'accueil, ton nom apparaîtra.</p>" }
+    ],
+    LEGAL: {
+      disclaimer:
+        '<h2>Avertissement</h2><p class="lsub">Debrief FC · Sofia la Bianca</p>' +
+        '<div class="lbox"><b>En bref' + NB + ':</b> cette app aide un jeune sportif à réfléchir à ses entraînements et à ses matchs. Elle ne donne pas de conseil médical, psychologique ou technique.</div>' +
+        "<h3>Pas de conseil médical</h3><p>Les questions sur l'énergie, le sommeil et la douleur servent à prêter attention à ton corps. Elles ne remplacent pas un médecin, un kiné ou un psychologue du sport. En cas de douleur, de blessure ou de souci, parles-en toujours à ton entraîneur, à tes parents ou à un professionnel de santé.</p>" +
+        "<h3>Jeunes sportifs</h3><p>L'app est conçue pour les jeunes. Utilise-la avec l'accord d'un parent ou d'un tuteur.</p>" +
+        "<h3>Stats et rapports</h3><p>Toutes les stats, comme les buts, les duels ou les minutes, sont encodées par toi. Ce sont des aide-mémoire, pas des statistiques officielles. L'app te compare à toi-même, pas aux autres.</p>" +
+        "<h3>Aucun lien avec un club</h3><p>L'app est indépendante et n'est liée à aucun club de football ni à aucune fédération. Les idées issues de séances de préparation mentale sont reformulées avec nos propres mots.</p>" +
+        "<h3>Utilisation sous ta propre responsabilité</h3><p>L'app est proposée telle quelle. Sofia la Bianca fait de son mieux pour que tout fonctionne correctement, mais ne peut pas garantir que l'app fonctionne toujours sans erreur ni qu'aucune donnée ne sera jamais perdue. Fais donc régulièrement une sauvegarde.</p>" +
+        "<h3>Droits d'auteur</h3><p>© 2026 Sofia la Bianca. Tous droits réservés. Le design, les textes et le code ne peuvent pas être copiés ni diffusés sans autorisation.</p>" +
+        '<p class="lfoot">Dernière mise à jour' + NB + ': octobre 2026</p>',
+      privacy:
+        '<h2>Ta vie privée</h2><p class="lsub">Debrief FC · RGPD</p>' +
+        '<div class="lbox"><b>En bref' + NB + ':</b> tout ce que tu encodes reste sur ton appareil. Sofia ne peut pas voir tes données, et l\'app n\'envoie tes réponses nulle part.</div>' +
+        '<h3>Qui est responsable' + NB + '?</h3><p>Sofia la Bianca.</p><div id="privMail"><button type="button" class="btn btn-ghost lmailbtn" id="privMailBtn">Afficher l\'adresse e-mail</button></div>' +
+        "<h3>Que conserve l'app" + NB + "?</h3><p>Tes check-ins (réponses, notes, énergie, sommeil et douleurs signalées), ton planning, tes stats de match, ton poste et tes photos. Tout cela reste uniquement sur cet appareil, dans la mémoire de ton navigateur. C'est nécessaire au fonctionnement de l'app. C'est pourquoi l'app ne demande pas de consentement aux cookies.</p>" +
+        "<p>Les réponses sur la douleur et le sommeil sont des données de santé. C'est justement pour cela qu'elles restent sur ton propre appareil.</p>" +
+        "<h3>Ton code personnel</h3><p>Le code lui-même n'est pas conservé. L'app retient uniquement une empreinte illisible et le nom qui y correspond, sur ton appareil. L'app en ligne ne contient aucun nom.</p>" +
+        "<h3>Photos</h3><p>Les photos que tu ajoutes restent sur cet appareil et n'apparaissent pas dans le rapport A4. Des coéquipiers figurent sur la photo" + NB + "? Ne la partage pas sans l'accord de leurs parents.</p>" +
+        "<h3>Ce que l'app ne fait pas</h3><p>Pas de compte, pas de suivi, pas de publicité. Tes réponses ne sont envoyées ni à Sofia ni à un serveur.</p>" +
+        "<h3>Services de tiers</h3><p>Pour bien fonctionner, l'app utilise quelques services externes. Comme pour tout site web, ils voient ton adresse IP" + NB + ":</p>" +
+        "<ul><li><b>GitHub Pages</b> met l'app en ligne.</li><li><b>Google Fonts</b> fournit les polices.</li><li><b>jsDelivr</b> fournit le module PDF et, uniquement pour une photo iPhone sur Android, un convertisseur.</li></ul>" +
+        "<p><b>Dictée" + NB + ":</b> si tu utilises le micro, ton navigateur transforme ta voix en texte. Dans Chrome, cela passe par Google, dans Safari par Apple. Si tu ne le souhaites pas, écris ta réponse.</p>" +
+        "<h3>Sauvegarde</h3><p>Un fichier de sauvegarde contient toutes tes données, y compris tes photos et tes douleurs signalées. Garde-le en lieu sûr, par exemple dans Fichiers sur ton téléphone, et ne l'envoie pas à n'importe qui.</p>" +
+        "<h3>Effacer tes données</h3><p>Dans <b>Rapport</b>, tout en bas, tu trouves <b>Enregistrer une sauvegarde</b>, <b>Restaurer une sauvegarde</b> et <b>Tout effacer</b>. Ce dernier bouton supprime tout de cet appareil, y compris les photos et le nom.</p>" +
+        '<h3>Questions ou plaintes</h3><p>Envoie un e-mail à l\'adresse ci-dessus. Tu peux aussi t\'adresser à l\'Autorité de protection des données' + NB + ': <a href="https://www.autoriteprotectiondonnees.be" target="_blank" rel="noopener">autoriteprotectiondonnees.be</a>.</p>' +
+        '<p class="lfoot">Dernière mise à jour' + NB + ': octobre 2026</p>'
+    }
+  };
+
+  var CODE_SALT = "reflectie-v1";
+  var CODE_RONDEN = 250000;
+  /* Algemene spelerscodes RF-XXXX-XXXX: na de code geeft de speler zelf zijn naam in.
+     Het nummer achter elke regel komt overeen met de codelijst (Excel). Code intrekken = regel weghalen. */
+  var KNOWN_CODES_HASHED = [
+    "1ff88992f3e42ce6de44cd484a81ea279013bda35cc157cd7009a24f98115102", // PRESSY (persoonlijke code)
+    "18ecaa5ac751c15af3fd5ed546cedd8ec0b58a45363e2995a9af7a5f86a48eeb", // 001
+    "72682f09dd11e2a4ec1988e44d1c734ef55269aea5e344687a82280ae7f37792", // 002
+    "930c8e2c4fc45b41be5c8a105869cbcc49cf3c6065a6b18100b12ba9f3470732", // 003
+    "88dca17b9d0761fc053c08fe4cb86dff70ecd1be4d85387e834f8d597ed6fbeb", // 004
+    "da03328c24e3c170c7457b17d8eb8cfb7fffa94623663907db96ea7463241bef", // 005
+    "9b7505d60fac9ed69f201c82e81209f80f806e99095f024af3798f87631a07e3", // 006
+    "c18b6c7c8d675cb5c9d5b69027019d1f4c7e3a1158c28b562c18db39186b08bc", // 007
+    "da7c790e78b905d29bf88ec2fdc729d561e94b44aba09826e656eca035af0f6d", // 008
+    "a542f18f4b5ab0fb2712ded6ed260f024081d2d8a57b3c56282d01deb4d48c5e", // 009
+    "1bdeceb0dd372450e0dbc8ef1fa1eb6fa050570f616c7168ec090df1ebf49dec", // 010
+    "a0a8c2203d3c6a2b2c5eb8a2c76a734e7f9a29b520c85d40c7bd0607baf14f1c", // 011
+    "318e34661b9a00562cfa210464c371260ab23368cfc07cd4fafa85816a91f45f", // 012
+    "aaf9c887b6230880d469796de1a6ab43d4e28f0f7a848f129477719ef256b8b0", // 013
+    "b43547752756d13ecb63e5900f3348252b79f2a5369fbbab989914676f6efa99", // 014
+    "2fedbcf9e08ff3fa54586881e2db9c7633784129b893274957242f73b3d8c0d6", // 015
+    "c0776555900b6126e9c1dc9cce1205cbde3392c7faf47b4ce998d06be3dd01ea", // 016
+    "587366db0fe07b0c32e6a5c3ad755881acf824236113c88318b7031249c313a3", // 017
+    "5d768f38e4702b265c9976302126ff3f489b48f5e58978499e217c7c25ef58a9", // 018
+    "655f3d8f3b02fc4946a6be8b79f57640948e3b1844b276dbe62b7f757763f022", // 019
+    "48b665408ed039f44a585008f9b8240c718d469bd25fb0342e991d4a28981a94", // 020
+    "cbac824ab8b5c5d231d28749d58742980454697bfc677c215ff321719de6dc2e", // 021
+    "3456fca52797839121c04f250ffc9c7e74b421ad23ec9f3eaeda967cdb8fe4a6", // 022
+    "0182d0b6cb7557c9cbef2346fa0939a807bcd28af975fd4a854d3f181af537ef", // 023
+    "af762f6ec15f75a147b2cd91f221e2076b581754c7012f51a4030e77ec5cf11f", // 024
+    "2c97ebe8d1ca6cde6fb4e9001b2c60527cfbcc89e09d7712b5f2036481332828", // 025
+    "72402dc7a72d30a66e997d16f280c781bb15d86d630f98d5bf5911a3c3cf5c73", // 026
+    "44a497ddb40a3456bc620d7b9eab7396623783544097321ec3d0ca145cc0c549", // 027
+    "3fd244f2888a3e3f8819b9fce842e2b7b1e078728c7a4edf9bb98cedc9695466", // 028
+    "0b1cd866d15e8a4b4a18c4280c34bcd846786610ee0ad745b778e7e84796acba", // 029
+    "7eb8d5a4ab7da5d361287fa36231febf70acb1099ec97edefdc3a4b8770c4910", // 030
+    "b23747de012d152554665dc80acd5de6e44d0ecb78c239131ebdf40da6d5b77a", // 031
+    "b9b06d6ca52a6fd4ea0f09a46482d3d34ae02b0f4cf229d9ae11682f9d0cf8cc", // 032
+    "c3a9181df275ed9c6055bdf63df4612fa5fba668ebd78601c697ba98ccee1160", // 033
+    "565a11515ed78b45090a9c9cdc51eac75b33f4a51c9c84f30c20fcc4753dede6", // 034
+    "f50da4ba79bd2ff852deccb4067152af186dacb03a8a053ec98bf2ad1b44c3c3", // 035
+    "9a1ede0c9534c9f39030d87419b6d9d3d5507317ae9bfb5a8286534f8d3ec03a", // 036
+    "f01361ea77f054b93f01e42667f739ad6948d8f59be580203ca27b3496b2c5af", // 037
+    "12c3373c3c14fc41efcce5bb7387da73a46c056245b3a3391368f5ab269832e0", // 038
+    "0ef8a113d3fcd0df565e0701c76d4b8b284832c2ffdb1e0a121657ec531ec326", // 039
+    "d20cbda073e738a95f08b18d4aa806f3578ab2820122a9ae9c6e584d7e05d337", // 040
+    "7824360a096798e3d20cfbd389aa8dc8ad298c0f5680f3fd8f54ea1b2597a5ec", // 041
+    "a2e7a362687d23276d517c645a5c4fa27232d681fc3f4354fc8cddf2e7065d90", // 042
+    "3cb20d4beb234f15cfc0c42fe0a756d18782b811265a81b9f37ecf4be59591bb", // 043
+    "8a8086f86a334fd13c07a55581876eb244636b32cffecd34b8a53b6484d3143c", // 044
+    "b93639c368744ac13a0b04508ae5e0e13a6f7432abe83222e5fbf7f30aee831f", // 045
+    "d52667089c31bc4781c8e418402fadf783c99107281966c55e736e4bfc929bfa", // 046
+    "f01a1513e222baf72c71a0a0a63e08b70ddfebded57456ce354f282077e7d9cd", // 047
+    "849e364e7078596a333ed8016937717d9f35f49d54f6ea9651bc09dd70ec59a6", // 048
+    "be39b7a1419e57a292d30ecbf7bbc1e5809eb54746ba038e0ced0a47f1d21117", // 049
+    "32faf8ddf1bee6fa0a824f44cd803041998ac3d377179f22980c48e3286a9ad6", // 050
+    "9878c2c316ad4d2e0186485746cc4991dec894aa2f3fecd687589d5ce691c523", // 051
+    "f003bfd07cd3db3297b658ef5dbc95a9383838a5212778fefb87def14489491d", // 052
+    "5edd177cb303693445f81aa034503af55c5b3c03158b47b25f36e56219d32f05", // 053
+    "6a3e178ad6384e249d5bc29033189e8acc37b03a9abe269d2c7301a81703af70", // 054
+    "a56a6fb8ee855e8aa80968fdc624c67144870161cc0fcfc5a7a012811d554281", // 055
+    "a09dae57ba24a5c97eae344dc6a14b756669687148bf7f47c11fbec5d5448863", // 056
+    "42015cc5e85aea94b816bb84fae624daa2e718848815f0012f9fe14a87e6b0ef", // 057
+    "6318e439b7f54434e8d14f41372538ac7f7467d55f476d17a1a10deb21237773", // 058
+    "cd32a84d193457cfba5885aec195749d34fe6fd7cd898df0ca1d2d37ddeab508", // 059
+    "e2417014685bece06d120d2c128669c78e4a23127257cf52dc6a2165811ce327", // 060
+    "4597f5e15da7456724121ace85b9d9757a878cc17b9b3350a69874e5200010c8", // 061
+    "5f900a2bd44798ed204466c73f46e40294ec44209087ea428be6bb4d5f931455", // 062
+    "f2fc3b4952c95c085af9f64bad5bb2e201a3d712b4a0d07d038b0ed813972cc1", // 063
+    "9b4970373061417ff9551269dffcbb828d2776f59d409df4121edf299de98ee2", // 064
+    "f78cfdd4d80696a8292f187f648b61d49673c3035ed5838653c0d9e5eb7262d7", // 065
+    "d5a8e4d7d234df254c11ee056d13cc0260f34e165328d5cc521ea95ff0ada458", // 066
+    "dfeb25491a5ab44ec98f648e5a4a7c1b711997edd5b22a37ca9b45427c955371", // 067
+    "4a2246f69e256706d849bc4d33b78a1dbd3651a9b47763e5bc2209a729a2f58e", // 068
+    "09103eef85066eabaf9da9f27cff9608936f804083bf2a1ac9a07d9907dfc8db", // 069
+    "f5d02a51e98b5c322c3930859ab24b27dd671a5833ac30a83afb43c27f7f0470", // 070
+    "862c33f5df80b0cf504aec35a341ef81330d7549717e90124e51dd0895917b50", // 071
+    "bb4359a9112df10dfd007c6b508435c72a4f902802d42f8e501ee2c2c5696077", // 072
+    "bf22b839fa43864addd753a10a5a3e90882ce9fd18f4571b360aa3b34b02b4dd", // 073
+    "1dfce8cfc74a802809833d54b9de45b04925eceb69ecd3cc88f6ba1425e221da", // 074
+    "ca05fa4004c4874d38b6689dc96f30d3d1e811713dbc8005a6692b95741035ff", // 075
+    "d331684c2298594b47e7854dfdde07b09a06aa8ba13452db241928800a55a3e3", // 076
+    "c396246266af33987e3b3f660113a4ef0012787d444b5a9966515d1add1ba263", // 077
+    "a844ff93dba7f0378bcc4f2b81a8a6f20f366e866926883e8cd045cf4f676f1c", // 078
+    "9075439930b3944b5e0740ec480a8b8f190e7d3bcf0a5ca8c452d52eff339279", // 079
+    "d78cc96441364df592d7603ab54613d845b359f822a95640b1305bab78b10689", // 080
+    "309e47e740288044f6d4faec0d63fb1cc76289c8519cbb8481c29bf19d45d039", // 081
+    "813d795a6ea36ba3bb90b8de3d2b6b657c1b61a9b28b797045d8f8988908cd94", // 082
+    "231491a065a2bfeb11f6553546ec9196e91dbbf058b1e1db54ac730aaa57724e", // 083
+    "39e39e7725d1460e4d9315acbd910587a1af2eb08364848022b0b564065129b2", // 084
+    "2180c42c16ae08fa1531cd93ca9ffc585828a819ea130e6c2e4dd979f8b6f237", // 085
+    "928b77f5317ec945516efbe9fcac984d0cb53877ece15cb3c23ff3327f375a26", // 086
+    "4307f9cf7c9ee4f8b406018ca61d711258ed56ff1cfb446ade6460d16df96f65", // 087
+    "4c449b4ab5b03c78edd193d67324236cea2ab0b42f49c2994834d6e384dc8f60", // 088
+    "8859b6d353c6f4f0c05da2a82cb0ece1b976a1adf2b999b4a5cf32eb43ccf590", // 089
+    "af16c6d75cfe40ee182bb974ca7e667f73eaa5815a1727e9f30889503256b76d", // 090
+    "99961a02a5908843b7d495e4c35d4ac3a85cf0555c82c3b21166bbd31190b330", // 091
+    "f3a8a14c1d756d9921785d1fc67959d7ac53008987f5d3a656f733e079befd04", // 092
+    "752b6ed741e2bd5681c446a7373b60943eeeff11652acdd54b045a5ad08a823d", // 093
+    "9c417eff8dada4c44030cd7d571589890d872255cf34937a8b58601c8b37195c", // 094
+    "573066242db4426c73d6bceda6344989a1c5105d1f9491c2ed18330d3a8c1572", // 095
+    "c537de3cda3707eb228771028f54094e8f1d0e03472193f1492f063c8d6236eb", // 096
+    "1e61802d9484bab99fa97a3a722fa16e3215f650fcac00e250395bb1e3c41f81", // 097
+    "884bdeaadeb71e91991668191fcb4c8a92e37b51ae5a5f20468d0203f4c0d60f", // 098
+    "8e37c108a19a46548b27b32b252b47b09cae6dff9d9b77d6596813af6a0c3a9f", // 099
+    "815e715c68bf7924d7b33552ea9c46461d6877b6c3cda70d8c9426180b9b1c17" // 100
+  ];
+
+  var QUOTES = [
+    { t: "Streef naar perfectie, maar verwacht geen perfecte wedstrijd.", s: "" },
+    { t: "Fout gemaakt? Accepteer. Reset. Actie.", s: "" },
+    { t: "Ik leer het meest als het tegenzit.", s: "" },
+    { t: "Vergelijk je met wie je vorige week was.", s: "" },
+    { t: "De volgende actie telt meer dan de vorige.", s: "" },
+    { t: "Wie zich verstopt, raakt de bal niet. Vraag hem.", s: "" },
+    { t: "Twijfel is normaal. Blijf toch de bal vragen.", s: "" },
+    { t: "Scan. Beslis. Durf.", s: "" }
+  ];
+  var QS = [
+    { q: "Welk cijfer geef je jezelf vandaag? En waarom geen punt hoger?", short: "Welk cijfer geef je jezelf? En waarom geen punt hoger?",
+      hint: "Kies eerst je cijfer. Zeg daarna wat er ontbrak voor dat ene punt extra.", ph: "Ik geef mezelf een ... omdat ..." },
+    { q: "Welke actie van jou zou in je highlight-reel komen?", short: "Welke actie van jou zou in je highlight-reel komen?",
+      hint: "Speel het moment opnieuw af in je hoofd. Waar stond je, wat deed je, hoe voelde het?", ph: "Die ene actie waarbij ..." },
+    { q: "Wat was je lastigste moment, en hoe drukte je op de reset-knop?", short: "Wat was je lastigste moment, en hoe drukte je op de reset-knop?",
+      hint: "Wat zou je zeggen tegen een ploegmaat die hetzelfde meemaakte?", ph: "Het lastigste moment was ... Ik reset door ...", reset: true },
+    { q: "Waar ga je volgende training bewust op letten?", short: "Waar let je volgende training bewust op?",
+      hint: "Liefst één ding, maximaal twee. Kies hieronder of zeg het zelf.", ph: "Volgende training let ik op ...",
+      chips: true }
+  ];
+
+  /* ====== datums ====== */
+  function iso(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function parse(s) { var p = s.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function monday(d) { var x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; }
+  function addDays(d, n) { var x = new Date(d); x.setDate(x.getDate() + n); return x; }
+  function isoWeek(d) {
+    var t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    var day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day);
+    var y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+    return Math.ceil(((t - y0) / 864e5 + 1) / 7);
+  }
+  function fmt(d, o) { return d.toLocaleDateString(LOCALE(), o); }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function rangeOf(mon) {
+    var sun = addDays(mon, 6);
+    return mon.getMonth() === sun.getMonth()
+      ? mon.getDate() + " - " + fmt(sun, { day: "numeric", month: "long", year: "numeric" })
+      : fmt(mon, { day: "numeric", month: "long" }) + " - " + fmt(sun, { day: "numeric", month: "long", year: "numeric" });
+  }
+  function quoteOf(week) { return QUOTES[week % QUOTES.length]; }
+  function today() { return new Date(); }
+
+  /* ====== opslag ====== */
+  var store = { sessions: [], draft: null };
+  try {
+    var raw = localStorage.getItem(CONFIG.storageKey);
+    if (raw) { var p = JSON.parse(raw); if (p && Array.isArray(p.sessions)) store = { sessions: p.sessions, draft: p.draft || null, plan: p.plan || {}, template: p.template || {}, position: p.position || "", team: p.team || "" }; }
+  } catch (e) { /* geen opslag beschikbaar: app werkt, maar onthoudt niets */ }
+  var storageOk = true;
+  function save() {
+    try { localStorage.setItem(CONFIG.storageKey, JSON.stringify(store)); storageOk = true; }
+    catch (e) { if (storageOk) toast(T("toast.saveFail")); storageOk = false; }
+  }
+  function sessionsIn(mon) {
+    var a = iso(mon), b = iso(addDays(mon, 6));
+    return store.sessions.filter(function (s) { return s.date >= a && s.date <= b; })
+      .sort(function (x, y) { return x.date === y.date ? (x.created || 0) - (y.created || 0) : (x.date < y.date ? -1 : 1); });
+  }
+
+  /* ====== helpers ====== */
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  var toastT;
+  function toast(msg) { var t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { t.hidden = true; }, 2800); }
+  function inViewer() { return !!(window.claude && typeof window.claude.use === "function"); }
+  function downloadFile(name, data, mime) {
+    var blob = data instanceof Blob ? data : new Blob([data], { type: mime });
+    if (inViewer()) {
+      return window.claude.use("downloads").then(function (dl) {
+        if (!dl) { toast(T("dl.unavailable")); return; }
+        return dl.save({ filename: name, data: blob }).catch(function (e) { if (!e || e.code !== "declined") toast(T("dl.unavailable")); });
+      }).catch(function () { toast(T("dl.unavailable")); });
+    }
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = name; a.rel = "noopener";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+  }
+
+  /* ====== naam via persoonlijke code ====== */
+  var profile = null;
+  try {
+    var pn = JSON.parse(localStorage.getItem(CONFIG.nameKey) || "null");
+    if (pn && pn.name && KNOWN_CODES_HASHED.indexOf(pn.hash) > -1) profile = pn;
+    else if (pn) localStorage.removeItem(CONFIG.nameKey);
+  } catch (e) {}
+  function nameNow() { return profile ? String(profile.name).toUpperCase() : ""; }
+  /* Algemene codes (RF-XXXX-XXXX) bevatten geen naam: na zo'n code geeft de speler zelf zijn naam in.
+     Persoonlijke codes (NAAM-XXXX-XXXX) zetten de naam meteen op het scherm. Namen altijd in hoofdletters. */
+  var GENERIC = "RF", pendingHash = null;
+  function cleanName(v) {
+    return String(v || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase()
+      .replace(/[^A-Z \-]/g, "").replace(/\s+/g, " ").replace(/^[ \-]+|[ \-]+$/g, "").slice(0, 16);
+  }
+  function cryptoOk() { return !!(window.crypto && crypto.subtle && window.isSecureContext); }
+  async function hashCode(code) {
+    var enc = new TextEncoder();
+    var key = await crypto.subtle.importKey("raw", enc.encode(code), { name: "PBKDF2" }, false, ["deriveBits"]);
+    var bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(CODE_SALT), iterations: CODE_RONDEN, hash: "SHA-256" }, key, 256);
+    return Array.from(new Uint8Array(bits)).map(function (b) { return b.toString(16).padStart(2, "0"); }).join("");
+  }
+  // Kleine letters, spaties, zonder streepjes: het wordt allemaal NAAM-XXXX-XXXX.
+  function netteCode(raw) {
+    var t = String(raw).toUpperCase().replace(/[^A-Z0-9]/g, "");
+    var m = t.match(/^([A-Z]{2,20})([A-Z0-9]{8})$/);
+    return m ? m[1] + "-" + m[2].slice(0, 4) + "-" + m[2].slice(4) : "";
+  }
+  function naamUitCode(code) { return code.split("-")[0]; }
+  function setProfile(name, h) {
+    profile = { name: name, hash: h };
+    try { localStorage.setItem(CONFIG.nameKey, JSON.stringify(profile)); } catch (e) {}
+  }
+  // Geeft "named" (naam staat in de code), "generic" (speler moet zijn naam nog ingeven) of false.
+  async function tryCode(raw) {
+    var net = netteCode(raw); if (!net) return false;
+    var h = await hashCode(net);
+    if (KNOWN_CODES_HASHED.indexOf(h) === -1) return false;
+    if (naamUitCode(net) === GENERIC) { pendingHash = h; return "generic"; }
+    setProfile(naamUitCode(net), h);
+    return "named";
+  }
+  function forgetName() { profile = null; try { localStorage.removeItem(CONFIG.nameKey); } catch (e) {} }
+  // Console-hulp om een nieuwe code te maken, zoals in de 12 · 3 · 30-app.
+  window.nieuweCode = async function (naam) {
+    var n = String(naam || "").toUpperCase().replace(/[^A-Z]/g, "");
+    if (n.length < 2) { console.log('Geef een naam mee, bv. nieuweCode("Naam")'); return; }
+    var tekens = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    var r = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(function (b) { return tekens[b % 32]; }).join("");
+    var code = n + "-" + r.slice(0, 4) + "-" + r.slice(4);
+    console.log("%c\n  NIEUWE CODE: " + code + "\n", "font-weight:bold;color:#0A3F9C;font-size:14px");
+    console.log("  Plak in GitHub, in KNOWN_CODES_HASHED:\n    \"" + (await hashCode(code)) + "\",");
+    return code;
+  };
+
+  function openCode() {
+    if (!cryptoOk()) { toast(T("code.https")); return; }
+    $("codeIn").value = ""; $("codeErr").hidden = true; $("codeIn").classList.remove("bad");
+    $("codeStep").hidden = false; $("nameStep").hidden = true; $("codeTitle").textContent = T("code.title");
+    $("codeOv").hidden = false; setTimeout(function () { $("codeIn").focus(); }, 50);
+  }
+  function showNameStep() {
+    $("codeStep").hidden = true; $("nameStep").hidden = false;
+    $("codeTitle").textContent = T("code.nameTitle");
+    $("nameIn").value = ""; $("nameErr").hidden = true; $("nameIn").classList.remove("bad");
+    $("codeOv").hidden = false; setTimeout(function () { $("nameIn").focus(); }, 50);
+  }
+  function saveName() {
+    var n = cleanName($("nameIn").value);
+    if (n.replace(/[^A-Z]/g, "").length < 2 || !pendingHash) {
+      $("nameErr").textContent = T("code.nameNeed"); $("nameErr").hidden = false; $("nameIn").classList.add("bad"); return;
+    }
+    setProfile(n, pendingHash); pendingHash = null;
+    closeCode(); refreshAll(); toast(T("code.hello", { n: nameNow() }));
+  }
+  function closeCode() { $("codeOv").hidden = true; pendingHash = null; }
+  var checking = false;
+  async function submitCode() {
+    if (checking) return;
+    var raw = $("codeIn").value.trim(); if (!raw) return;
+    checking = true; var btn = $("codeOk"); btn.disabled = true; btn.textContent = T("code.checking");
+    var ok = false;
+    try { ok = await tryCode(raw); } catch (e) { ok = false; }
+    checking = false; btn.disabled = false; btn.textContent = T("code.unlock");
+    if (ok === "generic") { showNameStep(); }
+    else if (ok) { closeCode(); refreshAll(); toast(T("code.hello", { n: nameNow() })); }
+    else {
+      $("codeErr").textContent = netteCode(raw) ? T("code.wrong") : T("code.format");
+      $("codeErr").hidden = false; $("codeIn").classList.add("bad");
+    }
+  }
+  $("codeBtn").addEventListener("click", openCode);
+  $("codeOk").addEventListener("click", submitCode);
+  $("codeCancel").addEventListener("click", closeCode);
+  $("codeIn").addEventListener("keydown", function (e) { if (e.key === "Enter") submitCode(); if (e.key === "Escape") closeCode(); });
+  $("nameOk").addEventListener("click", saveName);
+  $("nameIn").addEventListener("keydown", function (e) { if (e.key === "Enter") saveName(); if (e.key === "Escape") closeCode(); });
+  $("codeOv").addEventListener("click", function (e) { if (e.target === $("codeOv")) closeCode(); });
+  $("nameBtn").addEventListener("click", function () {
+    if (profile) { forgetName(); refreshAll(); toast(T("name.hidden")); }
+  });
+  function refreshAll() {
+    if (!$("v-start").hidden) renderStart();
+    if (!$("v-export").hidden) renderExport();
+  }
+
+  /* ====== navigatie ====== */
+  function go(v) {
+    stopMic();
+    ["start", "check", "export"].forEach(function (n) { $("v-" + n).hidden = (n !== v); });
+    document.querySelectorAll(".tab").forEach(function (b) {
+      if (b.dataset.go === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    $("app").classList.toggle("wide", v === "export");
+    if (v === "start") renderStart();
+    if (v === "check") { if (!store.draft) newDraft(); renderStep(); }
+    if (v === "export") { exportMon = monday(today()); excluded = {}; renderExport(); }
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll(".tab").forEach(function (b) { b.addEventListener("click", function () { go(b.dataset.go); }); });
+  $("startBtn").addEventListener("click", function () { go("check"); });
+
+  /* ====== PLANNING: training / match / rust ======
+     store.template = vaste week (0 = maandag ... 6 = zondag)
+     store.plan     = uitzonderingen per datum ("" = bewust niets gepland) */
+  var PLAN = { training: { l: "Training", s: "T" }, match: { l: "Match", s: "M" }, rust: { l: "Rust", s: "R" }, geannuleerd: { l: "Geannuleerd", s: "\u00D7" } };
+  var DAGEN = ["maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag", "zondag"];
+  var DN = ["ma", "di", "wo", "do", "vr", "za", "zo"];
+  function hasOwn(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
+  function planStore() { if (!store.plan) store.plan = {}; if (!store.template) store.template = {}; }
+  function wdOf(k) { return (parse(k).getDay() + 6) % 7; }
+  function planOf(k) {
+    planStore();
+    var v = hasOwn(store.plan, k) ? store.plan[k] : (store.template[wdOf(k)] || "");
+    return PLAN[v] ? v : "";
+  }
+  // Wat er normaal op die dag staat (vaste week), om "training geannuleerd" te kunnen zeggen.
+  function baseOf(k) { planStore(); var t = store.template[wdOf(k)]; return (t === "training" || t === "match") ? t : ""; }
+  function planWords(k) {
+    var p = planOf(k);
+    if (p === "geannuleerd") return (baseOf(k) ? PLAN[baseOf(k)].l.toLowerCase() + " " : "") + T("plan.cancelWord");
+    return p ? PLAN[p].l.toLowerCase() : "";
+  }
+  function longDay(k) { return cap(fmt(parse(k), { weekday: "long", day: "numeric", month: "long" })); }
+  function dayCells(mon, ws, todayKey) {
+    var h = "";
+    for (var i = 0; i < 7; i++) {
+      var k = iso(addDays(mon, i));
+      var hit = ws.filter(function (s) { return s.date === k; });
+      var p = planOf(k);
+      var letter = hit.length ? (hit.some(function (s) { return s.type === "match"; }) ? PLAN.match.s : PLAN.training.s) : (p ? PLAN[p].s : "");
+      var isMatch = hit.length ? hit.some(function (s) { return s.type === "match"; }) : p === "match";
+      var cls = "day" + (hit.length ? " done" : (p ? " plan-" + p : "")) + (isMatch ? " is-match" : "") + (k === todayKey ? " today" : "");
+      var sparks = isMatch ? '<i class="spark a"></i><i class="spark b"></i><i class="spark c"></i>' : "";
+      var label = longDay(k) + ": " + (p === "geannuleerd" ? planWords(k) : p ? T("day.planned", { w: PLAN[p].l.toLowerCase() }) : T("day.nothing")) +
+        (hit.length ? T("day.done") : "") + T("day.tap");
+      h += '<button type="button" class="' + cls + '" data-plan="' + k + '" aria-label="' + esc(label) + '"><span class="dot" aria-hidden="true">' +
+        letter + sparks + '</span><span aria-hidden="true">' + DN[i] + "</span></button>";
+    }
+    return h;
+  }
+  function todayLine(k) {
+    var p = planOf(k);
+    if (p === "training") return T("today.training");
+    if (p === "match") return T("today.match");
+    if (p === "geannuleerd") return baseOf(k) ? T("today.cancel", { w: PLAN[baseOf(k)].l.toLowerCase() }) : T("today.cancelAny");
+    if (p === "rust") return T("today.rest");
+    return T("today.default");
+  }
+  function planLine(mon) {
+    var out = [];
+    for (var i = 0; i < 7; i++) { var p = planOf(iso(addDays(mon, i))); if (p) out.push(DN[i] + " " + planWords(iso(addDays(mon, i)))); }
+    return out.join(" · ");
+  }
+  function typeFor(k, fallback) { var p = planOf(k); return (p === "training" || p === "match") ? p : fallback; }
+
+  var planKey = null, planSel = "", planWasRepeat = false;
+  function markPlan() {
+    document.querySelectorAll("#planOpts button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === planSel)); });
+    // Geannuleerd geldt altijd voor één dag: dan kan "elke week" niet.
+    var c = planSel === "geannuleerd", cb = $("planRepeat");
+    cb.disabled = c;
+    if (c) cb.checked = false; else if (cb.dataset.auto === "1") cb.checked = planWasRepeat;
+    cb.dataset.auto = c ? "1" : "";
+    $("planRepeatLbl").textContent = c ? T("plan.onlyDay") : T("plan.every", { d: DAGEN[wdOf(planKey)] });
+  }
+  function openPlan(k) {
+    planStore(); planKey = k; planSel = planOf(k);
+    var wd = wdOf(k);
+    planWasRepeat = !hasOwn(store.plan, k) && !!store.template[wd];
+    $("planTitle").textContent = longDay(k);
+    $("planRepeatLbl").textContent = T("plan.every", { d: DAGEN[wd] });
+    $("planRepeat").checked = planWasRepeat; $("planRepeat").dataset.auto = "";
+    markPlan(); $("planOv").hidden = false;
+    var first = document.querySelector('#planOpts button[aria-pressed="true"]') || document.querySelector("#planOpts button");
+    if (first) setTimeout(function () { first.focus(); }, 30);
+  }
+  function closePlan() { $("planOv").hidden = true; }
+  function savePlan() {
+    planStore(); var wd = wdOf(planKey);
+    if (planSel === "geannuleerd") {
+      store.plan[planKey] = "geannuleerd";                    // vaste week blijft gewoon staan
+    } else if ($("planRepeat").checked) {
+      if (planSel) store.template[wd] = planSel; else delete store.template[wd];
+      delete store.plan[planKey];
+    } else if (planWasRepeat) {
+      delete store.template[wd];                              // vaste dag stopgezet
+      if (planSel) store.plan[planKey] = planSel; else delete store.plan[planKey];
+    } else {
+      if ((store.template[wd] || "") === planSel) delete store.plan[planKey]; else store.plan[planKey] = planSel;
+    }
+    save(); closePlan(); renderStart();
+    toast(planSel === "geannuleerd" ? T("plan.toastCancel") : planSel ? T("plan.toastSet", { w: PLAN[planSel].l }) : T("plan.toastClear"));
+  }
+  $("days").addEventListener("click", function (e) { var b = e.target.closest("[data-plan]"); if (b) openPlan(b.dataset.plan); });
+  $("planOpts").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) { planSel = b.dataset.v; markPlan(); } });
+  $("planOk").addEventListener("click", savePlan);
+  $("planCancel").addEventListener("click", closePlan);
+  $("planOv").addEventListener("click", function (e) { if (e.target === $("planOv")) closePlan(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("planOv").hidden) closePlan(); });
+
+  /* ====== SNELKIEZEN: max. twee focuspunten ====== */
+  var MAX_CHIPS = 2;
+  function bindChips(ta, onChange) {
+    var btns = Array.prototype.slice.call(document.querySelectorAll("#chips button"));
+    function has(v) { return ta.value.indexOf(v) > -1; }
+    function sync() { btns.forEach(function (b) { b.setAttribute("aria-pressed", String(has(b.dataset.v))); }); }
+    function tidy(v) { return v.replace(/\s*,\s*(,\s*)+/g, ", ").replace(/^[\s,]+|[\s,]+$/g, ""); }
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        var c = b.dataset.v, v = ta.value;
+        if (has(c)) { v = tidy(v.split(c).join("")); }
+        else {
+          var n = btns.filter(function (x) { return has(x.dataset.v); }).length;
+          if (n >= MAX_CHIPS) { toast(T("chips.max")); return; }
+          v = tidy(v); v = v ? v.replace(/[\s.]+$/, "") + ", " + c : c;
+        }
+        ta.value = v; onChange(v); sync();
+      });
+    });
+    ta.addEventListener("input", sync);
+    sync();
+  }
+
+  /* ====== SLAAP ====== */
+  var SLEEP_Q = { slecht: "slecht", oke: "oké", goed: "goed" };
+  var HOURS = { "6-": "6 u of minder", "10+": "10 u of meer", unit: " u" };
+  function sleepHours(h) { return h === "6-" || h === "10+" ? HOURS[h] : h ? h + HOURS.unit : ""; }
+  function sleepTxt(s) {
+    var h = sleepHours(s.sleepH), q = SLEEP_Q[s.sleepQ] || "";
+    return (h || q) ? T("rep.sleep") + [h, q].filter(Boolean).join(", ") : "";
+  }
+  function shortSleep(h) { return h === "6-" || h === "7"; }
+
+  /* ====== MATCHCIJFERS: alleen bij een match, per positie een mix van resultaat en inzet ====== */
+  var STATS = {
+    goals:      { l: "Goals", g: "r" },
+    assists:    { l: "Assists", g: "r" },
+    preassists: { l: "Pré-assists", g: "r" },
+    cleansheet: { l: "Clean sheet", g: "r", bool: true },
+    recup:      { l: "Balrecuperaties", g: "i" },
+    duels:      { l: "Gewonnen duels", g: "i" },
+    intercept:  { l: "Onderscheppingen", g: "i" },
+    shots:      { l: "Schoten op doel", g: "i" },
+    saves:      { l: "Reddingen", g: "i" },
+    claims:     { l: "Ballen geclaimd", g: "i" },
+    crosses:    { l: "Goede voorzetten", g: "i" },
+    onevone:    { l: "Gewonnen 1-tegen-1", g: "i" }
+  };
+  var POS = {
+    doelman:      { l: "Doelman",             stats: ["cleansheet", "saves", "claims"] },
+    verdediger:   { l: "Centrale verdediger", stats: ["goals", "assists", "recup", "duels", "intercept"] },
+    back:         { l: "Back",                stats: ["goals", "assists", "duels", "recup", "crosses"] },
+    middenvelder: { l: "Middenvelder",        stats: ["goals", "assists", "preassists", "recup", "duels"] },
+    flank:        { l: "Flankspeler",         stats: ["goals", "assists", "preassists", "onevone", "recup"] },
+    aanvaller:    { l: "Aanvaller",           stats: ["goals", "assists", "preassists", "shots", "duels"] }
+  };
+  function stepKeys(d) { return ["quick"].concat(d.type === "match" ? ["stats"] : []).concat(["q0", "q1", "q2", "q3", "photos"]); }
+  function drawProgress(step, n) {
+    var p = $("progress"); p.style.gridTemplateColumns = "repeat(" + n + ",1fr)";
+    var h = ""; for (var k = 0; k < n; k++) h += '<span class="' + (k <= step ? "on" : "") + '"></span>';
+    p.innerHTML = h;
+  }
+  function counterRow(id, label, val, isMin) {
+    return '<div class="srow"><span>' + esc(label) + '</span><div class="stepper" data-id="' + id + '">' +
+      '<button type="button" data-d="-1" aria-label="' + esc(T("stats.less", { l: label.toLowerCase() })) + '">−</button>' +
+      '<output aria-live="polite">' + (val == null ? (isMin ? "–" : "0") : val) + "</output>" +
+      '<button type="button" data-d="1" aria-label="' + esc(T("stats.more", { l: label.toLowerCase() })) + '">+</button></div></div>';
+  }
+  function renderStats(d) {
+    if (!d.stats) d.stats = {};
+    if (!d.pos) d.pos = (store.position && POS[store.position]) ? store.position : "";
+    $("stepBody").innerHTML = '<div class="stack">' +
+      '<div class="qhead"><div class="eyebrow">' + T("stats.eyebrow") + '</div><h2>' + T("stats.title") + '</h2>' +
+      '<p class="hint">' + T("stats.hint") + '</p></div>' +
+      '<div><p class="field-l">' + T("stats.pos") + ' <span>' + T("stats.posNote") + '</span></p><div class="seg c2" id="gPos">' +
+      Object.keys(POS).map(function (k) { return '<button data-v="' + k + '">' + POS[k].l + "</button>"; }).join("") + "</div></div>" +
+      '<div id="statRows"></div></div>';
+    setPressed("#gPos", d.pos);
+    bindSeg("#gPos", function (v) { d.pos = v; store.position = v; d.statsTouched = true; drawRows(); });
+    function drawRows() {
+      if (!d.pos) { $("statRows").innerHTML = '<p class="note">' + T("stats.pickPos") + '</p>'; return; }
+      var ids = POS[d.pos].stats, h = "";
+      [["r", T("stats.gR")], ["i", T("stats.gI")]].forEach(function (grp) {
+        var rows = ids.filter(function (id) { return STATS[id].g === grp[0]; });
+        if (!rows.length) return;
+        h += '<p class="sgroup">' + grp[1] + '</p><div class="srows">';
+        rows.forEach(function (id) {
+          var s = STATS[id];
+          if (s.bool) {
+            h += '<div class="srow"><span>' + s.l + '</span><div class="seg c2 mini" data-bool="' + id + '">' +
+              '<button type="button" data-v="1" aria-pressed="' + (d.stats[id] === true) + '">' + T("common.yes") + '</button>' +
+              '<button type="button" data-v="0" aria-pressed="' + (d.stats[id] === false) + '">' + T("common.no") + '</button></div></div>';
+          } else h += counterRow(id, s.l, d.stats[id] || 0, false);
+        });
+        h += "</div>";
+      });
+      h += '<p class="sgroup">' + T("stats.gC") + '</p><div class="srows">' + counterRow("min", T("stats.minutes"), d.stats.min, true) + "</div>";
+      $("statRows").innerHTML = h;
+    }
+    $("statRows").addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b) return;
+      var st = b.closest(".stepper"), bo = b.closest("[data-bool]");
+      if (st) {
+        var id = st.dataset.id, isMin = id === "min", cur = d.stats[id];
+        var step = isMin ? 5 : 1, max = isMin ? 120 : 30;
+        if (isMin && cur == null && +b.dataset.d < 0) return;
+        var next = (cur == null ? 0 : cur) + step * (+b.dataset.d);
+        next = Math.max(0, Math.min(max, next));
+        d.stats[id] = next; d.statsTouched = true;
+        st.querySelector("output").textContent = next;
+      } else if (bo) {
+        d.stats[bo.dataset.bool] = b.dataset.v === "1"; d.statsTouched = true;
+        bo.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      }
+      save();
+    });
+    drawRows();
+  }
+  function statsForSave(d) {
+    if (d.type !== "match" || !d.statsTouched || !d.pos || !POS[d.pos]) return null;
+    var v = {}; POS[d.pos].stats.forEach(function (id) { if (d.stats && d.stats[id] !== undefined) v[id] = d.stats[id]; });
+    return { pos: d.pos, min: (d.stats && d.stats.min != null) ? d.stats.min : null, v: v };
+  }
+  function statsLine(s) {
+    if (!s.stats || !POS[s.stats.pos]) return "";
+    var st = s.stats, parts = [POS[st.pos].l];
+    if (st.min != null) parts.push(st.min + " min");
+    POS[st.pos].stats.forEach(function (id) {
+      var v = st.v[id], S = STATS[id];
+      parts.push(S.bool ? S.l + ": " + (v === true ? T("common.yesL") : v === false ? T("common.noL") : "-") : S.l + " " + (v || 0));
+    });
+    return parts.join(" · ");
+  }
+  function seasonStart(d) { var y = d.getMonth() >= 7 ? d.getFullYear() : d.getFullYear() - 1; return new Date(y, 7, 1); }
+  function renderSeason(now) {
+    var card = $("seasonCard"); if (!card) return;
+    var s0 = seasonStart(now), st = iso(s0);
+    var ms = store.sessions.filter(function (s) { return s.type === "match" && s.date >= st && s.stats && POS[s.stats.pos]; });
+    if (!ms.length) { card.hidden = true; return; }
+    card.hidden = false;
+    var pos = (store.position && POS[store.position]) ? store.position : ms[ms.length - 1].stats.pos;
+    var tiles = [];
+    var mins = ms.reduce(function (a, s) { return a + (s.stats.min || 0); }, 0);
+    POS[pos].stats.forEach(function (id) {
+      var S = STATS[id];
+      var tot = ms.reduce(function (a, s) { var v = s.stats.v[id]; return a + (S.bool ? (v === true ? 1 : 0) : (+v || 0)); }, 0);
+      tiles.push({ v: tot, l: S.bool ? T("season.cs") : S.l });
+    });
+    function soft(t) { return esc(t).replace("Balrecuperaties", "Bal&shy;recuperaties").replace("Onderscheppingen", "Onder&shy;scheppingen"); }
+    $("seasonLbl").textContent = s0.getFullYear() + "–" + (s0.getFullYear() + 1) + " · " + plural(ms.length, "season.match1", "season.matchN") + (mins ? " · " + mins + " min" : "");
+    $("seasonTiles").innerHTML = tiles.map(function (t) { return '<div class="tile"><b>' + t.v + "</b><small>" + soft(t.l) + "</small></div>"; }).join("");
+    $("seasonNote").textContent = T("season.note", { p: POS[pos].l.toLowerCase() });
+  }
+
+  /* ====== SNELKEUZES VRAAG 4: voor iedereen + per positie ====== */
+  var FOCUS = {
+    algemeen:     ["Scannen voor ik de bal krijg", "Tweebenigheid", "Balaanname", "Vrijlopen en aanspeelbaar zijn", "Terugsprinten na balverlies", "Druk zetten", "Snel omschakelen", "Praten en coachen op het veld"],
+    doelman:      ["Positie kiezen bij schoten", "Uitkomen bij voorzetten", "Opbouwen met de voet", "Mijn verdediging coachen"],
+    verdediger:   ["Positie houden in de lijn", "Kopduels winnen", "Rustig opbouwen van achteruit", "De diepte afschermen"],
+    back:         ["Op tijd mee opkomen", "Voorzetten op de juiste plek", "Mijn tegenstander op de flank stoppen", "Snel terug in positie"],
+    middenvelder: ["Draaien met de bal", "Het tempo van het spel bepalen", "Aanspeelbaar zijn tussen de linies", "Defensief juist positie kiezen"],
+    flank:        ["Het 1-tegen-1 durven aangaan", "Diepgaan achter de verdediging", "Juiste keuze: voorzet of naar binnen", "Mee terugverdedigen"],
+    aanvaller:    ["Afwerken in één tijd", "Bal vasthouden met de rug naar doel", "Diepgaande loopacties", "Als eerste verdediger storen"]
+  };
+  function chipsHTML(pos) {
+    function row(list) { return '<div class="chips">' + list.map(function (c) { return '<button type="button" data-v="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + "</div>"; }
+    var own = POS[pos] ? pos : "";
+    var h = '<div id="chips" class="chipwrap"><p class="field-l">' + T("chips.title") + ' <span>max. 2</span></p>' +
+      '<p class="chipgrp">' + T("chips.all") + '</p>' + row(FOCUS.algemeen);
+    if (own) h += '<p class="chipgrp">' + T("chips.own", { p: POS[own].l.toLowerCase() }) + "</p>" + row(FOCUS[own]);
+    h += '<details class="morepos"><summary>' + (own ? T("chips.others") : T("chips.perPos")) + "</summary>" +
+      Object.keys(POS).filter(function (k) { return k !== own; }).map(function (k) { return '<p class="chipgrp">' + POS[k].l + "</p>" + row(FOCUS[k]); }).join("") +
+      "</details></div>";
+    return h;
+  }
+
+  /* ====== FOTO'S ======
+     Opslag: IndexedDB (localStorage is te klein voor foto's).
+     Elke foto wordt eerst verkleind tot max. 1600 px (JPEG, ±300 KB).
+     Foto's blijven op dit toestel, gaan mee in de back-up en komen nooit in het A4-verslag. */
+  var MAX_PHOTOS = 3, PHOTO_DB = "reflectie-fotos", phDbP = null, phUrls = {};
+  function phDb() {
+    if (phDbP) return phDbP;
+    phDbP = new Promise(function (res, rej) {
+      if (!window.indexedDB) { rej(new Error("no-idb")); return; }
+      var r;
+      try { r = indexedDB.open(PHOTO_DB, 1); } catch (e) { rej(e); return; }
+      r.onupgradeneeded = function () { r.result.createObjectStore("photos", { keyPath: "id" }); };
+      r.onsuccess = function () { res(r.result); };
+      r.onerror = function () { rej(r.error); };
+    });
+    phDbP.catch(function () { phDbP = null; });
+    return phDbP;
+  }
+  function phTx(mode, fn) {
+    return phDb().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction("photos", mode), req = fn(tx.objectStore("photos"));
+        tx.oncomplete = function () { res(req ? req.result : undefined); };
+        tx.onerror = tx.onabort = function () { rej(tx.error); };
+      });
+    });
+  }
+  function phPut(rec) { return phTx("readwrite", function (st) { return st.put(rec); }); }
+  function phGet(id) { return phTx("readonly", function (st) { return st.get(id); }); }
+  function phAll() { return phTx("readonly", function (st) { return st.getAll(); }); }
+  function phClear() { phUrlsDrop(Object.keys(phUrls)); return phTx("readwrite", function (st) { return st.clear(); }); }
+  function phDel(ids) {
+    ids = (ids || []).slice(); if (!ids.length) return Promise.resolve();
+    phUrlsDrop(ids);
+    return phTx("readwrite", function (st) { ids.forEach(function (id) { st.delete(id); }); return null; });
+  }
+  function phPatch(id, patch) {
+    return phGet(id).then(function (rec) { if (!rec) return; Object.keys(patch).forEach(function (k) { rec[k] = patch[k]; }); return phPut(rec); });
+  }
+  function phUrlsDrop(ids) { ids.forEach(function (id) { if (phUrls[id]) { try { URL.revokeObjectURL(phUrls[id]); } catch (e) {} delete phUrls[id]; } }); }
+  function urlFor(rec) { if (!phUrls[rec.id]) phUrls[rec.id] = URL.createObjectURL(rec.blob); return phUrls[rec.id]; }
+  function phNewId() { return "p" + Date.now() + Math.random().toString(36).slice(2, 7); }
+
+  function shrink(file) {
+    return new Promise(function (res, rej) {
+      var src = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, 1600 / Math.max(w, h));
+        var c = document.createElement("canvas"); c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k));
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(src);
+        c.toBlob(function (b) { if (b) res({ blob: b, w: c.width, h: c.height }); else rej(new Error("toBlob")); }, "image/jpeg", 0.82);
+      };
+      img.onerror = function () { URL.revokeObjectURL(src); rej(new Error("decode")); };
+      img.src = src;
+    });
+  }
+  /* iPhone-foto's (HEIC) op Android/Chrome: Chrome kan HEIC niet lezen. Alleen dan laden we
+     eenmalig een omzetter (heic2any, ±1,3 MB) en maken we er eerst een gewone JPEG van. */
+  var HEIC_SRC = "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js", heicP = null;
+  function isHeic(f) { return /hei[cf]/i.test(f.type || "") || /\.(heic|heif)$/i.test(f.name || ""); }
+  function loadHeic() {
+    if (window.heic2any) return Promise.resolve(window.heic2any);
+    if (heicP) return heicP;
+    heicP = new Promise(function (res, rej) {
+      var sc = document.createElement("script"); sc.src = HEIC_SRC; sc.async = true;
+      sc.onload = function () { if (window.heic2any) res(window.heic2any); else { heicP = null; rej(new Error("heic2any")); } };
+      sc.onerror = function () { heicP = null; rej(new Error("load")); };
+      document.head.appendChild(sc);
+    });
+    return heicP;
+  }
+  function readPhoto(f) {
+    return shrink(f).catch(function (err) {
+      if (!isHeic(f)) throw err;
+      toast(T("ph.heicBusy"));
+      return loadHeic()
+        .then(function (h) { return h({ blob: f, toType: "image/jpeg", quality: 0.9 }); })
+        .then(function (out) { return shrink(Array.isArray(out) ? out[0] : out); });
+    });
+  }
+  function addPhotos(files, current) {
+    var all = Array.prototype.slice.call(files || []), room = MAX_PHOTOS - current.length;
+    if (all.length > room) toast(T("ph.max", { n: MAX_PHOTOS }));
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+    return all.slice(0, Math.max(0, room)).reduce(function (p, f) {
+      return p.then(function (ids) {
+        return readPhoto(f).then(function (r) {
+          var id = phNewId();
+          return phPut({ id: id, blob: r.blob, w: r.w, h: r.h, caption: "", created: Date.now() }).then(function () { return ids.concat(id); });
+        }).catch(function () {
+          toast(isHeic(f) ? T("ph.heicFail") : T("ph.fail"));
+          return ids;
+        });
+      });
+    }, Promise.resolve([]));
+  }
+
+  /* Foto-blok: miniaturen met onderschrift, verwijderen en toevoegen. ids wordt in place aangepast. */
+  function photoEditor(box, ids, onChange) {
+    var capT = {};
+    function draw() {
+      box.innerHTML = '<div class="phgrid">' + ids.map(function (id) {
+        return '<figure class="ph"><button type="button" class="phimg" data-phview="' + id + '" aria-label="' + T("ph.view") + '"><img alt="" data-phsrc="' + id + '"></button>' +
+          '<button type="button" class="phdel" data-phdel="' + id + '" aria-label="' + T("ph.del") + '">×</button>' +
+          '<input type="text" class="phcap" data-phcap="' + id + '" maxlength="80" placeholder="' + T("ph.cap") + '" aria-label="' + T("ph.cap") + '"></figure>';
+      }).join("") + (ids.length < MAX_PHOTOS ? '<label class="phadd"><input type="file" accept="image/*" multiple class="vh"><span>' + T("ph.add") + '</span></label>' : "") + "</div>";
+      ids.forEach(function (id) {
+        phGet(id).then(function (rec) {
+          if (!rec) return;
+          var img = box.querySelector('[data-phsrc="' + id + '"]'); if (img) img.src = urlFor(rec);
+          var cap = box.querySelector('[data-phcap="' + id + '"]'); if (cap) cap.value = rec.caption || "";
+        }).catch(function () {});
+      });
+    }
+    box.addEventListener("change", function (e) {
+      var inp = e.target.closest('input[type="file"]'); if (!inp) return;
+      var lbl = inp.closest(".phadd"); if (lbl) lbl.classList.add("busy");
+      addPhotos(inp.files, ids).then(function (newIds) {
+        Array.prototype.push.apply(ids, newIds); onChange(ids); draw();
+      });
+    });
+    box.addEventListener("click", function (e) {
+      var del = e.target.closest("[data-phdel]"), view = e.target.closest("[data-phview]");
+      if (del) { var id = del.dataset.phdel; ids.splice(ids.indexOf(id), 1); phDel([id]); onChange(ids); draw(); }
+      else if (view) openViewer(ids.map(function (x) { return { id: x }; }), ids.indexOf(view.dataset.phview));
+    });
+    box.addEventListener("input", function (e) {
+      var c = e.target.closest("[data-phcap]"); if (!c) return;
+      var id = c.dataset.phcap; clearTimeout(capT[id]);
+      capT[id] = setTimeout(function () { phPatch(id, { caption: c.value.trim() }); }, 400);
+    });
+    phDb().then(draw, function () { box.innerHTML = '<p class="note">' + T("ph.noIdb") + '</p>'; });
+  }
+
+  function renderPhotoStep(d) {
+    if (!d.photos) d.photos = [];
+    $("stepBody").innerHTML = '<div class="stack"><div class="qhead"><div class="eyebrow">' + T("ph.eyebrow") + '</div><h2>' + T("ph.title") + '</h2>' +
+      '<p class="hint">' + T("ph.hint") + '</p></div>' +
+      '<div id="phStep"></div></div>';
+    photoEditor($("phStep"), d.photos, function (ids) { d.photos = ids; save(); });
+  }
+
+  /* Grote weergave */
+  var vList = [], vIdx = 0;
+  function openViewer(list, i) { vList = list; vIdx = Math.max(0, i); showViewer(); $("phView").hidden = false; }
+  function showViewer() {
+    var it = vList[vIdx]; if (!it) return;
+    $("phPrev").hidden = $("phNext").hidden = vList.length < 2;
+    $("phImg").removeAttribute("src");
+    phGet(it.id).then(function (rec) {
+      if (!rec) return;
+      $("phImg").src = urlFor(rec);
+      $("phCap").innerHTML = (rec.caption ? esc(rec.caption) : "") + (it.meta ? "<small>" + esc(it.meta) + "</small>" : "");
+    }).catch(function () {});
+  }
+  function closeViewer() { $("phView").hidden = true; }
+  $("phClose").addEventListener("click", closeViewer);
+  $("phPrev").addEventListener("click", function () { vIdx = (vIdx - 1 + vList.length) % vList.length; showViewer(); });
+  $("phNext").addEventListener("click", function () { vIdx = (vIdx + 1) % vList.length; showViewer(); });
+  $("phView").addEventListener("click", function (e) { if (e.target === $("phView")) closeViewer(); });
+  document.addEventListener("keydown", function (e) {
+    if ($("phView").hidden) return;
+    if (e.key === "Escape") closeViewer();
+    if (e.key === "ArrowLeft") $("phPrev").click();
+    if (e.key === "ArrowRight") $("phNext").click();
+  });
+
+  /* Fotomomenten op het startscherm */
+  function renderMoments() {
+    var card = $("momentsCard"); if (!card) return;
+    var items = [];
+    store.sessions.slice().sort(function (a, b) { return a.date === b.date ? (b.created || 0) - (a.created || 0) : (a.date < b.date ? 1 : -1); })
+      .forEach(function (s) {
+        (s.photos || []).forEach(function (id) {
+          items.push({ id: id, meta: cap(fmt(parse(s.date), { weekday: "long", day: "numeric", month: "long" })) + " · " + typeLabel(s.type) });
+        });
+      });
+    if (!items.length) { card.hidden = true; return; }
+    card.hidden = false;
+    var shown = items.slice(0, 24);
+    $("momentsCount").textContent = plural(items.length, "ph.count1", "ph.countN");
+    $("momentsStrip").innerHTML = shown.map(function (it, i) {
+      return '<button type="button" data-mi="' + i + '" aria-label="' + esc(T("ph.of", { m: it.meta })) + '"><img alt="" data-phsrc="' + it.id + '"></button>';
+    }).join("");
+    shown.forEach(function (it) {
+      phGet(it.id).then(function (rec) {
+        var img = $("momentsStrip").querySelector('[data-phsrc="' + it.id + '"]');
+        if (rec && img) img.src = urlFor(rec); else if (img) img.parentNode.remove();
+      }).catch(function () {});
+    });
+    $("momentsStrip").onclick = function (e) { var b = e.target.closest("[data-mi]"); if (b) openViewer(shown, +b.dataset.mi); };
+  }
+
+  /* Back-up: foto's als tekst (data-URL) mee in het JSON-bestand */
+  function blobToDataUrl(b) { return new Promise(function (res, rej) { var r = new FileReader(); r.onload = function () { res(r.result); }; r.onerror = rej; r.readAsDataURL(b); }); }
+  function dataUrlToBlob(u) {
+    var parts = String(u).split(","), mime = (parts[0].match(/data:([^;]+)/) || [])[1] || "image/jpeg";
+    var bin = atob(parts[1] || ""), arr = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  }
+  function photosForBackup() {
+    return phAll().then(function (recs) {
+      return Promise.all(recs.map(function (r) {
+        return blobToDataUrl(r.blob).then(function (data) { return { id: r.id, caption: r.caption || "", created: r.created, w: r.w, h: r.h, data: data }; });
+      }));
+    }).catch(function () { return []; });
+  }
+  function restorePhotos(list) {
+    if (!Array.isArray(list) || !list.length) return Promise.resolve(0);
+    return phAll().then(function (have) {
+      var ids = {}; have.forEach(function (r) { ids[r.id] = true; });
+      var todo = list.filter(function (p) { return p && p.id && p.data && !ids[p.id]; });
+      return todo.reduce(function (pr, p) {
+        return pr.then(function (n) {
+          return phPut({ id: p.id, blob: dataUrlToBlob(p.data), w: p.w, h: p.h, caption: p.caption || "", created: p.created || Date.now() }).then(function () { return n + 1; });
+        });
+      }, Promise.resolve(0));
+    }).catch(function () { return 0; });
+  }
+
+  /* ====== UITLEG: "Hoe werkt de app?" ====== */
+  var GUIDE = [
+    { e: "Welkom", t: "Twee minuten na elke sessie",
+      h: "<p>Na elke training of match beantwoord je vier korte vragen. Zo zie je zelf waar je groeit, week na week.</p><p>Er is geen fout antwoord. Eerlijk is genoeg.</p>" },
+    { e: "Stap 1", t: "Plan je week",
+      h: "<p>Tik op een dag in <b>Deze week</b> en kies <b>training</b>, <b>match</b>, <b>rust</b> of <b>geannuleerd</b>.</p><p>Vink <b>Elke … zo</b> aan voor je vaste trainingsdagen. Dan hoef je ze maar één keer in te stellen. Matchdagen krijgen sterretjes.</p>" },
+    { e: "Stap 2", t: "Doe je check-in",
+      h: "<ul><li><b>Snelle check:</b> energie, slaap en pijn.</li><li><b>Bij een match:</b> je positie en je cijfers, zoals goals, duels en recuperaties.</li><li><b>Vier vragen:</b> je cijfer, je highlight, je reset-moment en je focus.</li><li><b>Eventueel</b> een foto van de dag.</li></ul><p>Een half ingevulde check-in blijft bewaard. Je kan later verderdoen.</p>" },
+    { e: "Stap 3", t: "Inspreken in plaats van typen",
+      h: "<p>Tik op de blauwe <b>microfoon</b> naast het tekstvak en praat rustig. Tik opnieuw om te stoppen.</p><p><b>Leestekens komen vanzelf:</b> na elke korte pauze een punt en een hoofdletter. Zeg <b>komma</b>, <b>vraagteken</b>, <b>uitroepteken</b> of <b>nieuwe regel</b> als je die wil.</p><p>Werkt de microfoon niet op jouw toestel? Tik in het tekstvak en gebruik het microfoontje van je toetsenbord.</p>" },
+    { e: "Stap 4", t: "Je weekverslag",
+      h: "<p>In <b>Verslag</b> kies je de week en vink je aan welke check-ins erin komen. Kies daar ook één keer <b>je ploeg</b> (U-categorie), die komt bovenaan je verslag.</p><p>Daarna <b>Download PDF</b> of <b>Print</b>: een nette A4 voor jou en je trainer, met plaats voor notities. Foto's komen niet op papier.</p>" },
+    { e: "Voor ouders", t: "Zo volg je mee",
+      h: "<p>De app heeft <b>geen server en geen account</b>. Alles wat je kind invult, staat alleen op zijn eigen telefoon.</p><p>Open je de app op je eigen telefoon, dan is die leeg, ook met de code van je kind. Dat is geen fout: zo blijven de antwoorden privé.</p><p><b>Zo volg je mee:</b></p><ul><li><b>Het weekverslag:</b> je kind downloadt de PDF in Verslag en stuurt hem naar jou.</li><li><b>Samen kijken</b> op de telefoon van je kind.</li></ul>" },
+    { e: "Stap 5", t: "Veilig bewaren",
+      h: "<p>Alles staat alleen op dit toestel. Niemand anders kan het zien.</p><p>Maak af en toe een <b>back-up</b> (Verslag, onderaan), zeker op iPhone. Kreeg je een <b>persoonlijke code</b>? Geef die in op het startscherm, dan komt je naam erop.</p>" }
+  ];
+  var gIdx = 0, gReturn = null;
+  function drawGuide() {
+    var g = GUIDE[gIdx], last = gIdx === GUIDE.length - 1;
+    $("gEyebrow").textContent = g.e;
+    $("gTitle").textContent = g.t;
+    $("gBody").innerHTML = g.h + (last ? '<p class="gmotto">“The top of the mountain is the bottom of the next, so keep climbing.”</p>' : "");
+    $("gDots").innerHTML = GUIDE.map(function (_, i) { return '<span class="' + (i === gIdx ? "on" : "") + '"></span>'; }).join("");
+    $("gPrev").disabled = gIdx === 0;
+    $("gNext").textContent = last ? T("guide.go") : T("common.next");
+    $("gStep").textContent = (gIdx + 1) + " / " + GUIDE.length;
+  }
+  function openGuide() {
+    gReturn = document.activeElement; gIdx = 0; drawGuide(); $("guideOv").hidden = false;
+    setTimeout(function () { $("gNext").focus(); }, 30);
+  }
+  function closeGuide() {
+    $("guideOv").hidden = true;
+    try { localStorage.setItem("reflectie.uitlegGezien", "1"); } catch (e) {}
+    if (gReturn && gReturn.focus) gReturn.focus();
+  }
+  $("gPrev").addEventListener("click", function () { if (gIdx > 0) { gIdx--; drawGuide(); } });
+  $("gNext").addEventListener("click", function () { if (gIdx < GUIDE.length - 1) { gIdx++; drawGuide(); } else closeGuide(); });
+  $("gClose").addEventListener("click", closeGuide);
+  $("guideOv").addEventListener("click", function (e) { if (e.target === $("guideOv")) closeGuide(); });
+  document.addEventListener("keydown", function (e) {
+    if ($("guideOv").hidden) return;
+    if (e.key === "Escape") closeGuide();
+    if (e.key === "ArrowRight") $("gNext").click();
+    if (e.key === "ArrowLeft") $("gPrev").click();
+  });
+  $("helpBtn").addEventListener("click", openGuide);
+  $("helpLink").addEventListener("click", openGuide);
+
+  /* ====== DISCLAIMER & PRIVACY (GDPR) ======
+     Het e-mailadres staat niet leesbaar in de code (zoals in de 12 · 3 · 30-app): robots die code afschuimen vinden het niet. */
+  var PRIV_MAIL = [112, 114, 105, 118, 97, 99, 121, 46, 98, 111, 100, 121, 98, 108, 111, 111, 109, 64, 111, 117, 116, 108, 111, 111, 107, 46, 98, 101];
+  var LEGAL = {
+    disclaimer:
+      '<h2>Disclaimer</h2><p class="lsub">Debrief FC · Sofia la Bianca</p>' +
+      '<div class="lbox"><b>Kort gezegd:</b> deze app helpt een jonge sporter om na te denken over zijn trainingen en matchen. Ze geeft geen medisch, psychologisch of sporttechnisch advies.</div>' +
+      "<h3>Geen medisch advies</h3><p>Vragen over energie, slaap en pijn zijn bedoeld om bewust stil te staan bij je lichaam. Ze vervangen geen arts, kinesitherapeut of sportpsycholoog. Heb je pijn, een blessure of zit je ergens mee, praat er dan altijd over met je trainer, je ouders of een zorgverlener.</p>" +
+      "<h3>Jonge sporters</h3><p>De app is gemaakt voor jongeren. Gebruik haar met medeweten van een ouder of voogd.</p>" +
+      "<h3>Cijfers en verslagen</h3><p>Alle cijfers, zoals goals, duels of minuten, vul je zelf in. Ze zijn een geheugensteun, geen officiële statistiek. De app vergelijkt je met jezelf, niet met anderen.</p>" +
+      "<h3>Geen band met een club</h3><p>De app is onafhankelijk en niet verbonden aan een voetbalclub of federatie. Ideeën uit mentale trainingssessies zijn in eigen woorden verwerkt.</p>" +
+      "<h3>Gebruik op eigen verantwoordelijkheid</h3><p>De app wordt aangeboden zoals ze is. Sofia la Bianca doet haar best om alles correct te laten werken, maar kan niet garanderen dat de app altijd foutloos werkt of dat er nooit gegevens verloren gaan. Maak daarom regelmatig een back-up.</p>" +
+      "<h3>Auteursrecht</h3><p>© 2026 Sofia la Bianca. Alle rechten voorbehouden. Het ontwerp, de teksten en de code mogen niet zonder toestemming gekopieerd of verspreid worden.</p>" +
+      '<p class="lfoot">Laatst bijgewerkt: oktober 2026</p>',
+    privacy:
+      '<h2>Jouw privacy</h2><p class="lsub">Debrief FC · GDPR</p>' +
+      '<div class="lbox"><b>Kort gezegd:</b> alles wat je invult, blijft op jouw toestel. Sofia kan je gegevens niet zien, en de app stuurt je antwoorden nergens naartoe.</div>' +
+      '<h3>Wie is verantwoordelijk?</h3><p>Sofia la Bianca.</p><div id="privMail"><button type="button" class="btn btn-ghost lmailbtn" id="privMailBtn">Toon e-mailadres</button></div>' +
+      "<h3>Wat bewaart de app?</h3><p>Je check-ins (antwoorden, cijfers, energie, slaap en pijnmeldingen), je weekplanning, je matchcijfers, je positie en je foto's. Dat alles staat alleen op dit toestel, in het geheugen van je browser. Dat is nodig om de app te laten werken. Daarom vraagt de app geen toestemming voor cookies.</p>" +
+      "<p>Antwoorden over pijn en slaap zijn gezondheidsgegevens. Juist daarom blijven ze op je eigen toestel.</p>" +
+      "<h3>Je persoonlijke code</h3><p>De code zelf wordt niet bewaard. De app onthoudt alleen een onleesbare afdruk ervan en de naam die erbij hoort, op jouw toestel. In de app op het internet staat geen naam.</p>" +
+      "<h3>Foto's</h3><p>Foto's die je toevoegt, blijven op dit toestel en komen niet in het A4-verslag. Staan er ploegmaats op? Deel die foto's dan niet verder zonder toestemming van hun ouders.</p>" +
+      "<h3>Wat doet de app niet?</h3><p>Geen account, geen tracking, geen advertenties. Je antwoorden gaan niet naar Sofia en niet naar een server.</p>" +
+      "<h3>Diensten van anderen</h3><p>Om goed te werken, gebruikt de app een paar externe diensten. Die zien, zoals bij elke website, je IP-adres:</p>" +
+      "<ul><li><b>GitHub Pages</b> zet de app online.</li><li><b>Google Fonts</b> levert de lettertypes.</li><li><b>jsDelivr</b> levert de PDF-module, en alleen bij een iPhone-foto op Android ook een omzetter.</li></ul>" +
+      "<p><b>Inspreken:</b> gebruik je de microfoon, dan zet je browser je stem om in tekst. In Chrome gebeurt dat via Google, in Safari via Apple. Wil je dat niet, typ dan je antwoord.</p>" +
+      "<h3>Back-up</h3><p>Een back-upbestand bevat al je gegevens, ook je foto's en pijnmeldingen. Bewaar het op een veilige plek, bijvoorbeeld in Bestanden op je telefoon, en stuur het niet zomaar door.</p>" +
+      '<h3>Je gegevens wissen</h3><p>In <b>Verslag</b>, helemaal onderaan, vind je <b>Back-up opslaan</b>, <b>Back-up terugzetten</b> en <b>Alles wissen</b>. Met die laatste verwijder je alles van dit toestel, ook de foto\'s en de naam.</p>' +
+      '<h3>Vragen of klachten</h3><p>Mail gerust naar het adres hierboven. Je kan ook terecht bij de Gegevensbeschermingsautoriteit: <a href="https://www.gegevensbeschermingsautoriteit.be" target="_blank" rel="noopener">gegevensbeschermingsautoriteit.be</a>.</p>' +
+      '<p class="lfoot">Laatst bijgewerkt: oktober 2026</p>'
+  };
+  var legalReturn = null;
+  var legalKind = null;
+  function openLegal(kind) {
+    legalKind = kind; legalReturn = document.activeElement;
+    $("legalBody").innerHTML = LEGAL[kind];
+    $("legalPage").hidden = false; $("legalPage").scrollTop = 0;
+    var mb = $("privMailBtn");
+    if (mb) mb.addEventListener("click", function () {
+      var a = String.fromCharCode.apply(null, PRIV_MAIL);
+      $("privMail").innerHTML = '<p class="lmail"><a href="mailto:' + a + '">' + a + '</a> <button type="button" class="linkbtn" id="privCopy">' + T("legal.copy") + '</button></p>';
+      $("privCopy").addEventListener("click", function () {
+        var done = function () { toast(T("legal.copied")); };
+        try { navigator.clipboard.writeText(a).then(done, function () { selectMail(); }); } catch (e) { selectMail(); }
+      });
+    });
+    setTimeout(function () { $("legalBack").focus(); }, 30);
+  }
+  function selectMail() {
+    var el = document.querySelector(".lmail a"); if (!el) return;
+    var r = document.createRange(); r.selectNodeContents(el); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    toast(T("legal.hold"));
+  }
+  function closeLegal() { $("legalPage").hidden = true; if (legalReturn && legalReturn.focus) legalReturn.focus(); }
+  $("legalBack").addEventListener("click", closeLegal);
+  $("discBtn").addEventListener("click", function () { openLegal("disclaimer"); });
+  $("privBtn").addEventListener("click", function () { openLegal("privacy"); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("legalPage").hidden) closeLegal(); });
+
+  /* ====== START ====== */
+  var openId = null, delArm = null;
+  function renderStart() {
+    var now = today(), mon = monday(now), wk = isoWeek(now), q = quoteOf(wk);
+    $("wkchip").textContent = T("common.week", { w: wk }); $("wkbig").textContent = wk;
+    $("qtext").textContent = q.t; $("qsrc").textContent = q.s || T("start.quoteOf", { w: wk });
+    $("wkrange").textContent = rangeOf(mon);
+    $("greet").textContent = nameNow() ? T("start.greetName", { n: nameNow() }) : T("start.greet");
+    $("codeBtn").hidden = !!profile;
+    $("startLbl").textContent = store.draft ? T("start.resume") : T("start.start");
+
+    var ws = sessionsIn(mon);
+    $("days").innerHTML = dayCells(mon, ws, iso(now));
+    $("greetSub").textContent = todayLine(iso(now));
+    renderSeason(now);
+    renderMoments();
+
+    if (!ws.length) {
+      $("sessList").innerHTML = '<li style="border:0"><p class="empty">' + T("start.empty") + '</p></li>';
+    } else {
+      $("sessList").innerHTML = ws.map(function (s) {
+        var open = openId === s.id;
+        var tags = s.pain ? '<span class="tag warn">' + T("tag.pain") + '</span>' : "";
+        var det = '<div class="detail" id="d-' + s.id + '"' + (open ? "" : " hidden") + ">" +
+          (s.pain ? '<p><b>' + T("detail.pain") + '</b>' + esc(s.painText || T("common.yesL")) + "</p>" : "") +
+          QS.map(function (q, i) { return "<p><b>" + (i + 1) + ". " + esc(q.short) + "</b>" + esc(s.a[i] || "-") + "</p>"; }).join("") +
+          (open ? '<div class="phdetail"><b>' + T("ph.label") + '</b><div id="phd-' + s.id + '"></div></div>' : "") +
+          '<button class="del" data-del="' + s.id + '">' + (delArm === s.id ? T("detail.delSure") : T("detail.del")) + "</button></div>";
+        return '<li><button class="sess-row" data-open="' + s.id + '" aria-expanded="' + open + '" aria-controls="d-' + s.id + '">' +
+          '<span class="score">' + (s.score || "–") + '</span><span class="t">' +
+          cap(fmt(parse(s.date), { weekday: "long", day: "numeric", month: "short" })) +
+          "<small>" + typeLabel(s.type) + " · " + T("start.energy", { e: s.energy }) + (s.sleepH ? " · " + T("start.sleep", { h: sleepHours(s.sleepH) }) : "") + '</small><span class="tags">' + tags + "</span></span>" +
+          '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' + det + "</li>";
+      }).join("");
+    }
+    var os = openId && ws.filter(function (x) { return x.id === openId; })[0];
+    if (os && $("phd-" + os.id)) { if (!os.photos) os.photos = []; photoEditor($("phd-" + os.id), os.photos, function () { save(); renderMoments(); }); }
+    var last = ws.slice().reverse().find(function (s) { return s.a[3] && s.a[3].trim(); });
+    $("focusText").textContent = last ? last.a[3] : T("start.noFocus");
+  }
+  $("sessList").addEventListener("click", function (e) {
+    if (e.target.closest(".phdetail")) return;
+    var o = e.target.closest("[data-open]"), d = e.target.closest("[data-del]");
+    if (o) { openId = openId === o.dataset.open ? null : o.dataset.open; delArm = null; renderStart(); return; }
+    if (d) {
+      var id = d.dataset.del;
+      if (delArm !== id) { delArm = id; renderStart(); return; }
+      store.sessions.filter(function (s) { return s.id === id; }).forEach(function (s) { phDel(s.photos); });
+      store.sessions = store.sessions.filter(function (s) { return s.id !== id; });
+      delArm = null; openId = null; save(); renderStart(); toast(T("detail.deleted"));
+    }
+  });
+
+  /* ====== CHECK-IN ====== */
+  function newDraft() {
+    var d = today().getDay();
+    store.draft = { date: iso(today()), type: typeFor(iso(today()), (d === 6 || d === 0) ? "match" : "training"), energy: null, pain: null, painText: "", score: null, a: ["", "", "", ""], step: 0 };
+    save();
+  }
+  function setPressed(sel, val) {
+    document.querySelectorAll(sel + " button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === String(val))); });
+  }
+  function bindSeg(sel, cb) {
+    document.querySelectorAll(sel + " button").forEach(function (b) {
+      b.addEventListener("click", function () { cb(b.dataset.v); setPressed(sel, b.dataset.v); save(); });
+    });
+  }
+  var MIC_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>';
+
+  function renderStep() {
+    var d = store.draft, keys = stepKeys(d), body = "";
+    if ((d.step || 0) >= keys.length) d.step = keys.length - 1;
+    var step = d.step || 0, key = keys[step], N = keys.length;
+    drawProgress(step, N);
+    $("stepnum").textContent = (step + 1) + "/" + N;
+    $("ckBack").setAttribute("aria-label", step === 0 ? T("ck.backStart") : T("ck.backStep"));
+    $("ckNext").textContent = step === N - 1 ? T("ck.save") : T("common.next");
+
+    if (key === "stats") { renderStats(d); return; }
+    if (key === "photos") { renderPhotoStep(d); return; }
+    if (key === "quick") {
+      body = '<div class="stack" style="gap:22px">' +
+        '<div class="qhead"><div class="eyebrow">' + T("q.eyebrow") + '</div><h2>' + T("q.title") + '</h2></div>' +
+        '<div class="row2" style="align-items:end"><div><p class="field-l">' + T("q.what") + '</p><div class="seg c2" id="gType"><button data-v="training">' + typeLabel("training") + '</button><button data-v="match">' + typeLabel("match") + '</button></div></div>' +
+        '<div><label class="field-l" for="ckDate">' + T("q.date") + '</label><input class="dateinput" type="date" id="ckDate" value="' + d.date + '" max="' + iso(today()) + '"></div></div>' +
+        '<div><p class="field-l">' + T("q.energy") + ' <span>' + T("q.energyScale") + '</span></p><div class="seg c5" id="gEnergy">' +
+        [1, 2, 3, 4, 5].map(function (n) { return '<button data-v="' + n + '">' + n + "</button>"; }).join("") + "</div></div>" +
+        '<div><p class="field-l">' + T("q.sleep") + ' <span>' + T("q.hours") + '</span></p><div class="seg c5" id="gSleepH">' +
+        '<button data-v="6-" aria-label="' + T("q.h6") + '">≤6</button><button data-v="7">7</button><button data-v="8">8</button><button data-v="9">9</button><button data-v="10+" aria-label="' + T("q.h10") + '">10+</button></div>' +
+        '<p class="hint" id="sleepHint" hidden>' + T("q.sleepHint") + '</p></div>' +
+        '<div><p class="field-l">' + T("q.sleepQ") + '</p><div class="seg c3" id="gSleepQ"><button data-v="slecht">' + T("q.bad") + '</button><button data-v="oke">' + T("q.ok") + '</button><button data-v="goed">' + T("q.good") + '</button></div></div>' +
+        '<div><p class="field-l">' + T("q.pain") + '</p><div class="seg c2" id="gPain"><button data-v="false">' + T("common.no") + '</button><button data-v="true">' + T("common.yes") + '</button></div></div>' +
+        '<div id="painWrap"' + (d.pain ? "" : " hidden") + '><label class="field-l" for="painTxt">' + T("q.painWhere") + '</label>' +
+        '<div class="answer"><textarea class="plain" id="painTxt" placeholder="' + esc(T("q.painPh")) + '">' + esc(d.painText) + "</textarea></div>" +
+        '<p class="note" style="margin-top:8px">' + T("q.painNote") + '</p></div></div>';
+      $("stepBody").innerHTML = body;
+      setPressed("#gType", d.type); setPressed("#gEnergy", d.energy); setPressed("#gPain", d.pain);
+      setPressed("#gSleepH", d.sleepH); setPressed("#gSleepQ", d.sleepQ); $("sleepHint").hidden = !shortSleep(d.sleepH);
+      bindSeg("#gType", function (v) { d.type = v; drawProgress(0, stepKeys(d).length); $("stepnum").textContent = "1/" + stepKeys(d).length; });
+      bindSeg("#gEnergy", function (v) { d.energy = +v; });
+      bindSeg("#gSleepH", function (v) { d.sleepH = v; $("sleepHint").hidden = !shortSleep(v); });
+      bindSeg("#gSleepQ", function (v) { d.sleepQ = v; });
+      bindSeg("#gPain", function (v) { d.pain = (v === "true"); $("painWrap").hidden = !d.pain; });
+      $("ckDate").addEventListener("change", function (e) { if (e.target.value) { d.date = e.target.value; d.type = typeFor(d.date, d.type); setPressed("#gType", d.type); save(); } });
+      $("painTxt").addEventListener("input", function (e) { d.painText = e.target.value; save(); });
+      return;
+    }
+
+    var i = +key.slice(1), q = QS[i];
+    body = '<div class="stack">' +
+      '<div class="qhead"><div class="n" aria-hidden="true">' + (i + 1) + "</div><h2>" + esc(q.q) + '</h2><p class="hint">' + esc(q.hint) + "</p></div>";
+    if (i === 0) body += '<div><p class="field-l">' + T("q.score") + '</p><div class="jersey" id="gScore">' +
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (n) { return '<button data-v="' + n + '" aria-label="' + T("q.scoreN", { n: n }) + '">' + n + "</button>"; }).join("") + "</div></div>";
+    if (q.reset) body += '<div class="reset" aria-label="' + T("q.resetAria") + '"><div><b>' + T("q.r1") + '</b><small>' + T("q.r1s") + '</small></div><div><b>' + T("q.r2") + '</b><small>' + T("q.r2s") + '</small></div><div><b>' + T("q.r3") + '</b><small>' + T("q.r3s") + '</small></div></div>';
+    body += '<div class="answer"><label class="field-l" for="ans">' + T("q.answer") + ' <span>' + T("q.answerHow") + '</span></label>' +
+      '<textarea id="ans" placeholder="' + esc(q.ph) + '">' + esc(d.a[i]) + "</textarea>" +
+      '<button class="mic" id="mic" aria-label="' + T("mic.start") + '" aria-pressed="false">' + MIC_SVG + "</button></div>" +
+      '<p class="miclabel" id="micState" role="status"></p><p class="note" id="dictNote" hidden></p>';
+    if (q.chips) body += chipsHTML(d.type === "match" && d.pos ? d.pos : store.position);
+    body += "</div>";
+    $("stepBody").innerHTML = body;
+
+    if (i === 0) { setPressed("#gScore", d.score); bindSeg("#gScore", function (v) { d.score = +v; }); }
+    var ta = $("ans");
+    ta.addEventListener("input", function () { d.a[i] = ta.value; save(); });
+    $("mic").addEventListener("click", function () { toggleMic(ta, i); });
+    if (!SR) { showDictation(T("mic.noSR")); }
+    if (q.chips) {
+      bindChips(ta, function (v) { d.a[i] = v; save(); });
+      var mp = document.querySelector(".morepos"); if (mp && mp.querySelector('[aria-pressed="true"]')) mp.open = true;
+    }
+  }
+
+  $("ckBack").addEventListener("click", function () {
+    stopMic();
+    var d = store.draft;
+    if (!d || !d.step) { go("start"); return; }
+    d.step--; save(); renderStep();
+  });
+  $("ckNext").addEventListener("click", function () {
+    stopMic();
+    var d = store.draft, keys = stepKeys(d), step = Math.min(d.step || 0, keys.length - 1), key = keys[step];
+    if (key === "quick" && (!d.energy || d.pain === null)) { toast(T("ck.needQuick")); return; }
+    if (key === "q0" && !d.score) { toast(T("ck.needScore")); return; }
+    if (step < keys.length - 1) { d.step = step + 1; save(); renderStep(); window.scrollTo(0, 0); return; }
+    store.sessions.push({
+      id: "s" + Date.now(), created: Date.now(), date: d.date, type: d.type, energy: d.energy,
+      pain: d.pain, painText: d.pain ? d.painText.trim() : "", score: d.score, sleepH: d.sleepH || "", sleepQ: d.sleepQ || "",
+      stats: statsForSave(d), photos: (d.photos || []).slice(),
+      a: d.a.map(function (x) { return x.trim(); })
+    });
+    store.draft = null; save();
+    toast(T("ck.saved"));
+    go("start");
+  });
+
+  /* Automatische leestekens bij inspreken:
+     - elke zin (afgesloten door een pauze) krijgt een hoofdletter en een punt;
+     - gesproken "komma", "vraagteken", "uitroepteken" en "nieuwe regel" worden het teken zelf.
+     "Punt" als commando zit er bewust niet in: in het voetbal is "een punt halen" een gewone zin. */
+  function tidySpeech(t) {
+    t = String(t || "").replace(/\s+/g, " ").trim();
+    if (!t) return "";
+    if (LANG === "fr") {
+      t = t.replace(/\s*(nouvelle ligne|à la ligne)\s*/gi, "\n")
+           .replace(/\s*point d['’]interrogation/gi, "?")
+           .replace(/\s*point d['’]exclamation/gi, "!")
+           .replace(/\s*\bvirgule\b/gi, ",");
+    }
+    t = t.replace(/\s*\bnieuwe (regel|lijn)\b\s*/gi, "\n")
+         .replace(/\s*\bkomma\b/gi, ",")
+         .replace(/\s*\bvraagteken\b/gi, "?")
+         .replace(/\s*\buitroepteken\b/gi, "!")
+         .replace(/([,?!])(?=[^\s\n])/g, "$1 ")
+         .replace(/^[\s,]+/, "").replace(/[ \t]+$/, "");
+    t = t.replace(/(^|[.?!]\s+|\n)([a-zà-ÿ])/g, function (m, pre, ch) { return pre + ch.toUpperCase(); });
+    if (!/[.?!,:;]$/.test(t) && !/\n$/.test(t)) t += ".";
+    if (LANG === "fr") t = t.replace(/\s*([?!:;])/g, NB + "$1");
+    return t;
+  }
+
+  /* ====== SPRAAK NAAR TEKST (Web Speech API) ======
+     Werkt in Chrome, Edge (desktop + Android) en Safari (macOS, iOS 14.5+). Niet in Firefox.
+     Vereist HTTPS en toestemming voor de microfoon.
+     Bewuste keuze: continuous = false met automatische herstart. Chrome op Android
+     herhaalt tekst in continuous-modus; zo vermijden we dubbele zinnen. */
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  var rec = null, listening = false, lang = "nl-BE", stopTimer = null, sess = null;
+  function speechLang() { return LANG === "fr" ? "fr-BE" : "nl-BE"; }
+  function speechFallback() { return LANG === "fr" ? "fr-FR" : "nl-NL"; }
+
+  function showDictation(reason) {
+    var n = $("dictNote"); if (!n) return;
+    n.innerHTML = T("mic.kb", { r: esc(reason) });
+    n.hidden = false;
+  }
+  function setMicUI(on, msg) {
+    var m = $("mic"), s = $("micState");
+    if (m) { m.classList.toggle("rec", on); m.setAttribute("aria-pressed", String(on)); m.setAttribute("aria-label", on ? T("mic.stop") : T("mic.start")); }
+    if (s) s.textContent = msg || "";
+  }
+  function stopMic() {
+    listening = false; clearTimeout(stopTimer);
+    if (rec) { try { rec.stop(); } catch (e) {} }
+    setMicUI(false, "");
+  }
+  function startRec() {
+    rec = new SR();
+    rec.lang = lang; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+    rec.onresult = function (e) {
+      var interim = "";
+      for (var k = e.resultIndex; k < e.results.length; k++) {
+        var r = e.results[k];
+        if (r.isFinal) { var ft = tidySpeech(r[0].transcript); if (ft) sess.final += (sess.final && !/\s$/.test(sess.final) ? " " : "") + ft; }
+        else interim += r[0].transcript;
+      }
+      sess.ta.value = sess.base + sess.final + (interim ? (sess.final ? " " : "") + interim : "");
+      store.draft.a[sess.i] = sess.ta.value; save();
+    };
+    rec.onerror = function (e) {
+      if (e.error === "language-not-supported" && lang !== speechFallback()) { lang = speechFallback(); return; } // onend herstart in de terugvaltaal
+      if (e.error === "no-speech" || e.error === "aborted") return;
+      listening = false;
+      var why = (e.error === "not-allowed" || e.error === "service-not-allowed") ? T("mic.denied") :
+                e.error === "audio-capture" ? T("mic.noMic") :
+                e.error === "network" ? T("mic.net") : T("mic.fail");
+      setMicUI(false, ""); showDictation(why);
+    };
+    rec.onend = function () {
+      if (listening) { try { startRec(); return; } catch (err) { listening = false; } }
+      setMicUI(false, sess && sess.final ? T("mic.done") : "");
+    };
+    rec.start();
+  }
+  function toggleMic(ta, i) {
+    if (listening) { stopMic(); return; }
+    if (!SR) { showDictation(T("mic.noSR")); ta.focus(); return; }
+    if (!window.isSecureContext) { showDictation(T("mic.https")); ta.focus(); return; }
+    lang = speechLang();
+    sess = { ta: ta, i: i, base: ta.value.trim() ? ta.value.replace(/\s*$/, "").replace(/([A-Za-zÀ-ÿ0-9])$/, "$1.") + " " : "", final: "" };
+    try {
+      listening = true; startRec();
+      setMicUI(true, T("mic.listening"));
+      stopTimer = setTimeout(stopMic, CONFIG.maxListenMs);
+    } catch (err) { stopMic(); showDictation(T("mic.cantStart")); }
+  }
+  document.addEventListener("visibilitychange", function () { if (document.hidden) stopMic(); });
+
+  /* ====== VERSLAG ====== */
+  var excluded = {}, exportMon = monday(today()), lastPages = null, lastData = null;
+  function reportData() {
+    var wk = isoWeek(exportMon), q = quoteOf(wk), ws = chosen();
+    return {
+      week: wk, range: rangeOf(exportMon), player: [nameNow(), store.team || ""].filter(Boolean).join(", "), plan: planLine(exportMon),
+      L: { title: T("rep.title"), week: T("rep.week"), printed: T("rep.printed"), quote: T("rep.quote"), plan: T("rep.plan"),
+           noAnswer: T("rep.noAnswer"), empty: T("rep.empty"), notes: T("rep.notes"), html: T("rep.html"), qo: T("rep.qo"), qc: T("rep.qc") },
+      printed: fmt(today(), { day: "numeric", month: "long", year: "numeric" }),
+      quote: { text: q.t, src: q.s },
+      sessions: ws.map(function (s) {
+        return {
+          title: cap(fmt(parse(s.date), { weekday: "long", day: "numeric", month: "long" })) + " · " + typeLabel(s.type),
+          meta: T("rep.energy", { e: s.energy }) + sleepTxt(s) + T("rep.pain") + (s.pain ? (T("common.yesL") + (s.painText ? " - " + s.painText : "")) : T("common.noL")),
+          stats: statsLine(s),
+          qa: QS.map(function (qq, i) {
+            return { q: (i + 1) + ". " + qq.short, a: i === 0 ? (T("rep.score", { s: s.score }) + (s.a[0] ? " " + s.a[0] : "")) : s.a[i] };
+          })
+        };
+      })
+    };
+  }
+
+  function weekAll() { return sessionsIn(exportMon); }
+  function chosen() { return weekAll().filter(function (s) { return !excluded[s.id]; }); }
+  function renderPick() {
+    var all = weekAll();
+    $("pickAll").hidden = all.length < 2;
+    if (!all.length) { $("pickList").innerHTML = '<li><p class="pick-empty">' + T("exp.emptyWeek") + '</p></li>'; return; }
+    $("pickList").innerHTML = all.map(function (s) {
+      return '<li><label><input type="checkbox" data-id="' + esc(s.id) + '"' + (excluded[s.id] ? "" : " checked") + '>' +
+        '<span class="t">' + cap(fmt(parse(s.date), { weekday: "long", day: "numeric", month: "short" })) +
+        "<small>" + typeLabel(s.type) + " · " + T("start.energy", { e: s.energy }) + (s.sleepH ? " · " + T("start.sleep", { h: sleepHours(s.sleepH) }) : "") + (s.pain ? T("exp.painShort") : "") + "</small></span>" +
+        '<span class="sc">' + (s.score || "–") + "</span></label></li>";
+    }).join("");
+  }
+  function inclText() {
+    var all = weekAll(), n = chosen().length;
+    $("pickAll").textContent = n === all.length ? T("exp.allOff") : T("exp.allOn");
+    if (!all.length) return T("exp.onlyHead");
+    if (!n) return T("exp.nothing");
+    return T(all.length > 1 ? "exp.countN" : "exp.count1", { n: n, t: all.length });
+  }
+  $("pickList").addEventListener("change", function (e) {
+    var cb = e.target.closest("input[data-id]"); if (!cb) return;
+    if (cb.checked) delete excluded[cb.dataset.id]; else excluded[cb.dataset.id] = true;
+    updateReport();
+  });
+  $("pickAll").addEventListener("click", function () {
+    var all = weekAll(), allOn = chosen().length === all.length;
+    excluded = {}; if (allOn) all.forEach(function (s) { excluded[s.id] = true; });
+    renderPick(); updateReport();
+  });
+  function renderExport() {
+    var wk = isoWeek(exportMon);
+    // Code ingeven gebeurt alleen op het startscherm; hier enkel verbergen als er een naam actief is.
+    $("nameBox").hidden = !profile;
+    if (profile) { $("nameState").textContent = T("name.state", { n: nameNow() }); $("nameBtn").textContent = T("name.hide"); }
+    drawTeams();
+    $("printBtn").hidden = inViewer(); // in de Claude-viewer kan printen niet
+    $("wLabel").textContent = T("exp.week", { w: wk }); $("wRange").textContent = rangeOf(exportMon);
+    $("wNext").disabled = iso(exportMon) >= iso(monday(today()));
+    renderPick();
+    updateReport();
+  }
+  var TEAMS = ["U6", "U7", "U8", "U9", "U10", "U11", "U12", "U13", "U14", "U15", "U16", "U17", "U18", "U19", "U21"];
+  function drawTeams() {
+    var cur = store.team || "", opts = ['<option value="">' + esc(T("my.teamPick")) + "</option>"];
+    TEAMS.forEach(function (t) { opts.push('<option value="' + t + '"' + (t === cur ? " selected" : "") + ">" + t + "</option>"); });
+    var other = T("my.other"), isOther = cur && TEAMS.indexOf(cur) === -1;
+    opts.push('<option value="__other"' + (isOther ? " selected" : "") + ">" + esc(isOther ? cur : other) + "</option>");
+    $("teamSel").innerHTML = opts.join("");
+  }
+  $("teamSel").addEventListener("change", function (e) {
+    var v = e.target.value;
+    store.team = v === "__other" ? T("my.other") : v;
+    save(); updateReport();
+  });
+  function pagesTxt(n) { return plural(n, "exp.pages1", "exp.pagesN"); }
+  function updateReport() {
+    lastData = reportData();
+    $("inclText").innerHTML = inclText();
+    $("printArea").innerHTML = A4.body(lastData);
+    var J = window.jspdf && window.jspdf.jsPDF;
+    if (!J) {
+      lastPages = null; $("dlPdf").disabled = true;
+      $("sheets").innerHTML = '<p class="note">' + T("exp.noPdf") + '</p>';
+      return;
+    }
+    $("dlPdf").disabled = false;
+    lastPages = A4.build(J, lastData);
+    $("inclText").innerHTML += pagesTxt(lastPages.length);
+    $("sheets").innerHTML = lastPages.map(function (p, i) {
+      return '<div class="sheet">' + A4.toSVG(p) + '</div><div class="pglbl">' + T("exp.pageOf", { i: i + 1, n: lastPages.length }) + "</div>";
+    }).join("");
+  }
+  $("wPrev").addEventListener("click", function () { exportMon = addDays(exportMon, -7); excluded = {}; renderExport(); });
+  $("wNext").addEventListener("click", function () { exportMon = addDays(exportMon, 7); excluded = {}; renderExport(); });
+
+  function fileBase() { return (nameNow() ? nameNow() + "_" : "") + T("exp.file") + isoWeek(exportMon); }
+  $("dlPdf").addEventListener("click", function () {
+    var J = window.jspdf && window.jspdf.jsPDF; if (!J || !lastPages) return;
+    downloadFile(fileBase() + ".pdf", A4.toPDF(J, lastPages).output("blob"));
+    $("dlStatus").textContent = T("exp.pdfDone");
+  });
+  $("printBtn").addEventListener("click", function () {
+    $("printArea").innerHTML = A4.body(lastData || reportData());
+    $("dlStatus").textContent = T("exp.printTip");
+    window.print();
+  });
+  $("dlHtml").addEventListener("click", function () {
+    downloadFile(fileBase() + ".html", A4.toHTML(lastData || reportData()), "text/html;charset=utf-8");
+    $("dlStatus").textContent = T("exp.htmlDone");
+  });
+
+  /* ====== ALLES WISSEN ====== */
+  function wipeReset() { $("wipeBox").hidden = true; $("wipeStart").hidden = false; $("wipeSure").checked = false; $("wipeGo").disabled = true; }
+  $("wipeStart").addEventListener("click", function () { $("wipeBox").hidden = false; $("wipeStart").hidden = true; });
+  $("wipeCancel").addEventListener("click", wipeReset);
+  $("wipeBackup").addEventListener("click", function () { $("bkOut").click(); });
+  $("wipeSure").addEventListener("change", function () { $("wipeGo").disabled = !this.checked; });
+  $("wipeGo").addEventListener("click", function () {
+    if (!$("wipeSure").checked) return;
+    stopMic();
+    store = { sessions: [], draft: null, plan: {}, template: {}, position: "", team: "" };
+    forgetName(); excluded = {}; openId = null; delArm = null; phClear().catch(function () {});
+    save(); wipeReset();
+    go("start"); toast(T("wipe.done"));
+  });
+
+  /* ====== BACK-UP ====== */
+  $("bkOut").addEventListener("click", function () {
+    $("dlStatus").textContent = T("bk.busy");
+    photosForBackup().then(function (photos) {
+      var data = JSON.stringify({ app: "reflectie", version: 2, exported: new Date().toISOString(), sessions: store.sessions, plan: store.plan || {}, template: store.template || {}, position: store.position || "", team: store.team || "", photos: photos });
+      downloadFile(T("bk.file") + iso(today()) + ".json", data, "application/json");
+      $("dlStatus").textContent = T("bk.done", { f: photos.length ? plural(photos.length, "bk.with1", "bk.withN") : "" });
+    });
+  });
+  $("bkIn").addEventListener("click", function () { $("bkFile").click(); });
+  $("bkFile").addEventListener("change", function (e) {
+    var f = e.target.files && e.target.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function () {
+      try {
+        var p = JSON.parse(r.result);
+        if (!p || p.app !== "reflectie" || !Array.isArray(p.sessions)) throw new Error("bad");
+        var have = {}; store.sessions.forEach(function (s) { have[s.id] = true; });
+        var added = 0;
+        p.sessions.forEach(function (s) {
+          if (s && s.id && s.date && Array.isArray(s.a) && !have[s.id]) { store.sessions.push(s); added++; }
+        });
+        planStore();
+        if (p.template && typeof p.template === "object") Object.keys(p.template).forEach(function (k) { if (!hasOwn(store.template, k) && PLAN[p.template[k]]) store.template[k] = p.template[k]; });
+        if (p.plan && typeof p.plan === "object") Object.keys(p.plan).forEach(function (k) { if (!hasOwn(store.plan, k) && (p.plan[k] === "" || PLAN[p.plan[k]])) store.plan[k] = p.plan[k]; });
+        if (p.position && POS[p.position] && !store.position) store.position = p.position;
+        if (p.team && !store.team) store.team = String(p.team).slice(0, 20);
+        save(); renderExport();
+        restorePhotos(p.photos).then(function (np) {
+          var msg = added ? T("bk.nCheck", { n: added }) : "";
+          if (np) msg += (msg ? T("bk.and") : "") + plural(np, "ph.count1", "ph.countN");
+          toast(msg ? T("bk.restored", { m: msg }) : T("bk.already"));
+        });
+      } catch (err) { toast(T("bk.invalid")); }
+      e.target.value = "";
+    };
+    r.readAsText(f);
+  });
+
+  /* ====== TAAL TOEPASSEN ====== */
+  function typeLabel(t) { return PLAN[t === "match" ? "match" : "training"].l; }
+  var DATA_NL = {
+    QUOTES: QUOTES, QS: QS, DAGEN: DAGEN, DN: DN, SLEEP_Q: SLEEP_Q, HOURS: HOURS, FOCUS: FOCUS, GUIDE: GUIDE, LEGAL: LEGAL,
+    PLANL: {}, STATSL: {}, POSL: {}
+  };
+  Object.keys(PLAN).forEach(function (k) { DATA_NL.PLANL[k] = [PLAN[k].l, PLAN[k].s]; });
+  Object.keys(STATS).forEach(function (k) { DATA_NL.STATSL[k] = STATS[k].l; });
+  Object.keys(POS).forEach(function (k) { DATA_NL.POSL[k] = POS[k].l; });
+  function applyStatic() {
+    document.querySelectorAll("[data-i18n]").forEach(function (el) { el.textContent = T(el.getAttribute("data-i18n")); });
+    document.querySelectorAll("[data-i18n-html]").forEach(function (el) { el.innerHTML = T(el.getAttribute("data-i18n-html")); });
+    document.querySelectorAll("[data-i18n-aria]").forEach(function (el) { el.setAttribute("aria-label", T(el.getAttribute("data-i18n-aria"))); });
+    document.querySelectorAll("[data-i18n-ph]").forEach(function (el) { el.setAttribute("placeholder", T(el.getAttribute("data-i18n-ph"))); });
+    document.querySelectorAll("[data-plan-l]").forEach(function (el) { el.textContent = PLAN[el.getAttribute("data-plan-l")].l; });
+    document.querySelectorAll("[data-lang]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-lang") === LANG)); });
+  }
+  function applyLang() {
+    var D = LANG === "fr" ? DATA_FR : DATA_NL;
+    QUOTES = D.QUOTES; QS = D.QS; DAGEN = D.DAGEN; DN = D.DN; SLEEP_Q = D.SLEEP_Q; HOURS = D.HOURS;
+    FOCUS = D.FOCUS; GUIDE = D.GUIDE; LEGAL = D.LEGAL;
+    Object.keys(PLAN).forEach(function (k) { PLAN[k].l = D.PLANL[k][0]; PLAN[k].s = D.PLANL[k][1]; });
+    Object.keys(STATS).forEach(function (k) { STATS[k].l = D.STATSL[k]; });
+    Object.keys(POS).forEach(function (k) { POS[k].l = D.POSL[k]; });
+    document.documentElement.lang = LANG;
+    document.title = T("app.title");
+    applyStatic();
+  }
+  function setLang(l) {
+    if (l !== "nl" && l !== "fr") return;
+    LANG = l;
+    try { localStorage.setItem("reflectie.taal", l); } catch (e) {}
+    stopMic();
+    applyLang();
+    if (!$("v-start").hidden) renderStart();
+    if (!$("v-check").hidden && store.draft) renderStep();
+    if (!$("v-export").hidden) renderExport();
+    if (!$("guideOv").hidden) drawGuide();
+    if (!$("legalPage").hidden && legalKind) openLegal(legalKind);
+    if (!$("planOv").hidden && planKey) { $("planTitle").textContent = longDay(planKey); markPlan(); }
+  }
+  document.addEventListener("click", function (e) { var b = e.target.closest("[data-lang]"); if (b) setLang(b.getAttribute("data-lang")); });
+  applyLang();
+
+  /* ====== start ====== */
+  renderStart();
+  (function () {
+    var seen = false; try { seen = localStorage.getItem("reflectie.uitlegGezien") === "1"; } catch (e) { seen = true; }
+    if (!seen && !store.sessions.length) openGuide();
+  })();
+  // Staat er een code in de link (?code=NAAM-XXXX-XXXX)? Dan meteen ontgrendelen en de code uit de adresbalk halen.
+  (function () {
+    var q; try { q = new URLSearchParams(location.search); } catch (e) { return; }
+    var c = q.get("code"); if (!c) return;
+    try { q.delete("code"); var rest = q.toString(); history.replaceState(null, "", location.pathname + (rest ? "?" + rest : "") + location.hash); } catch (e) {}
+    if (profile || !cryptoOk()) return;
+    tryCode(c).then(function (ok) {
+      if (ok === "generic") showNameStep();
+      else if (ok) { refreshAll(); toast(T("code.hello", { n: nameNow() })); }
+    }).catch(function () {});
+  })();
+})();
+</script>
+</body>
+</html>
