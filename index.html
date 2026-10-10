@@ -349,6 +349,7 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .gate .hero blockquote{max-width:12ch}
 .gate .card h2{font-family:var(--display);font-weight:800;font-size:26px;line-height:1.05;margin:0 0 6px;text-transform:uppercase}
 .gate .card .stack{gap:12px}
+.gate .consent{margin:0;font-size:14px;line-height:1.4;color:var(--muted)}
 .gate .hint{margin:0;font-size:15px;color:var(--muted);text-align:center}
 body.locked #app,body.locked .tabbar{display:none}
 .codein{width:100%;min-height:56px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;padding:10px 14px}
@@ -517,6 +518,7 @@ body.locked #app,body.locked .tabbar{display:none}
           autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
         <p class="err" id="gateErr" role="alert" hidden></p>
         <button class="btn btn-primary" id="gateOk" data-i18n="code.unlock">Ontgrendel</button>
+        <p class="consent" data-i18n="gate.consent">Je code krijg je via je ouders. Door de code in te geven, gaan je ouders (of voogd) akkoord met deze app en de privacytekst.</p>
       </div>
     </div>
     <p class="hint" data-i18n="gate.none">Nog geen code? Vraag ze aan Sofia la Bianca.</p>
@@ -883,7 +885,8 @@ if (typeof module !== "undefined") module.exports = A4;
       "gate.aria": "Toegang", "gate.eyebrow": "Welkom bij Debrief FC", "gate.big": "Train. Reflecteer. Groei.",
       "gate.sub": "Twee minuten na elke training of match.", "gate.title": "Jouw persoonlijke code",
       "gate.desc": "Geef je code in. Dat doe je maar één keer, daarna onthoudt dit toestel je.",
-      "gate.none": "Nog geen code? Vraag ze aan Sofia la Bianca.",
+      "gate.none": "Nog geen code? Je ouders kunnen ze vragen aan Sofia la Bianca.",
+      "gate.consent": "Je code krijg je via je ouders. Door de code in te geven, gaan je ouders (of voogd) akkoord met deze app en de privacytekst.",
       "guide.close": "Uitleg sluiten", "guide.go": "Aan de slag",
       "exp.eyebrow": "A4-export", "exp.title": "Weekverslag", "exp.prev": "Vorige week", "exp.next": "Volgende week", "exp.week": "Week {w}",
       "exp.what": "Wat komt in het verslag?", "exp.allOff": "Alles uit", "exp.allOn": "Alles aan",
@@ -994,7 +997,8 @@ if (typeof module !== "undefined") module.exports = A4;
       "gate.aria": "Accès", "gate.eyebrow": "Bienvenue sur Debrief FC", "gate.big": "Joue. Réfléchis. Progresse.",
       "gate.sub": "Deux minutes après chaque entraînement ou match.", "gate.title": "Ton code personnel",
       "gate.desc": "Saisis ton code. Tu ne le fais qu'une fois, ensuite cet appareil se souvient de toi.",
-      "gate.none": "Pas encore de code" + NB + "? Demande-le à Sofia la Bianca.",
+      "gate.none": "Pas encore de code" + NB + "? Tes parents peuvent le demander à Sofia la Bianca.",
+      "gate.consent": "Tu reçois ton code via tes parents. En saisissant le code, tes parents (ou ton tuteur) acceptent cette app et le texte sur la vie privée.",
       "guide.close": "Fermer l'explication", "guide.go": "C'est parti",
       "exp.eyebrow": "Export A4", "exp.title": "Rapport hebdomadaire", "exp.prev": "Semaine précédente", "exp.next": "Semaine suivante", "exp.week": "Semaine {w}",
       "exp.what": "Que mettre dans le rapport" + NB + "?", "exp.allOff": "Tout décocher", "exp.allOn": "Tout cocher",
@@ -1087,7 +1091,7 @@ if (typeof module !== "undefined") module.exports = A4;
       { e: "Étape 4", t: "Ton rapport hebdomadaire",
         h: "<p>Dans <b>Rapport</b>, choisis la semaine et coche les check-ins à inclure. Choisis-y aussi une fois <b>ton équipe</b> (catégorie U), elle apparaît en haut de ton rapport.</p><p>Ensuite <b>Télécharger le PDF</b> ou <b>Imprimer</b>" + NB + ": une page A4 soignée pour toi et ton entraîneur, avec de la place pour des notes. Les photos ne sont pas imprimées.</p>" },
       { e: "Pour les parents", t: "Comment suivre",
-        h: "<p>L'app n'a <b>ni serveur ni compte</b>. Tout ce que votre enfant encode reste uniquement sur son propre téléphone.</p><p>Si vous ouvrez l'app sur votre propre téléphone, elle est vide, même avec le code de votre enfant. Ce n'est pas une erreur" + NB + ": les réponses restent ainsi privées.</p><p><b>Pour suivre" + NB + ":</b></p><ul><li><b>Le rapport hebdomadaire" + NB + ":</b> votre enfant télécharge le PDF dans Rapport et vous l'envoie.</li><li><b>Regarder ensemble</b> sur le téléphone de votre enfant.</li></ul>" },
+        h: "<p>L'app n'a <b>ni serveur ni compte</b>. Tout ce que votre enfant encode reste uniquement sur son propre téléphone.</p><p>Si vous ouvrez l'app sur votre propre téléphone, elle est vide, même avec le code de votre enfant. Ce n'est pas une erreur" + NB + ": les réponses restent ainsi privées.</p><p><b>Pour suivre" + NB + ":</b></p><ul><li><b>Le rapport hebdomadaire" + NB + ":</b> votre enfant télécharge le PDF dans Rapport et vous l'envoie.</li><li><b>Regarder ensemble</b> sur le téléphone de votre enfant.</li></ul><p><b>Accord" + NB + ":</b> votre enfant reçoit son code via vous. En donnant le code ou en le saisissant vous-même, vous acceptez l'app et le texte sur la vie privée.</p>" },
       { e: "Étape 5", t: "Garder tes données en sécurité",
         h: "<p>Tout reste uniquement sur cet appareil. Personne d'autre ne peut le voir.</p><p>Fais de temps en temps une <b>sauvegarde</b> (Rapport, tout en bas), surtout sur iPhone. Tu changes de téléphone" + NB + "? Restaure ta sauvegarde et saisis à nouveau ton <b>code personnel</b>.</p>" }
     ],
@@ -1106,14 +1110,14 @@ if (typeof module !== "undefined") module.exports = A4;
         '<h2>Ta vie privée</h2><p class="lsub">Debrief FC · RGPD</p>' +
         '<div class="lbox"><b>En bref' + NB + ':</b> tout ce que tu encodes reste sur ton appareil. Sofia ne peut pas voir tes données, et l\'app n\'envoie tes réponses nulle part.</div>' +
         '<h3>Qui est responsable' + NB + '?</h3><p>Sofia la Bianca.</p><div id="privMail"><button type="button" class="btn btn-ghost lmailbtn" id="privMailBtn">Afficher l\'adresse e-mail</button></div>' +
-        "<h3>Que conserve l'app" + NB + "?</h3><p>Tes check-ins (réponses, notes, énergie, sommeil et douleurs signalées), ton planning, tes stats de match, ton poste et tes photos. Tout cela reste uniquement sur cet appareil, dans la mémoire de ton navigateur. C'est nécessaire au fonctionnement de l'app. C'est pourquoi l'app ne demande pas de consentement aux cookies.</p>" +
+        "<h3>Que conserve l'app" + NB + "?</h3><p>Tes check-ins (réponses, notes, énergie, sommeil et douleurs signalées), ton planning, tes stats de match, ton poste et tes photos. Tout cela reste uniquement sur cet appareil, dans la mémoire de ton navigateur. C'est nécessaire au fonctionnement de l'app. C'est pourquoi l'app ne demande pas de consentement aux cookies.</p><p><b>Combien de temps" + NB + "?</b> Tes données restent sur cet appareil jusqu'à ce que tu les effaces avec <b>Tout effacer</b>, ou que tu effaces les données de site de ton navigateur.</p>" +
         "<p>Les réponses sur la douleur et le sommeil sont des données de santé. C'est justement pour cela qu'elles restent sur ton propre appareil.</p>" +
-        "<h3>Ton code personnel</h3><p>Le code lui-même n'est pas conservé. L'app retient uniquement une empreinte illisible et le nom qui y correspond, sur ton appareil. L'app en ligne ne contient aucun nom.</p>" +
+        "<h3>Ton code personnel</h3><p>Le code lui-même n'est pas conservé. L'app retient uniquement une empreinte illisible et le nom qui y correspond, sur ton appareil. L'app en ligne ne contient aucun nom.</p><p>Sofia conserve uniquement, en privé, quel code correspond à quel prénom et à quelle équipe, et efface ces données quand le code n'est plus utilisé.</p><h3>Pour les parents</h3><p>Tu reçois ton code via tes parents (ou ton tuteur). S'ils te donnent le code ou le saisissent eux-mêmes, cela veut dire qu'ils savent ce que fait cette app et qu'ils acceptent ce texte sur la vie privée. Ils ne sont pas (ou plus) d'accord" + NB + "? Efface alors tout via <b>Rapport → Tout effacer</b> et préviens Sofia. Elle désactivera le code.</p>" +
         "<h3>Photos</h3><p>Les photos que tu ajoutes restent sur cet appareil et n'apparaissent pas dans le rapport A4. Des coéquipiers figurent sur la photo" + NB + "? Ne la partage pas sans l'accord de leurs parents.</p>" +
         "<h3>Ce que l'app ne fait pas</h3><p>Pas de compte, pas de suivi, pas de publicité. Tes réponses ne sont envoyées ni à Sofia ni à un serveur.</p>" +
         "<h3>Services de tiers</h3><p>Pour bien fonctionner, l'app utilise quelques services externes. Comme pour tout site web, ils voient ton adresse IP" + NB + ":</p>" +
         "<ul><li><b>GitHub Pages</b> met l'app en ligne.</li><li><b>Google Fonts</b> fournit les polices.</li><li><b>jsDelivr</b> fournit le module PDF et, uniquement pour une photo iPhone sur Android, un convertisseur.</li></ul>" +
-        "<p><b>Dictée" + NB + ":</b> si tu utilises le micro, ton navigateur transforme ta voix en texte. Dans Chrome, cela passe par Google, dans Safari par Apple. Si tu ne le souhaites pas, écris ta réponse.</p>" +
+        "<p><b>Dictée" + NB + ":</b> si tu utilises le micro, ta voix est envoyée à Google (dans Chrome) ou à Apple (dans Safari) pour être transformée en texte. Si tu ne le souhaites pas, écris ta réponse.</p>" +
         "<h3>Sauvegarde</h3><p>Un fichier de sauvegarde contient toutes tes données, y compris tes photos et tes douleurs signalées. Garde-le en lieu sûr, par exemple dans Fichiers sur ton téléphone, et ne l'envoie pas à n'importe qui.</p>" +
         "<h3>Effacer tes données</h3><p>Dans <b>Rapport</b>, tout en bas, tu trouves <b>Enregistrer une sauvegarde</b>, <b>Restaurer une sauvegarde</b> et <b>Tout effacer</b>. Ce dernier bouton supprime tout de cet appareil, y compris les photos et le nom.</p>" +
         '<h3>Questions ou plaintes</h3><p>Envoie un e-mail à l\'adresse ci-dessus. Tu peux aussi t\'adresser à l\'Autorité de protection des données' + NB + ': <a href="https://www.autoriteprotectiondonnees.be" target="_blank" rel="noopener">autoriteprotectiondonnees.be</a>.</p>' +
@@ -1977,7 +1981,7 @@ if (typeof module !== "undefined") module.exports = A4;
     { e: "Stap 4", t: "Je weekverslag",
       h: "<p>In <b>Verslag</b> kies je de week en vink je aan welke check-ins erin komen. Kies daar ook één keer <b>je ploeg</b> (U-categorie), die komt bovenaan je verslag.</p><p>Daarna <b>Download PDF</b> of <b>Print</b>: een nette A4 voor jou en je trainer, met plaats voor notities. Foto's komen niet op papier.</p>" },
     { e: "Voor ouders", t: "Zo volg je mee",
-      h: "<p>De app heeft <b>geen server en geen account</b>. Alles wat je kind invult, staat alleen op zijn eigen telefoon.</p><p>Open je de app op je eigen telefoon, dan is die leeg, ook met de code van je kind. Dat is geen fout: zo blijven de antwoorden privé.</p><p><b>Zo volg je mee:</b></p><ul><li><b>Het weekverslag:</b> je kind downloadt de PDF in Verslag en stuurt hem naar jou.</li><li><b>Samen kijken</b> op de telefoon van je kind.</li></ul>" },
+      h: "<p>De app heeft <b>geen server en geen account</b>. Alles wat je kind invult, staat alleen op zijn eigen telefoon.</p><p>Open je de app op je eigen telefoon, dan is die leeg, ook met de code van je kind. Dat is geen fout: zo blijven de antwoorden privé.</p><p><b>Zo volg je mee:</b></p><ul><li><b>Het weekverslag:</b> je kind downloadt de PDF in Verslag en stuurt hem naar jou.</li><li><b>Samen kijken</b> op de telefoon van je kind.</li></ul><p><b>Akkoord:</b> je kind krijgt zijn code via jou. Door de code te geven of zelf in te geven, ga je akkoord met de app en de privacytekst.</p>" },
     { e: "Stap 5", t: "Veilig bewaren",
       h: "<p>Alles staat alleen op dit toestel. Niemand anders kan het zien.</p><p>Maak af en toe een <b>back-up</b> (Verslag, onderaan), zeker op iPhone. Wissel je van telefoon? Zet je back-up terug en geef je <b>persoonlijke code</b> opnieuw in.</p>" }
   ];
@@ -2032,14 +2036,14 @@ if (typeof module !== "undefined") module.exports = A4;
       '<h2>Jouw privacy</h2><p class="lsub">Debrief FC · GDPR</p>' +
       '<div class="lbox"><b>Kort gezegd:</b> alles wat je invult, blijft op jouw toestel. Sofia kan je gegevens niet zien, en de app stuurt je antwoorden nergens naartoe.</div>' +
       '<h3>Wie is verantwoordelijk?</h3><p>Sofia la Bianca.</p><div id="privMail"><button type="button" class="btn btn-ghost lmailbtn" id="privMailBtn">Toon e-mailadres</button></div>' +
-      "<h3>Wat bewaart de app?</h3><p>Je check-ins (antwoorden, cijfers, energie, slaap en pijnmeldingen), je weekplanning, je matchcijfers, je positie en je foto's. Dat alles staat alleen op dit toestel, in het geheugen van je browser. Dat is nodig om de app te laten werken. Daarom vraagt de app geen toestemming voor cookies.</p>" +
+      "<h3>Wat bewaart de app?</h3><p>Je check-ins (antwoorden, cijfers, energie, slaap en pijnmeldingen), je weekplanning, je matchcijfers, je positie en je foto's. Dat alles staat alleen op dit toestel, in het geheugen van je browser. Dat is nodig om de app te laten werken. Daarom vraagt de app geen toestemming voor cookies.</p><p><b>Hoe lang?</b> Je gegevens blijven op dit toestel tot jij ze wist met <b>Alles wissen</b>, of tot je de websitegegevens van je browser wist.</p>" +
       "<p>Antwoorden over pijn en slaap zijn gezondheidsgegevens. Juist daarom blijven ze op je eigen toestel.</p>" +
-      "<h3>Je persoonlijke code</h3><p>De code zelf wordt niet bewaard. De app onthoudt alleen een onleesbare afdruk ervan en de naam die erbij hoort, op jouw toestel. In de app op het internet staat geen naam.</p>" +
+      "<h3>Je persoonlijke code</h3><p>De code zelf wordt niet bewaard. De app onthoudt alleen een onleesbare afdruk ervan en de naam die erbij hoort, op jouw toestel. In de app op het internet staat geen naam.</p><p>Sofia bewaart enkel welke code bij welke voornaam en ploeg hoort, privé, en wist die gegevens als de code niet meer gebruikt wordt.</p><h3>Voor ouders</h3><p>Je code krijg je via je ouders (of voogd). Geven zij de code aan jou, of geven ze die zelf in, dan betekent dat: ze weten wat deze app doet en ze gaan akkoord met deze privacytekst. Gaan ze niet (meer) akkoord? Wis dan alles via <b>Verslag → Alles wissen</b> en laat het Sofia weten. Dan trekt zij de code in.</p>" +
       "<h3>Foto's</h3><p>Foto's die je toevoegt, blijven op dit toestel en komen niet in het A4-verslag. Staan er ploegmaats op? Deel die foto's dan niet verder zonder toestemming van hun ouders.</p>" +
       "<h3>Wat doet de app niet?</h3><p>Geen account, geen tracking, geen advertenties. Je antwoorden gaan niet naar Sofia en niet naar een server.</p>" +
       "<h3>Diensten van anderen</h3><p>Om goed te werken, gebruikt de app een paar externe diensten. Die zien, zoals bij elke website, je IP-adres:</p>" +
       "<ul><li><b>GitHub Pages</b> zet de app online.</li><li><b>Google Fonts</b> levert de lettertypes.</li><li><b>jsDelivr</b> levert de PDF-module, en alleen bij een iPhone-foto op Android ook een omzetter.</li></ul>" +
-      "<p><b>Inspreken:</b> gebruik je de microfoon, dan zet je browser je stem om in tekst. In Chrome gebeurt dat via Google, in Safari via Apple. Wil je dat niet, typ dan je antwoord.</p>" +
+      "<p><b>Inspreken:</b> gebruik je de microfoon, dan wordt je stem naar Google (in Chrome) of Apple (in Safari) gestuurd om er tekst van te maken. Wil je dat niet, typ dan je antwoord.</p>" +
       "<h3>Back-up</h3><p>Een back-upbestand bevat al je gegevens, ook je foto's en pijnmeldingen. Bewaar het op een veilige plek, bijvoorbeeld in Bestanden op je telefoon, en stuur het niet zomaar door.</p>" +
       '<h3>Je gegevens wissen</h3><p>In <b>Verslag</b>, helemaal onderaan, vind je <b>Back-up opslaan</b>, <b>Back-up terugzetten</b> en <b>Alles wissen</b>. Met die laatste verwijder je alles van dit toestel, ook de foto\'s en de naam.</p>' +
       '<h3>Vragen of klachten</h3><p>Mail gerust naar het adres hierboven. Je kan ook terecht bij de Gegevensbeschermingsautoriteit: <a href="https://www.gegevensbeschermingsautoriteit.be" target="_blank" rel="noopener">gegevensbeschermingsautoriteit.be</a>.</p>' +
