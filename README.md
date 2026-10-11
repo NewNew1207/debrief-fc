@@ -22,7 +22,7 @@ Een app die aanvoelt als een debrief na de sessie. Twee minuten, vier vragen, ty
 - **Mijn doel.** De speler stelt zelf zijn doel op: wat hij wil bereiken, waarom, en wat hij er elke week zelf voor doet. Elke week: hoe dichtbij ben ik?
 - **Typen of inspreken.** Typ je antwoord, of spreek het in met de microfoon van je toetsenbord.
 - **Matchcijfers per positie.** Van doelman tot spits: goals, assists, duels, recuperaties, reddingen.
-- **Mijn evolutie.** Grafieken per matchcijfer, vergeleken met je eigen gemiddelde: groen erboven, blauw rond, rood eronder. Met tips.
+- - **Mijn evolutie.** Grafieken per matchcijfer, vergeleken met je eigen gemiddelde: groen erboven, blauw rond, rood eronder. Bij trainingen: je eigen cijfer en je energie, en of slaap daarin meespeelt. Met tips.
 - **Het lichaam in het oog.** Energie, slaap en pijn bij elke check-in. Twee keer na elkaar pijn? Dan raadt de app aan het te vertellen aan ouders of trainer.
 - **Weekplanning.** Training, match, rust of geannuleerd. Matchdagen springen eruit. Op een rustdag kies je wat je doet: chillax, specifiek, fitness of lopen, en stuur je je keuze met één tik door naar je ouders.
 - **Vraag voor je trainer.** Noteer een vraag na een match of training. Op trainingsdagen krijg je een herinnering om ze te stellen.
