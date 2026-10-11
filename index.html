@@ -104,6 +104,20 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .day{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .dot{width:30px;height:30px;border-radius:50%;border:1.5px dashed var(--line);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:15px;color:var(--muted)}
 .day{font-family:inherit;background:none;border:0;padding:4px 0;border-radius:10px;cursor:pointer}
+.dot.restk{font-size:15px;line-height:1}
+.restrows{display:flex;flex-direction:column;gap:8px;margin:0 0 12px}
+.restrows:empty{display:none}
+.restrow{display:flex;align-items:center;gap:6px;background:var(--blue-soft);border-radius:12px;padding:5px}
+.rr-main{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:none;border:0;padding:6px 6px 6px 8px;text-align:left;color:var(--ink);font:inherit;cursor:pointer;border-radius:9px}
+.rr-main .ri{font-size:24px;line-height:1;flex:none}
+.rr-main .rt{display:flex;flex-direction:column;min-width:0;gap:1px}
+.rr-main b{font-size:16px;color:var(--blue-ink)}
+.rr-main small{font-size:13px;color:var(--ink);opacity:.78;font-weight:600}
+.rshare{flex:none;display:inline-flex;align-items:center;gap:6px;border:0;background:var(--surface);color:var(--blue-ink);border-radius:9px;padding:10px 12px;font-size:15px;font-weight:700;min-height:44px;cursor:pointer}
+.rshare svg{width:18px;height:18px}
+#planShare{font-size:16px;padding-inline:14px}
+#planShare svg{width:20px;height:20px;flex:none}
+#planOv .dialog{max-height:calc(100vh - 32px);overflow-y:auto}
 .day:hover .dot{border-color:var(--blue-ink)}
 .day.plan-training .dot,.day.plan-match .dot{border:2px solid var(--blue-ink);color:var(--blue-ink)}
 .day.plan-rust .dot{border:0;background:var(--line);color:var(--muted)}
@@ -442,6 +456,7 @@ body.locked #app,body.locked .tabbar{display:none}
       <div class="card">
         <div class="sec-h"><h3 data-i18n="start.thisWeek">Deze week</h3><span class="muted" id="wkrange" style="font-size:14px"></span></div>
         <div class="days" id="days"></div>
+        <div class="restrows" id="restRows"></div>
         <p class="legend" data-i18n="start.legend">Tik op een dag om training, match of rust te plannen. Volle bol = check-in gedaan, rood = geannuleerd.</p>
         <ul class="sess" id="sessList"></ul>
       </div>
@@ -637,8 +652,18 @@ body.locked #app,body.locked .tabbar{display:none}
       <button type="button" data-v="rust" data-plan-l="rust">Rust</button>
       <button type="button" data-v="geannuleerd" data-plan-l="geannuleerd">Geannuleerd</button>
     </div>
+    <div id="restBox" hidden>
+      <p class="field-l" style="margin:2px 0 8px" data-i18n="rest.q">Wat doe je op je rustdag?</p>
+      <div class="seg c2" id="restOpts" role="group">
+        <button type="button" data-v="chillax">😎 <span data-i18n="rest.chillax">Chillax</span></button>
+        <button type="button" data-v="specifiek">⚽ <span data-i18n="rest.specifiek">Specifiek</span></button>
+        <button type="button" data-v="fitness">💪 <span data-i18n="rest.fitness">Fitness</span></button>
+        <button type="button" data-v="lopen">🏃 <span data-i18n="rest.lopen">Lopen</span></button>
+      </div>
+    </div>
     <label class="chk"><input type="checkbox" id="planRepeat"> <span id="planRepeatLbl">Elke week zo</span></label>
     <button class="btn btn-primary" id="planOk" data-i18n="common.save">Bewaar</button>
+    <button class="btn btn-soft" id="planShare" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span data-i18n="rest.saveShare">Bewaar en deel met mijn ouders</span></button>
     <button class="btn btn-ghost" id="planCancel" data-i18n="common.cancel">Annuleer</button>
   </div>
 </div>
@@ -961,6 +986,10 @@ if (typeof module !== "undefined") module.exports = A4;
       "today.rest": "Vandaag rust. Herstel hoort bij de training. Een check-in mag, maar hoeft niet.",
       "today.default": "Vier vragen, twee minuten.",
       "day.planned": "{w} gepland", "day.nothing": "niets gepland", "day.done": ", check-in gedaan", "day.tap": ". Tik om te plannen.",
+      "rest.q": "Wat doe je op je rustdag?", "rest.chillax": "Chillax", "rest.specifiek": "Specifiek", "rest.fitness": "Fitness", "rest.lopen": "Lopen",
+      "rest.day": "Rustdag", "rest.share": "Deel", "rest.shareAria": "Deel je rustdag van {d} met je ouders", "rest.saveShare": "Bewaar en deel met mijn ouders",
+      "rest.shareDay": "Rustdag · {d}", "rest.shareMine": "Mijn keuze: {k}", "rest.subject": "Debrief FC · rustdag {d}",
+      "today.restKind": "Vandaag rustdag: {k}. Herstel hoort bij de training. Een check-in mag, maar hoeft niet.",
       "plan.eyebrow": "Planning", "plan.group": "Wat staat er op deze dag?", "plan.none": "Niets",
       "plan.every": "Elke {d} zo", "plan.onlyDay": "Geldt alleen voor deze dag", "plan.cancelWord": "geannuleerd",
       "plan.toastCancel": "Gemarkeerd als geannuleerd.", "plan.toastSet": "{w} gepland.", "plan.toastClear": "Planning gewist.",
@@ -1112,6 +1141,10 @@ if (typeof module !== "undefined") module.exports = A4;
       "today.rest": "Repos aujourd'hui. La récupération fait partie de l'entraînement. Un check-in est possible, mais pas obligatoire.",
       "today.default": "Quatre questions, deux minutes.",
       "day.planned": "{w} prévu", "day.nothing": "rien de prévu", "day.done": ", check-in fait", "day.tap": ". Touche pour planifier.",
+      "rest.q": "Que fais-tu pendant ton jour de repos" + NB + "?", "rest.chillax": "Chillax", "rest.specifiek": "Spécifique", "rest.fitness": "Fitness", "rest.lopen": "Course",
+      "rest.day": "Jour de repos", "rest.share": "Partager", "rest.shareAria": "Partage ton jour de repos du {d} avec tes parents", "rest.saveShare": "Enregistrer et partager avec mes parents",
+      "rest.shareDay": "Jour de repos · {d}", "rest.shareMine": "Mon choix" + NB + ": {k}", "rest.subject": "Debrief FC · jour de repos {d}",
+      "today.restKind": "Jour de repos aujourd'hui" + NB + ": {k}. La récupération fait partie de l'entraînement. Un check-in est possible, mais pas obligatoire.",
       "plan.eyebrow": "Planning", "plan.group": "Qu'est-ce qui est prévu ce jour-là" + NB + "?", "plan.none": "Rien",
       "plan.every": "Chaque {d}", "plan.onlyDay": "Uniquement pour ce jour", "plan.cancelWord": "annulé",
       "plan.toastCancel": "Marqué comme annulé.", "plan.toastSet": "{w} prévu.", "plan.toastClear": "Planning effacé.",
@@ -1290,7 +1323,7 @@ if (typeof module !== "undefined") module.exports = A4;
       { e: "Bienvenue", t: "Deux minutes après chaque séance",
         h: "<p>Après chaque entraînement ou match, tu réponds à quatre petites questions. Tu vois ainsi toi-même où tu progresses, semaine après semaine.</p><p>Il n'y a pas de mauvaise réponse. Être honnête suffit.</p><p>Sur l'écran d'accueil, fixe aussi <b>ton propre objectif</b>" + NB + ": que veux-tu atteindre, et que fais-tu toi-même chaque semaine pour y arriver" + NB + "?</p>" },
       { e: "Étape 1", t: "Planifie ta semaine",
-        h: "<p>Touche un jour dans <b>Cette semaine</b> et choisis <b>entraînement</b>, <b>match</b>, <b>repos</b> ou <b>annulé</b>.</p><p>Coche <b>Chaque …</b> pour tes jours d'entraînement fixes. Tu ne dois les régler qu'une fois. Les jours de match reçoivent des étoiles.</p>" },
+        h: "<p>Touche un jour dans <b>Cette semaine</b> et choisis <b>entraînement</b>, <b>match</b>, <b>repos</b> ou <b>annulé</b>.</p><p>Si tu choisis <b>repos</b>, tu choisis aussi ce que tu fais" + NB + ": chillax, spécifique, fitness ou course. Avec <b>Partager</b>, tu envoies ton choix à tes parents.</p><p>Coche <b>Chaque …</b> pour tes jours d'entraînement fixes. Tu ne dois les régler qu'une fois. Les jours de match reçoivent des étoiles.</p>" },
       { e: "Étape 2", t: "Fais ton check-in",
         h: "<ul><li><b>Check rapide" + NB + ":</b> énergie, sommeil et douleur.</li><li><b>Après un match" + NB + ":</b> ton poste et tes stats, comme les buts, les duels et les récupérations.</li><li><b>Quatre questions" + NB + ":</b> ta note, ton highlight, ton moment reset et ton point d'attention.</li><li><b>Pour finir" + NB + ":</b> une question pour ton entraîneur et, si tu veux, une photo du jour. Ta question reste sur ton écran d'accueil jusqu'à ce que tu l'aies posée.</li></ul><p>Un check-in commencé reste enregistré. Tu peux le terminer plus tard.</p>" },
       { e: "Étape 3", t: "Écrire ou dicter",
@@ -1298,7 +1331,7 @@ if (typeof module !== "undefined") module.exports = A4;
       { e: "Étape 4", t: "Ton rapport hebdomadaire",
         h: "<p>Dans <b>Rapport</b>, choisis la semaine et coche les check-ins à inclure. Ton <b>équipe</b> (catégorie U) se choisit sur l'écran d'accueil, sous ton nom. Elle apparaît en haut de ton rapport.</p><p>Ensuite <b>Télécharger le PDF</b> ou <b>Imprimer</b>" + NB + ": une page A4 soignée pour toi et ton entraîneur. En bas, un cadre est prévu pour écrire <b>à la main</b>" + NB + ": emporte la feuille et note le retour de ton entraîneur pour ton prochain entraînement ou match. Les photos ne sont pas imprimées.</p><p>Sur ton écran d'accueil, <b>Mon évolution</b> montre comment tes stats de match évoluent par rapport à ta propre moyenne.</p>" },
       { e: "Pour les parents", t: "Comment suivre",
-        h: "<p>L'app n'a <b>ni serveur ni compte</b>. Tout ce que votre enfant encode reste uniquement sur son propre téléphone.</p><p>Si vous ouvrez l'app sur votre propre téléphone, elle est vide, même avec le code de votre enfant. Ce n'est pas une erreur" + NB + ": les réponses restent ainsi privées.</p><p><b>Pour suivre" + NB + ":</b></p><ul><li><b>Le rapport hebdomadaire" + NB + ":</b> votre enfant télécharge le PDF dans Rapport et vous l'envoie.</li><li><b>Après chaque check-in" + NB + ":</b> votre enfant peut vous envoyer ses réponses en un clic via WhatsApp ou mail. C'est lui qui choisit.</li><li><b>Regarder ensemble</b> sur le téléphone de votre enfant.</li></ul><p><b>Accord" + NB + ":</b> votre enfant reçoit son code via vous. En donnant le code ou en le saisissant vous-même, vous acceptez l'app et le texte sur la vie privée.</p>" },
+        h: "<p>L'app n'a <b>ni serveur ni compte</b>. Tout ce que votre enfant encode reste uniquement sur son propre téléphone.</p><p>Si vous ouvrez l'app sur votre propre téléphone, elle est vide, même avec le code de votre enfant. Ce n'est pas une erreur" + NB + ": les réponses restent ainsi privées.</p><p><b>Pour suivre" + NB + ":</b></p><ul><li><b>Le rapport hebdomadaire" + NB + ":</b> votre enfant télécharge le PDF dans Rapport et vous l'envoie.</li><li><b>Après chaque check-in" + NB + ":</b> votre enfant peut vous envoyer ses réponses en un clic via WhatsApp ou mail. C'est lui qui choisit.</li><li><b>Un jour de repos" + NB + ":</b> votre enfant peut vous dire en un clic ce qu'il fait" + NB + ": chillax, spécifique, fitness ou course.</li><li><b>Regarder ensemble</b> sur le téléphone de votre enfant.</li></ul><p><b>Accord" + NB + ":</b> votre enfant reçoit son code via vous. En donnant le code ou en le saisissant vous-même, vous acceptez l'app et le texte sur la vie privée.</p>" },
       { e: "Étape 5", t: "Garder tes données en sécurité",
         h: "<p>Tout reste uniquement sur cet appareil. Personne d'autre ne peut le voir.</p><p>Fais de temps en temps une <b>sauvegarde</b> (Rapport, tout en bas), surtout sur iPhone. Tu changes de téléphone" + NB + "? Restaure ta sauvegarde et saisis à nouveau ton <b>code personnel</b>.</p>" }
     ],
@@ -1716,8 +1749,32 @@ if (typeof module !== "undefined") module.exports = A4;
   }
   // Wat er normaal op die dag staat (vaste week), om "training geannuleerd" te kunnen zeggen.
   function baseOf(k) { planStore(); var t = store.template[wdOf(k)]; return (t === "training" || t === "match") ? t : ""; }
+  /* Rustdag-invulling: chillax, specifiek, fitness of lopen (optioneel).
+     store.restKind = per datum, store.restKindT = vaste week (zelfde idee als plan/template). */
+  var REST_ICON = { chillax: "😎", specifiek: "⚽", fitness: "💪", lopen: "🏃" };
+  function restKindOf(k) {
+    if (planOf(k) !== "rust") return "";
+    var rk = store.restKind || {}, rt = store.restKindT || {};
+    if (hasOwn(rk, k)) return REST_ICON[rk[k]] ? rk[k] : "";
+    return (!hasOwn(store.plan || {}, k) && REST_ICON[rt[wdOf(k)]]) ? rt[wdOf(k)] : "";
+  }
+  function restLabel(k) { var r = restKindOf(k); return r ? T("rest." + r) : ""; }
+  // Onder de weekstrook: icoon + naam van de keuze, met een deelknop. In de strook zelf past enkel het icoon.
+  function restRows(mon) {
+    var h = "";
+    for (var i = 0; i < 7; i++) {
+      var k = iso(addDays(mon, i)), r = restKindOf(k);
+      if (!r) continue;
+      var day = longDay(k).toLowerCase();
+      h += '<div class="restrow"><button type="button" class="rr-main" data-plan="' + k + '" aria-label="' + esc(longDay(k) + ": " + planWords(k) + T("day.tap")) + '">' +
+        '<span class="ri" aria-hidden="true">' + REST_ICON[r] + '</span><span class="rt" aria-hidden="true"><b>' + esc(T("rest." + r)) + "</b><small>" + esc(T("rest.day") + " · " + fmt(parse(k), { weekday: "long" })) + "</small></span></button>" +
+        '<button type="button" class="rshare" data-rshare="' + k + '" aria-label="' + esc(T("rest.shareAria", { d: day })) + '">' + SHARE_SVG + "<span>" + esc(T("rest.share")) + "</span></button></div>";
+    }
+    return h;
+  }
   function planWords(k) {
     var p = planOf(k);
+    if (p === "rust" && restKindOf(k)) return PLAN.rust.l.toLowerCase() + " (" + restLabel(k).toLowerCase() + ")";
     if (p === "geannuleerd") return (baseOf(k) ? PLAN[baseOf(k)].l.toLowerCase() + " " : "") + T("plan.cancelWord");
     return p ? PLAN[p].l.toLowerCase() : "";
   }
@@ -1728,13 +1785,14 @@ if (typeof module !== "undefined") module.exports = A4;
       var k = iso(addDays(mon, i));
       var hit = ws.filter(function (s) { return s.date === k; });
       var p = planOf(k);
-      var letter = hit.length ? (hit.some(function (s) { return s.type === "match"; }) ? PLAN.match.s : PLAN.training.s) : (p ? PLAN[p].s : "");
+      var rk = !hit.length && p === "rust" ? restKindOf(k) : "";
+      var letter = hit.length ? (hit.some(function (s) { return s.type === "match"; }) ? PLAN.match.s : PLAN.training.s) : (rk ? REST_ICON[rk] : p ? PLAN[p].s : "");
       var isMatch = hit.length ? hit.some(function (s) { return s.type === "match"; }) : p === "match";
       var cls = "day" + (hit.length ? " done" : (p ? " plan-" + p : "")) + (isMatch ? " is-match" : "") + (k === todayKey ? " today" : "");
       var sparks = isMatch ? '<i class="spark a"></i><i class="spark b"></i><i class="spark c"></i>' : "";
-      var label = longDay(k) + ": " + (p === "geannuleerd" ? planWords(k) : p ? T("day.planned", { w: PLAN[p].l.toLowerCase() }) : T("day.nothing")) +
+      var label = longDay(k) + ": " + (p === "geannuleerd" || rk ? planWords(k) : p ? T("day.planned", { w: PLAN[p].l.toLowerCase() }) : T("day.nothing")) +
         (hit.length ? T("day.done") : "") + T("day.tap");
-      h += '<button type="button" class="' + cls + '" data-plan="' + k + '" aria-label="' + esc(label) + '"><span class="dot" aria-hidden="true">' +
+      h += '<button type="button" class="' + cls + '" data-plan="' + k + '" aria-label="' + esc(label) + '"><span class="dot' + (rk ? " restk" : "") + '" aria-hidden="true">' +
         letter + sparks + '</span><span aria-hidden="true">' + DN[i] + "</span></button>";
     }
     return h;
@@ -1744,7 +1802,7 @@ if (typeof module !== "undefined") module.exports = A4;
     if (p === "training") return T("today.training");
     if (p === "match") return T("today.match");
     if (p === "geannuleerd") return baseOf(k) ? T("today.cancel", { w: PLAN[baseOf(k)].l.toLowerCase() }) : T("today.cancelAny");
-    if (p === "rust") return T("today.rest");
+    if (p === "rust") return restKindOf(k) ? T("today.restKind", { k: restLabel(k).toLowerCase() }) : T("today.rest");
     return T("today.default");
   }
   function planLine(mon) {
@@ -1754,8 +1812,11 @@ if (typeof module !== "undefined") module.exports = A4;
   }
   function typeFor(k, fallback) { var p = planOf(k); return (p === "training" || p === "match") ? p : fallback; }
 
-  var planKey = null, planSel = "", planWasRepeat = false;
+  var planKey = null, planSel = "", planWasRepeat = false, restSel = "";
   function markPlan() {
+    $("restBox").hidden = planSel !== "rust";
+    $("planShare").hidden = !(planSel === "rust" && restSel);
+    document.querySelectorAll("#restOpts button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === restSel)); });
     document.querySelectorAll("#planOpts button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === planSel)); });
     // Geannuleerd geldt altijd voor één dag: dan kan "elke week" niet.
     var c = planSel === "geannuleerd", cb = $("planRepeat");
@@ -1766,7 +1827,7 @@ if (typeof module !== "undefined") module.exports = A4;
     $("planOk").disabled = !planSel;
   }
   function openPlan(k) {
-    planStore(); planKey = k; planSel = planOf(k);
+    planStore(); planKey = k; planSel = planOf(k); restSel = restKindOf(k);
     var wd = wdOf(k);
     planWasRepeat = !hasOwn(store.plan, k) && !!store.template[wd];
     $("planTitle").textContent = longDay(k);
@@ -1791,12 +1852,30 @@ if (typeof module !== "undefined") module.exports = A4;
     } else {
       if ((store.template[wd] || "") === planSel) delete store.plan[planKey]; else store.plan[planKey] = planSel;
     }
+    if (!store.restKind) store.restKind = {};
+    if (!store.restKindT) store.restKindT = {};
+    if (planSel === "rust" && $("planRepeat").checked) {
+      if (restSel) store.restKindT[wd] = restSel; else delete store.restKindT[wd];
+      delete store.restKind[planKey];
+    } else if (planSel === "rust") {
+      if (restSel || store.restKindT[wd]) store.restKind[planKey] = restSel; else delete store.restKind[planKey];
+    } else {
+      delete store.restKind[planKey];
+      if ($("planRepeat").checked || planWasRepeat) delete store.restKindT[wd];
+    }
     save(); closePlan(); renderStart();
     toast(planSel === "geannuleerd" ? T("plan.toastCancel") : planSel ? T("plan.toastSet", { w: PLAN[planSel].l }) : T("plan.toastClear"));
   }
   $("days").addEventListener("click", function (e) { var b = e.target.closest("[data-plan]"); if (b) openPlan(b.dataset.plan); });
   $("planOpts").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) { planSel = b.dataset.v; markPlan(); } });
+  $("restOpts").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) { restSel = restSel === b.dataset.v ? "" : b.dataset.v; markPlan(); } });
   $("planOk").addEventListener("click", savePlan);
+  // Bewaren en meteen delen: share() moet in dezelfde tik gebeuren, dus synchroon na savePlan.
+  $("planShare").addEventListener("click", function () { var k = planKey; savePlan(); shareRest(k); });
+  $("restRows").addEventListener("click", function (e) {
+    var sh = e.target.closest("[data-rshare]"); if (sh) { shareRest(sh.dataset.rshare); return; }
+    var b = e.target.closest("[data-plan]"); if (b) openPlan(b.dataset.plan);
+  });
   $("planCancel").addEventListener("click", closePlan);
   $("planOv").addEventListener("click", function (e) { if (e.target === $("planOv")) closePlan(); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("planOv").hidden) closePlan(); });
@@ -2431,7 +2510,7 @@ if (typeof module !== "undefined") module.exports = A4;
     { e: "Welkom", t: "Twee minuten na elke sessie",
       h: "<p>Na elke training of match beantwoord je vier korte vragen. Zo zie je zelf waar je groeit, week na week.</p><p>Er is geen fout antwoord. Eerlijk is genoeg.</p><p>Stel op het startscherm ook <b>je eigen doel</b>: wat wil je bereiken, en wat doe je er elke week zelf voor?</p>" },
     { e: "Stap 1", t: "Plan je week",
-      h: "<p>Tik op een dag in <b>Deze week</b> en kies <b>training</b>, <b>match</b>, <b>rust</b> of <b>geannuleerd</b>.</p><p>Vink <b>Elke … zo</b> aan voor je vaste trainingsdagen. Dan hoef je ze maar één keer in te stellen. Matchdagen krijgen sterretjes.</p>" },
+      h: "<p>Tik op een dag in <b>Deze week</b> en kies <b>training</b>, <b>match</b>, <b>rust</b> of <b>geannuleerd</b>.</p><p>Kies je <b>rust</b>, dan kies je ook wat je doet: chillax, specifiek, fitness of lopen. Met <b>Deel</b> stuur je je keuze naar je ouders.</p><p>Vink <b>Elke … zo</b> aan voor je vaste trainingsdagen. Dan hoef je ze maar één keer in te stellen. Matchdagen krijgen sterretjes.</p>" },
     { e: "Stap 2", t: "Doe je check-in",
       h: "<ul><li><b>Snelle check:</b> energie, slaap en pijn.</li><li><b>Bij een match:</b> je positie en je cijfers, zoals goals, duels en recuperaties.</li><li><b>Vier vragen:</b> je cijfer, je highlight, je reset-moment en je focus.</li><li><b>Tot slot:</b> een vraag voor je trainer en eventueel een foto van de dag. Je vraag blijft op je startscherm staan tot je ze gesteld hebt.</li></ul><p>Een half ingevulde check-in blijft bewaard. Je kan later verderdoen.</p>" },
     { e: "Stap 3", t: "Typen of inspreken",
@@ -2439,7 +2518,7 @@ if (typeof module !== "undefined") module.exports = A4;
     { e: "Stap 4", t: "Je weekverslag",
       h: "<p>In <b>Verslag</b> kies je de week en vink je aan welke check-ins erin komen. Je <b>ploeg</b> (U-categorie) kies je op het startscherm, onder je naam. Die komt bovenaan je verslag.</p><p>Daarna <b>Download PDF</b> of <b>Print</b>: een nette A4 voor jou en je trainer. Onderaan staat een kader om <b>met de hand</b> in te vullen: neem het blad mee en noteer de feedback van je trainer voor je volgende training of match. Foto's komen niet op papier.</p><p>Op je startscherm zie je bij <b>Mijn evolutie</b> hoe je matchcijfers evolueren tegenover je eigen gemiddelde.</p>" },
     { e: "Voor ouders", t: "Zo volg je mee",
-      h: "<p>De app heeft <b>geen server en geen account</b>. Alles wat je kind invult, staat alleen op zijn eigen telefoon.</p><p>Open je de app op je eigen telefoon, dan is die leeg, ook met de code van je kind. Dat is geen fout: zo blijven de antwoorden privé.</p><p><b>Zo volg je mee:</b></p><ul><li><b>Het weekverslag:</b> je kind downloadt de PDF in Verslag en stuurt hem naar jou.</li><li><b>Na elke check-in:</b> je kind kan met één tik zijn antwoorden naar jou sturen via WhatsApp of mail. Je kind kiest zelf.</li><li><b>Samen kijken</b> op de telefoon van je kind.</li></ul><p><b>Akkoord:</b> je kind krijgt zijn code via jou. Door de code te geven of zelf in te geven, ga je akkoord met de app en de privacytekst.</p>" },
+      h: "<p>De app heeft <b>geen server en geen account</b>. Alles wat je kind invult, staat alleen op zijn eigen telefoon.</p><p>Open je de app op je eigen telefoon, dan is die leeg, ook met de code van je kind. Dat is geen fout: zo blijven de antwoorden privé.</p><p><b>Zo volg je mee:</b></p><ul><li><b>Het weekverslag:</b> je kind downloadt de PDF in Verslag en stuurt hem naar jou.</li><li><b>Na elke check-in:</b> je kind kan met één tik zijn antwoorden naar jou sturen via WhatsApp of mail. Je kind kiest zelf.</li><li><b>Op een rustdag:</b> je kind kan met één tik laten weten wat het doet: chillax, specifiek, fitness of lopen.</li><li><b>Samen kijken</b> op de telefoon van je kind.</li></ul><p><b>Akkoord:</b> je kind krijgt zijn code via jou. Door de code te geven of zelf in te geven, ga je akkoord met de app en de privacytekst.</p>" },
     { e: "Stap 5", t: "Veilig bewaren",
       h: "<p>Alles staat alleen op dit toestel. Niemand anders kan het zien.</p><p>Maak af en toe een <b>back-up</b> (Verslag, onderaan), zeker op iPhone. Wissel je van telefoon? Zet je back-up terug en geef je <b>persoonlijke code</b> opnieuw in.</p>" }
   ];
@@ -2549,6 +2628,7 @@ if (typeof module !== "undefined") module.exports = A4;
 
     var ws = sessionsIn(mon);
     $("days").innerHTML = dayCells(mon, ws, iso(now));
+    $("restRows").innerHTML = restRows(mon);
     $("greetSub").textContent = todayLine(iso(now));
     renderSeason(now);
     renderTrend(now);
@@ -2743,11 +2823,22 @@ if (typeof module !== "undefined") module.exports = A4;
     } catch (e) {}
     if (!inViewer()) { try { location.href = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(text); } catch (e) {} }
   }
-  function shareSession(s) {
-    var text = shareText(s), subject = T("share.subject", { d: fmt(parse(s.date), { day: "numeric", month: "long" }) });
+  function shareOut(text, subject) {
     if (navigator.share) {
       navigator.share({ title: subject, text: text }).catch(function (e) { if (!e || e.name !== "AbortError") copyFallback(text, subject); });
     } else copyFallback(text, subject);
+  }
+  function shareSession(s) {
+    shareOut(shareText(s), T("share.subject", { d: fmt(parse(s.date), { day: "numeric", month: "long" }) }));
+  }
+  // Rustdagkeuze naar de ouders: "Rustdag · zondag 11 oktober / Mijn keuze: 💪 Fitness".
+  function restShareText(k) {
+    var r = restKindOf(k);
+    return ["Debrief FC" + (nameNow() ? " · " + nameNow() : ""), T("rest.shareDay", { d: longDay(k).toLowerCase() }), T("rest.shareMine", { k: REST_ICON[r] + " " + T("rest." + r) })].join("\n");
+  }
+  function shareRest(k) {
+    if (!restKindOf(k)) return;
+    shareOut(restShareText(k), T("rest.subject", { d: fmt(parse(k), { day: "numeric", month: "long" }) }));
   }
   var lastSaved = null;
   function openShare(s) {
@@ -2883,6 +2974,7 @@ if (typeof module !== "undefined") module.exports = A4;
     $("dlStatus").textContent = T("bk.busy");
     photosForBackup().then(function (photos) {
       var data = JSON.stringify({ app: "reflectie", version: 2, exported: new Date().toISOString(), sessions: store.sessions, plan: store.plan || {}, template: store.template || {}, position: store.position || "", team: store.team || "",
+        restKind: store.restKind || {}, restKindT: store.restKindT || {},
         asks: store.asks || [], goal: store.goal || null, goalHist: store.goalHist || [], goalCheck: store.goalCheck || {}, photos: photos });
       downloadFile(T("bk.file") + iso(today()) + ".json", data, "application/json");
       var doneMsg = T("bk.done", { f: photos.length ? plural(photos.length, "bk.with1", "bk.withN") : "" });
@@ -2910,6 +3002,7 @@ if (typeof module !== "undefined") module.exports = A4;
         if (p.team && !store.team) store.team = String(p.team).slice(0, 20);
         if (Array.isArray(p.asks)) { if (!store.asks) store.asks = []; var hq = {}; store.asks.forEach(function (q) { hq[q.id] = 1; }); p.asks.forEach(function (q) { if (q && q.id && q.text && !hq[q.id]) store.asks.push(q); }); }
         if (p.goal && p.goal.what && !store.goal) store.goal = p.goal;
+        ["restKind", "restKindT"].forEach(function (f) { if (p[f] && typeof p[f] === "object") { if (!store[f]) store[f] = {}; Object.keys(p[f]).forEach(function (k) { if (!hasOwn(store[f], k)) store[f][k] = p[f][k]; }); } });
         if (Array.isArray(p.goalHist)) { if (!store.goalHist) store.goalHist = []; var hg = {}; store.goalHist.forEach(function (g) { hg[g.id] = 1; }); p.goalHist.forEach(function (g) { if (g && g.id && !hg[g.id]) store.goalHist.push(g); }); }
         if (p.goalCheck && typeof p.goalCheck === "object") { if (!store.goalCheck) store.goalCheck = {}; Object.keys(p.goalCheck).forEach(function (k) { if (!hasOwn(store.goalCheck, k)) store.goalCheck[k] = p.goalCheck[k]; }); }
         save(); renderExport();
