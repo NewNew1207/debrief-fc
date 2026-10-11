@@ -24,7 +24,7 @@ Een app die aanvoelt als een debrief na de sessie. Twee minuten, vier vragen, ty
 - **Matchcijfers per positie.** Van doelman tot spits: goals, assists, duels, recuperaties, reddingen.
 - **Mijn evolutie.** Grafieken per matchcijfer, vergeleken met je eigen gemiddelde: groen erboven, blauw rond, rood eronder. Met tips.
 - **Het lichaam in het oog.** Energie, slaap en pijn bij elke check-in. Twee keer na elkaar pijn? Dan raadt de app aan het te vertellen aan ouders of trainer.
-- **Weekplanning.** Training, match, rust of geannuleerd. Matchdagen springen eruit.
+- **Weekplanning.** Training, match, rust of geannuleerd. Matchdagen springen eruit. Op een rustdag kies je wat je doet: chillax, specifiek, fitness of lopen, en stuur je je keuze met één tik door naar je ouders.
 - **Vraag voor je trainer.** Noteer een vraag na een match of training. Op trainingsdagen krijg je een herinnering om ze te stellen.
 - **Delen met ouders.** Na elke check-in deelt de speler zijn antwoorden met één tik via WhatsApp of mail. Hij kiest zelf of en met wie.
 - **Weekverslag op A4.** Klaar om te printen of door te sturen naar ouders en trainer.
