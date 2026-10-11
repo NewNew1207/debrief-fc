@@ -116,6 +116,8 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .rshare{flex:none;display:inline-flex;align-items:center;gap:6px;border:0;background:var(--surface);color:var(--blue-ink);border-radius:9px;padding:10px 12px;font-size:15px;font-weight:700;min-height:44px;cursor:pointer}
 .rshare svg{width:18px;height:18px}
 #planShare{font-size:16px;padding-inline:14px}
+#restClear{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:8px 0 0}
+.field-l .opt{font-weight:600;color:var(--muted);font-size:14px}
 #planShare svg{width:20px;height:20px;flex:none}
 #planOv .dialog{max-height:calc(100vh - 32px);overflow-y:auto}
 .day:hover .dot{border-color:var(--blue-ink)}
@@ -301,6 +303,8 @@ body.typing .tabbar{display:none}
 .asknow{margin:0 0 10px;background:var(--blue);color:var(--on-blue);border-radius:10px;padding:8px 12px;font-weight:700;font-size:15px}
 .askadd{margin-top:10px}
 .tr-pend rect{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:4 3}
+.trtabs{margin:2px 0 12px}
+.trtabs button{min-height:42px;font-size:15px}
 .trend-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:2px 0 12px;font-size:13px;color:var(--muted)}
 .trend-legend span{display:inline-flex;align-items:center;gap:6px}
 .trend-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
@@ -487,6 +491,7 @@ body.locked #app,body.locked .tabbar{display:none}
       </div>
       <div class="card" id="trendCard">
         <div class="sec-h"><h3 data-i18n="trend.title">Mijn evolutie</h3><span class="muted" id="trendLbl" style="font-size:14px"></span></div>
+        <div class="seg c2 trtabs" id="trendTabs" role="group" data-i18n-aria="trend.tabs" aria-label="Matchen of trainingen"><button type="button" data-v="match" data-i18n="trend.tabMatch">Matchen</button><button type="button" data-v="training" data-i18n="trend.tabTraining">Trainingen</button></div>
         <div id="trendBody"></div>
       </div>
       <div class="card" id="momentsCard" hidden>
@@ -653,13 +658,14 @@ body.locked #app,body.locked .tabbar{display:none}
       <button type="button" data-v="geannuleerd" data-plan-l="geannuleerd">Geannuleerd</button>
     </div>
     <div id="restBox" hidden>
-      <p class="field-l" style="margin:2px 0 8px" data-i18n="rest.q">Wat doe je op je rustdag?</p>
+      <p class="field-l" style="margin:2px 0 8px"><span data-i18n="rest.q">Wat doe je op je rustdag?</span> <span class="opt" data-i18n="rest.opt">(mag, hoeft niet)</span></p>
       <div class="seg c2" id="restOpts" role="group">
         <button type="button" data-v="chillax">😎 <span data-i18n="rest.chillax">Chillax</span></button>
         <button type="button" data-v="specifiek">⚽ <span data-i18n="rest.specifiek">Specifiek</span></button>
         <button type="button" data-v="fitness">💪 <span data-i18n="rest.fitness">Fitness</span></button>
         <button type="button" data-v="lopen">🏃 <span data-i18n="rest.lopen">Lopen</span></button>
       </div>
+      <button type="button" class="linkbtn" id="restClear" hidden><span aria-hidden="true">✕</span> <span data-i18n="rest.clear">Toch niets kiezen</span></button>
     </div>
     <label class="chk"><input type="checkbox" id="planRepeat"> <span id="planRepeatLbl">Elke week zo</span></label>
     <button class="btn btn-primary" id="planOk" data-i18n="common.save">Bewaar</button>
@@ -986,7 +992,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "today.rest": "Vandaag rust. Herstel hoort bij de training. Een check-in mag, maar hoeft niet.",
       "today.default": "Vier vragen, twee minuten.",
       "day.planned": "{w} gepland", "day.nothing": "niets gepland", "day.done": ", check-in gedaan", "day.tap": ". Tik om te plannen.",
-      "rest.q": "Wat doe je op je rustdag?", "rest.chillax": "Chillax", "rest.specifiek": "Specifiek", "rest.fitness": "Fitness", "rest.lopen": "Lopen",
+      "rest.q": "Wat doe je op je rustdag?", "rest.chillax": "Chillax", "rest.specifiek": "Specifiek", "rest.fitness": "Fitness", "rest.lopen": "Lopen", "rest.opt": "(mag, hoeft niet)", "rest.clear": "Toch niets kiezen",
       "rest.day": "Rustdag", "rest.share": "Deel", "rest.shareAria": "Deel je rustdag van {d} met je ouders", "rest.saveShare": "Bewaar en deel met mijn ouders",
       "rest.shareDay": "Rustdag · {d}", "rest.shareMine": "Mijn keuze: {k}", "rest.subject": "Debrief FC · rustdag {d}",
       "today.restKind": "Vandaag rustdag: {k}. Herstel hoort bij de training. Een check-in mag, maar hoeft niet.",
@@ -1017,7 +1023,19 @@ if (typeof module !== "undefined") module.exports = A4;
       "ask.stepEyebrow": "Tot slot", "ask.stepTitle": "Een vraag voor je trainer?", "ask.stepHint": "Optioneel. Zo vergeet je hem niet tegen de volgende training.",
       "trend.pending": "Je grafiek kleurt in vanaf 3 matchen met cijfers als {p}. Nog {k} te gaan!",
       "trend.pendingNoPos": "Je grafiek kleurt in vanaf 3 matchen met cijfers. Kies bij je eerste match je positie.",
-      "trend.title": "Mijn evolutie", "trend.sub": "als {p} · laatste {n}",
+      "trend.title": "Mijn evolutie",
+      "trend.tabs": "Matchen of trainingen", "trend.tabMatch": "Matchen", "trend.tabTraining": "Trainingen",
+      "trend.tScore": "Jouw cijfer", "trend.tEnergy": "Energie", "trend.tSub": "laatste {n}", "trend.tLast": "Laatste training: {v}",
+      "trend.tPending": "Je grafiek kleurt in vanaf 3 trainingen. Nog {k} te gaan!",
+      "trend.tScoreUp": "Je geeft jezelf hogere cijfers op training: de laatste 3 gemiddeld {r}, daarvoor {b}. Wat doe je nu anders? Hou dat vast.",
+      "trend.tScoreDown": "Je cijfer op training zakte de laatste 3 keer ({r} tegen {b}). Dat mag gebeuren. Kijk eens naar je slaap en je energie, en praat erover als het zo blijft.",
+      "trend.tEnergyUp": "Je energie op training gaat omhoog: de laatste 3 gemiddeld {r}, daarvoor {b}.",
+      "trend.tEnergyDown": "Je energie zakte de laatste 3 trainingen ({r} tegen {b}). Let op slaap, eten en drinken. Blijft het zo, vertel het aan je ouders of trainer.",
+      "trend.tSleepScore": "Na 8 uur slaap of meer geef je jezelf op training gemiddeld een {g}, na minder slaap een {s}. Een patroon, geen bewijs, maar wel iets om op te letten.",
+      "trend.tSleepEnergy": "Na 8 uur slaap of meer is je energie op training gemiddeld {g}, na minder slaap {s}. Een patroon, geen bewijs, maar wel iets om op te letten.",
+      "trend.tDay": "Op {d} is je energie op training meestal lager ({w} tegen {a} gemiddeld). Wat zit er die dag in de weg: school, een andere sport, slaap?",
+      "trend.tFlat": "Je cijfer en je energie op training zijn stabiel. Dat is een sterke basis.",
+      "trend.tNote": "Je vergelijkt je met je eigen gemiddelde op training dit seizoen. Je cijfer is een gevoel, geen meting: er is geen goed of fout.", "trend.sub": "als {p} · laatste {n}",
       "trend.up": "Boven je gemiddelde", "trend.mid": "Rond je gemiddelde", "trend.down": "Onder je gemiddelde", "trend.avg": "gemiddeld {a}",
       "trend.last": "Laatste match: {v}", "trend.oldNew": "ouder → recenter", "trend.tips": "Tips",
       "trend.few": "Na 3 matchen met cijfers als {p} zie je hier hoe je evolueert. Je vergelijkt je met jezelf, niet met anderen.",
@@ -1141,7 +1159,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "today.rest": "Repos aujourd'hui. La récupération fait partie de l'entraînement. Un check-in est possible, mais pas obligatoire.",
       "today.default": "Quatre questions, deux minutes.",
       "day.planned": "{w} prévu", "day.nothing": "rien de prévu", "day.done": ", check-in fait", "day.tap": ". Touche pour planifier.",
-      "rest.q": "Que fais-tu pendant ton jour de repos" + NB + "?", "rest.chillax": "Chillax", "rest.specifiek": "Spécifique", "rest.fitness": "Fitness", "rest.lopen": "Course",
+      "rest.q": "Que fais-tu pendant ton jour de repos" + NB + "?", "rest.chillax": "Chillax", "rest.specifiek": "Spécifique", "rest.fitness": "Fitness", "rest.lopen": "Course", "rest.opt": "(si tu veux)", "rest.clear": "Finalement, rien de prévu",
       "rest.day": "Jour de repos", "rest.share": "Partager", "rest.shareAria": "Partage ton jour de repos du {d} avec tes parents", "rest.saveShare": "Enregistrer et partager avec mes parents",
       "rest.shareDay": "Jour de repos · {d}", "rest.shareMine": "Mon choix" + NB + ": {k}", "rest.subject": "Debrief FC · jour de repos {d}",
       "today.restKind": "Jour de repos aujourd'hui" + NB + ": {k}. La récupération fait partie de l'entraînement. Un check-in est possible, mais pas obligatoire.",
@@ -1172,7 +1190,19 @@ if (typeof module !== "undefined") module.exports = A4;
       "ask.stepEyebrow": "Pour finir", "ask.stepTitle": "Une question pour ton entraîneur" + NB + "?", "ask.stepHint": "Facultatif. Comme ça, tu ne l'oublies pas d'ici le prochain entraînement.",
       "trend.pending": "Ton graphique se colore à partir de 3 matchs avec des stats en tant que {p}. Encore {k}" + NB + "!",
       "trend.pendingNoPos": "Ton graphique se colore à partir de 3 matchs avec des stats. Choisis ton poste lors de ton premier match.",
-      "trend.title": "Mon évolution", "trend.sub": "en tant que {p} · {n} derniers",
+      "trend.title": "Mon évolution",
+      "trend.tabs": "Matchs ou entraînements", "trend.tabMatch": "Matchs", "trend.tabTraining": "Entraînements",
+      "trend.tScore": "Ta note", "trend.tEnergy": "Énergie", "trend.tSub": "{n} derniers", "trend.tLast": "Dernier entraînement" + NB + ": {v}",
+      "trend.tPending": "Ton graphique se colore à partir de 3 entraînements. Encore {k}" + NB + "!",
+      "trend.tScoreUp": "Tu te donnes de meilleures notes à l'entraînement" + NB + ": {r} en moyenne sur les 3 derniers, {b} avant. Qu'est-ce que tu fais autrement" + NB + "? Garde ça.",
+      "trend.tScoreDown": "Ta note à l'entraînement a baissé les 3 dernières fois ({r} contre {b}). Ça peut arriver. Regarde ton sommeil et ton énergie, et parles-en si ça continue.",
+      "trend.tEnergyUp": "Ton énergie à l'entraînement monte" + NB + ": {r} en moyenne sur les 3 derniers, {b} avant.",
+      "trend.tEnergyDown": "Ton énergie a baissé sur les 3 derniers entraînements ({r} contre {b}). Fais attention au sommeil, à l'alimentation et à l'hydratation. Si ça continue, parles-en à tes parents ou à ton entraîneur.",
+      "trend.tSleepScore": "Après 8 heures de sommeil ou plus, tu te donnes en moyenne {g} à l'entraînement, après moins de sommeil {s}. C'est une tendance, pas une preuve, mais ça vaut la peine d'y faire attention.",
+      "trend.tSleepEnergy": "Après 8 heures de sommeil ou plus, ton énergie à l'entraînement est en moyenne de {g}, après moins de sommeil {s}. C'est une tendance, pas une preuve, mais ça vaut la peine d'y faire attention.",
+      "trend.tDay": "Le {d}, ton énergie à l'entraînement est souvent plus basse ({w} contre {a} en moyenne). Qu'est-ce qui pèse ce jour-là" + NB + ": l'école, un autre sport, le sommeil" + NB + "?",
+      "trend.tFlat": "Ta note et ton énergie à l'entraînement sont stables. C'est une base solide.",
+      "trend.tNote": "Tu te compares à ta propre moyenne à l'entraînement cette saison. Ta note est un ressenti, pas une mesure" + NB + ": il n'y a pas de bonne ou de mauvaise réponse.", "trend.sub": "en tant que {p} · {n} derniers",
       "trend.up": "Au-dessus de ta moyenne", "trend.mid": "Autour de ta moyenne", "trend.down": "En dessous de ta moyenne", "trend.avg": "moyenne {a}",
       "trend.last": "Dernier match" + NB + ": {v}", "trend.oldNew": "plus ancien → plus récent", "trend.tips": "Conseils",
       "trend.few": "Après 3 matchs avec des stats en tant que {p}, tu verras ici ton évolution. Tu te compares à toi-même, pas aux autres.",
@@ -1323,13 +1353,13 @@ if (typeof module !== "undefined") module.exports = A4;
       { e: "Bienvenue", t: "Deux minutes après chaque séance",
         h: "<p>Après chaque entraînement ou match, tu réponds à quatre petites questions. Tu vois ainsi toi-même où tu progresses, semaine après semaine.</p><p>Il n'y a pas de mauvaise réponse. Être honnête suffit.</p><p>Sur l'écran d'accueil, fixe aussi <b>ton propre objectif</b>" + NB + ": que veux-tu atteindre, et que fais-tu toi-même chaque semaine pour y arriver" + NB + "?</p>" },
       { e: "Étape 1", t: "Planifie ta semaine",
-        h: "<p>Touche un jour dans <b>Cette semaine</b> et choisis <b>entraînement</b>, <b>match</b>, <b>repos</b> ou <b>annulé</b>.</p><p>Si tu choisis <b>repos</b>, tu choisis aussi ce que tu fais" + NB + ": chillax, spécifique, fitness ou course. Avec <b>Partager</b>, tu envoies ton choix à tes parents.</p><p>Coche <b>Chaque …</b> pour tes jours d'entraînement fixes. Tu ne dois les régler qu'une fois. Les jours de match reçoivent des étoiles.</p>" },
+        h: "<p>Touche un jour dans <b>Cette semaine</b> et choisis <b>entraînement</b>, <b>match</b>, <b>repos</b> ou <b>annulé</b>.</p><p>Si tu choisis <b>repos</b>, tu peux aussi choisir ce que tu fais" + NB + ": chillax, spécifique, fitness ou course. Ce n'est pas obligatoire. Avec <b>Partager</b>, tu envoies ton choix à tes parents.</p><p>Coche <b>Chaque …</b> pour tes jours d'entraînement fixes. Tu ne dois les régler qu'une fois. Les jours de match reçoivent des étoiles.</p>" },
       { e: "Étape 2", t: "Fais ton check-in",
         h: "<ul><li><b>Check rapide" + NB + ":</b> énergie, sommeil et douleur.</li><li><b>Après un match" + NB + ":</b> ton poste et tes stats, comme les buts, les duels et les récupérations.</li><li><b>Quatre questions" + NB + ":</b> ta note, ton highlight, ton moment reset et ton point d'attention.</li><li><b>Pour finir" + NB + ":</b> une question pour ton entraîneur et, si tu veux, une photo du jour. Ta question reste sur ton écran d'accueil jusqu'à ce que tu l'aies posée.</li></ul><p>Un check-in commencé reste enregistré. Tu peux le terminer plus tard.</p>" },
       { e: "Étape 3", t: "Écrire ou dicter",
         h: "<p>Écris simplement ta réponse dans la zone de texte.</p><p><b>Tu préfères dicter" + NB + "?</b> Touche la zone de texte et appuie sur le <b>micro de ton clavier</b>. Ton téléphone transforme ta voix en texte. Ça marche sur iPhone et Android.</p><p>Tu peux ensuite encore modifier le texte.</p>" },
       { e: "Étape 4", t: "Ton rapport hebdomadaire",
-        h: "<p>Dans <b>Rapport</b>, choisis la semaine et coche les check-ins à inclure. Ton <b>équipe</b> (catégorie U) se choisit sur l'écran d'accueil, sous ton nom. Elle apparaît en haut de ton rapport.</p><p>Ensuite <b>Télécharger le PDF</b> ou <b>Imprimer</b>" + NB + ": une page A4 soignée pour toi et ton entraîneur. En bas, un cadre est prévu pour écrire <b>à la main</b>" + NB + ": emporte la feuille et note le retour de ton entraîneur pour ton prochain entraînement ou match. Les photos ne sont pas imprimées.</p><p>Sur ton écran d'accueil, <b>Mon évolution</b> montre comment tes stats de match évoluent par rapport à ta propre moyenne.</p>" },
+        h: "<p>Dans <b>Rapport</b>, choisis la semaine et coche les check-ins à inclure. Ton <b>équipe</b> (catégorie U) se choisit sur l'écran d'accueil, sous ton nom. Elle apparaît en haut de ton rapport.</p><p>Ensuite <b>Télécharger le PDF</b> ou <b>Imprimer</b>" + NB + ": une page A4 soignée pour toi et ton entraîneur. En bas, un cadre est prévu pour écrire <b>à la main</b>" + NB + ": emporte la feuille et note le retour de ton entraîneur pour ton prochain entraînement ou match. Les photos ne sont pas imprimées.</p><p>Sur ton écran d'accueil, <b>Mon évolution</b> montre comment tes stats de match évoluent par rapport à ta propre moyenne. Sous <b>Entraînements</b>, tu vois ta note et ton énergie, et si le sommeil joue un rôle.</p>" },
       { e: "Pour les parents", t: "Comment suivre",
         h: "<p>L'app n'a <b>ni serveur ni compte</b>. Tout ce que votre enfant encode reste uniquement sur son propre téléphone.</p><p>Si vous ouvrez l'app sur votre propre téléphone, elle est vide, même avec le code de votre enfant. Ce n'est pas une erreur" + NB + ": les réponses restent ainsi privées.</p><p><b>Pour suivre" + NB + ":</b></p><ul><li><b>Le rapport hebdomadaire" + NB + ":</b> votre enfant télécharge le PDF dans Rapport et vous l'envoie.</li><li><b>Après chaque check-in" + NB + ":</b> votre enfant peut vous envoyer ses réponses en un clic via WhatsApp ou mail. C'est lui qui choisit.</li><li><b>Un jour de repos" + NB + ":</b> votre enfant peut vous dire en un clic ce qu'il fait" + NB + ": chillax, spécifique, fitness ou course.</li><li><b>Regarder ensemble</b> sur le téléphone de votre enfant.</li></ul><p><b>Accord" + NB + ":</b> votre enfant reçoit son code via vous. En donnant le code ou en le saisissant vous-même, vous acceptez l'app et le texte sur la vie privée.</p>" },
       { e: "Étape 5", t: "Garder tes données en sécurité",
@@ -1816,6 +1846,7 @@ if (typeof module !== "undefined") module.exports = A4;
   function markPlan() {
     $("restBox").hidden = planSel !== "rust";
     $("planShare").hidden = !(planSel === "rust" && restSel);
+    $("restClear").hidden = !restSel;
     document.querySelectorAll("#restOpts button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === restSel)); });
     document.querySelectorAll("#planOpts button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === planSel)); });
     // Geannuleerd geldt altijd voor één dag: dan kan "elke week" niet.
@@ -1868,6 +1899,8 @@ if (typeof module !== "undefined") module.exports = A4;
   }
   $("days").addEventListener("click", function (e) { var b = e.target.closest("[data-plan]"); if (b) openPlan(b.dataset.plan); });
   $("planOpts").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) { planSel = b.dataset.v; markPlan(); } });
+  // Keuze wissen: rustdag zonder invulling is helemaal oké.
+  $("restClear").addEventListener("click", function () { restSel = ""; markPlan(); var f = document.querySelector("#restOpts button"); if (f) f.focus(); });
   $("restOpts").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) { restSel = restSel === b.dataset.v ? "" : b.dataset.v; markPlan(); } });
   $("planOk").addEventListener("click", savePlan);
   // Bewaren en meteen delen: share() moet in dezelfde tik gebeuren, dus synchroon na savePlan.
@@ -2157,19 +2190,20 @@ if (typeof module !== "undefined") module.exports = A4;
      Groen = duidelijk boven, blauw = rond, rood = duidelijk onder dat gemiddelde. Altijd ook in woorden. */
   var TREND_MAX = 8;
   function num1(x) { return String(Math.round(x * 10) / 10).replace(".", ","); }
-  function trendClass(v, avg) {
-    var thr = Math.max(0.75, avg * 0.25);
+  function trendClass(v, avg, fixThr) {
+    var thr = fixThr || Math.max(0.75, avg * 0.25);
     return v >= avg + thr ? "up" : v <= avg - thr ? "down" : "mid";
   }
-  function trendSvg(vals, dates, avg) {
+  function trendSvg(vals, dates, avg, o) {
+    o = o || {};
     var W = 300, H = 74, top = 14, base = H - 14, n = vals.length;
-    var max = Math.max(1, avg * 1.4, Math.max.apply(null, vals));
+    var max = o.max || Math.max(1, avg * 1.4, Math.max.apply(null, vals));
     var slot = W / TREND_MAX, bw = Math.min(26, slot - 8), x0 = (W - slot * n) / 2;
     function y(v) { return base - (base - top) * (v / max); }
     var out = ['<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-hidden="true">'];
     out.push('<line x1="0" x2="' + W + '" y1="' + base + '" y2="' + base + '" stroke="var(--line)" stroke-width="1"/>');
     vals.forEach(function (v, k) {
-      var cls = trendClass(v, avg), x = x0 + slot * k + (slot - bw) / 2, yy = Math.min(y(v), base - 3), h = base - yy, r = Math.min(4, h, bw / 2);
+      var cls = trendClass(v, avg, o.thr), x = x0 + slot * k + (slot - bw) / 2, yy = Math.min(y(v), base - 3), h = base - yy, r = Math.min(4, h, bw / 2);
       var d = "M" + x + " " + base + "V" + (yy + r) + "Q" + x + " " + yy + " " + (x + r) + " " + yy + "H" + (x + bw - r) + "Q" + (x + bw) + " " + yy + " " + (x + bw) + " " + (yy + r) + "V" + base + "Z";
       out.push('<path d="' + d + '" fill="var(--' + cls + ')"><title>' + esc(dates[k]) + ": " + v + "</title></path>");
       if (k === n - 1) out.push('<text x="' + (x + bw / 2) + '" y="' + (yy - 4) + '" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">' + v + "</text>");
@@ -2181,9 +2215,9 @@ if (typeof module !== "undefined") module.exports = A4;
     out.push("</svg>");
     return out.join("");
   }
-  function trendSvgPending(vals, dates) {
+  function trendSvgPending(vals, dates, fixMax) {
     var W = 300, H = 74, top = 14, base = H - 14, slots = 3, n = vals.length;
-    var max = Math.max(1, Math.max.apply(null, vals.concat([0])) * 1.4);
+    var max = fixMax || Math.max(1, Math.max.apply(null, vals.concat([0])) * 1.4);
     var slot = W / TREND_MAX, bw = Math.min(26, slot - 8), x0 = (W - slot * slots) / 2;
     var out = ['<svg viewBox="0 0 ' + W + " " + H + '" class="tr-pend" role="img" aria-hidden="true">'];
     out.push('<line x1="0" x2="' + W + '" y1="' + base + '" y2="' + base + '" stroke="var(--line)" stroke-width="1"/>');
@@ -2209,8 +2243,75 @@ if (typeof module !== "undefined") module.exports = A4;
     $("trendLbl").textContent = pos ? T("trend.sub", { p: POS[pos].l.toLowerCase(), n: ms.length }).split(" · ")[0] : "";
     $("trendBody").innerHTML = h;
   }
+  /* Tabblad Trainingen: eigen cijfer (1-10) en energie (1-5) per training, tegen het eigen gemiddelde.
+     Geen extra invoer: dit komt uit de gewone check-in. Slaap-inzicht enkel bij genoeg trainingen in beide groepen. */
+  var TR_TRAIN = [
+    { id: "score", l: "trend.tScore", max: 10, thr: 1, get: function (s) { return +s.score || 0; } },
+    { id: "energy", l: "trend.tEnergy", max: 5, thr: 0.75, get: function (s) { return +s.energy || 0; } }
+  ];
+  function mean(a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : 0; }
+  function trainSessions(now) {
+    var st = iso(seasonStart(now));
+    return store.sessions.filter(function (s) { return s.type === "training" && s.date >= st && s.score && s.energy; })
+      .sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.created - b.created; });
+  }
+  function renderTrendTraining(now) {
+    var ts = trainSessions(now), n = ts.length;
+    var dates = ts.map(function (s) { var d = parse(s.date); return d.getDate() + "/" + (d.getMonth() + 1); });
+    if (n < 3) {
+      var h0 = '<p class="legend" style="margin:0 0 6px">' + esc(T("trend.tPending", { k: 3 - n })) + "</p>";
+      TR_TRAIN.forEach(function (m) {
+        h0 += '<div class="tr"><div class="tr-h"><b>' + esc(T(m.l)) + "</b><span>" + n + " / 3</span></div>" + trendSvgPending(ts.map(m.get), dates, m.max) + "</div>";
+      });
+      $("trendLbl").textContent = ""; $("trendBody").innerHTML = h0; return;
+    }
+    var rd = dates.slice(-TREND_MAX);
+    $("trendLbl").textContent = T("trend.tSub", { n: rd.length });
+    var h = '<div class="trend-legend"><span><i style="background:var(--up)"></i>' + T("trend.up") + '</span><span><i style="background:var(--mid)"></i>' + T("trend.mid") +
+      '</span><span><i style="background:var(--down)"></i>' + T("trend.down") + "</span></div>";
+    var tips = [];
+    TR_TRAIN.forEach(function (m) {
+      var vAll = ts.map(m.get), avg = mean(vAll), vals = vAll.slice(-TREND_MAX), last = vals[vals.length - 1], cls = trendClass(last, avg, m.thr);
+      h += '<div class="tr"><div class="tr-h"><b>' + esc(T(m.l)) + "</b><span>" + T("trend.avg", { a: num1(avg) }) + "</span></div>" +
+        trendSvg(vals, rd, avg, { max: m.max, thr: m.thr }) +
+        '<p class="tr-last">' + T("trend.tLast", { v: last }) + ' · <em style="color:var(--' + cls + ')">' + (cls === "up" ? "↑ " : cls === "down" ? "↓ " : "≈ ") + "</em>" + T("trend." + cls) + "</p></div>";
+      if (vAll.length >= 5) {
+        var rm = mean(vAll.slice(-3)), bm = mean(vAll.slice(0, -3)), d = rm - bm;
+        if (d >= m.thr) tips.push(T("trend.t" + (m.id === "score" ? "Score" : "Energy") + "Up", { r: num1(rm), b: num1(bm) }));
+        else if (d <= -m.thr) tips.push(T("trend.t" + (m.id === "score" ? "Score" : "Energy") + "Down", { r: num1(rm), b: num1(bm) }));
+      }
+    });
+    // Slaap: 8 uur of meer tegenover minder dan 8 uur. Minstens 3 trainingen in elke groep.
+    var good = ts.filter(function (s) { return s.sleepH === "8" || s.sleepH === "9" || s.sleepH === "10+"; });
+    var short = ts.filter(function (s) { return s.sleepH === "6-" || s.sleepH === "7"; });
+    if (good.length >= 3 && short.length >= 3) {
+      var gs = mean(good.map(TR_TRAIN[0].get)), ss = mean(short.map(TR_TRAIN[0].get));
+      var ge = mean(good.map(TR_TRAIN[1].get)), se = mean(short.map(TR_TRAIN[1].get));
+      if (gs - ss >= 1) tips.push(T("trend.tSleepScore", { g: num1(gs), s: num1(ss) }));
+      else if (ge - se >= 0.75) tips.push(T("trend.tSleepEnergy", { g: num1(ge), s: num1(se) }));
+    }
+    // Weekdag met duidelijk minder energie (pas vanaf 8 trainingen, minstens 3 op die dag).
+    if (n >= 8) {
+      var ea = mean(ts.map(TR_TRAIN[1].get)), low = null;
+      for (var w = 0; w < 7; w++) {
+        var dw = ts.filter(function (s) { return wdOf(s.date) === w; });
+        if (dw.length < 3) continue;
+        var em = mean(dw.map(TR_TRAIN[1].get));
+        if (em <= ea - 0.75 && (!low || em < low.em)) low = { w: w, em: em };
+      }
+      if (low) tips.push(T("trend.tDay", { d: DAGEN[low.w], w: num1(low.em), a: num1(ea) }));
+    }
+    if (!tips.length && n >= 5) tips.push(T("trend.tFlat"));
+    if (tips.length) h += '<div class="tips"><div class="eyebrow">' + T("trend.tips") + "</div>" + tips.map(function (t) { return "<p>" + esc(t) + "</p>"; }).join("") + "</div>";
+    h += '<p class="legend" style="margin:10px 0 0">' + esc(T("trend.tNote")) + "</p>";
+    $("trendBody").innerHTML = h;
+  }
+  var trendTab = "";
   function renderTrend(now) {
     var card = $("trendCard"); if (!card) return;
+    if (!trendTab) trendTab = store.trendTab === "training" ? "training" : "match";
+    setPressed("#trendTabs", trendTab);
+    if (trendTab === "training") { card.hidden = false; renderTrendTraining(now); return; }
     var st = iso(seasonStart(now));
     var all = store.sessions.filter(function (s) { return s.type === "match" && s.date >= st && s.stats && POS[s.stats.pos]; });
     card.hidden = false;
@@ -2257,6 +2358,11 @@ if (typeof module !== "undefined") module.exports = A4;
     h += '<p class="legend" style="margin:10px 0 0">' + esc(T("trend.note", { p: pl })) + "</p>";
     $("trendBody").innerHTML = h;
   }
+
+  $("trendTabs").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b || b.dataset.v === trendTab) return;
+    trendTab = b.dataset.v; store.trendTab = trendTab; save(); renderTrend(today());
+  });
 
   /* ====== SNELKEUZES VRAAG 4: voor iedereen + per positie ====== */
   var FOCUS = {
@@ -2510,13 +2616,13 @@ if (typeof module !== "undefined") module.exports = A4;
     { e: "Welkom", t: "Twee minuten na elke sessie",
       h: "<p>Na elke training of match beantwoord je vier korte vragen. Zo zie je zelf waar je groeit, week na week.</p><p>Er is geen fout antwoord. Eerlijk is genoeg.</p><p>Stel op het startscherm ook <b>je eigen doel</b>: wat wil je bereiken, en wat doe je er elke week zelf voor?</p>" },
     { e: "Stap 1", t: "Plan je week",
-      h: "<p>Tik op een dag in <b>Deze week</b> en kies <b>training</b>, <b>match</b>, <b>rust</b> of <b>geannuleerd</b>.</p><p>Kies je <b>rust</b>, dan kies je ook wat je doet: chillax, specifiek, fitness of lopen. Met <b>Deel</b> stuur je je keuze naar je ouders.</p><p>Vink <b>Elke … zo</b> aan voor je vaste trainingsdagen. Dan hoef je ze maar één keer in te stellen. Matchdagen krijgen sterretjes.</p>" },
+      h: "<p>Tik op een dag in <b>Deze week</b> en kies <b>training</b>, <b>match</b>, <b>rust</b> of <b>geannuleerd</b>.</p><p>Kies je <b>rust</b>, dan kan je ook kiezen wat je doet: chillax, specifiek, fitness of lopen. Dat hoeft niet. Met <b>Deel</b> stuur je je keuze naar je ouders.</p><p>Vink <b>Elke … zo</b> aan voor je vaste trainingsdagen. Dan hoef je ze maar één keer in te stellen. Matchdagen krijgen sterretjes.</p>" },
     { e: "Stap 2", t: "Doe je check-in",
       h: "<ul><li><b>Snelle check:</b> energie, slaap en pijn.</li><li><b>Bij een match:</b> je positie en je cijfers, zoals goals, duels en recuperaties.</li><li><b>Vier vragen:</b> je cijfer, je highlight, je reset-moment en je focus.</li><li><b>Tot slot:</b> een vraag voor je trainer en eventueel een foto van de dag. Je vraag blijft op je startscherm staan tot je ze gesteld hebt.</li></ul><p>Een half ingevulde check-in blijft bewaard. Je kan later verderdoen.</p>" },
     { e: "Stap 3", t: "Typen of inspreken",
       h: "<p>Typ je antwoord gewoon in het tekstvak.</p><p><b>Liever inspreken?</b> Tik in het tekstvak en druk op het <b>microfoontje van je toetsenbord</b>. Je telefoon zet je stem om in tekst. Dat werkt op iPhone en Android.</p><p>Daarna kan je de tekst nog aanpassen.</p>" },
     { e: "Stap 4", t: "Je weekverslag",
-      h: "<p>In <b>Verslag</b> kies je de week en vink je aan welke check-ins erin komen. Je <b>ploeg</b> (U-categorie) kies je op het startscherm, onder je naam. Die komt bovenaan je verslag.</p><p>Daarna <b>Download PDF</b> of <b>Print</b>: een nette A4 voor jou en je trainer. Onderaan staat een kader om <b>met de hand</b> in te vullen: neem het blad mee en noteer de feedback van je trainer voor je volgende training of match. Foto's komen niet op papier.</p><p>Op je startscherm zie je bij <b>Mijn evolutie</b> hoe je matchcijfers evolueren tegenover je eigen gemiddelde.</p>" },
+      h: "<p>In <b>Verslag</b> kies je de week en vink je aan welke check-ins erin komen. Je <b>ploeg</b> (U-categorie) kies je op het startscherm, onder je naam. Die komt bovenaan je verslag.</p><p>Daarna <b>Download PDF</b> of <b>Print</b>: een nette A4 voor jou en je trainer. Onderaan staat een kader om <b>met de hand</b> in te vullen: neem het blad mee en noteer de feedback van je trainer voor je volgende training of match. Foto's komen niet op papier.</p><p>Op je startscherm zie je bij <b>Mijn evolutie</b> hoe je matchcijfers evolueren tegenover je eigen gemiddelde. Bij <b>Trainingen</b> zie je je eigen cijfer en je energie, en of slaap daarin meespeelt.</p>" },
     { e: "Voor ouders", t: "Zo volg je mee",
       h: "<p>De app heeft <b>geen server en geen account</b>. Alles wat je kind invult, staat alleen op zijn eigen telefoon.</p><p>Open je de app op je eigen telefoon, dan is die leeg, ook met de code van je kind. Dat is geen fout: zo blijven de antwoorden privé.</p><p><b>Zo volg je mee:</b></p><ul><li><b>Het weekverslag:</b> je kind downloadt de PDF in Verslag en stuurt hem naar jou.</li><li><b>Na elke check-in:</b> je kind kan met één tik zijn antwoorden naar jou sturen via WhatsApp of mail. Je kind kiest zelf.</li><li><b>Op een rustdag:</b> je kind kan met één tik laten weten wat het doet: chillax, specifiek, fitness of lopen.</li><li><b>Samen kijken</b> op de telefoon van je kind.</li></ul><p><b>Akkoord:</b> je kind krijgt zijn code via jou. Door de code te geven of zelf in te geven, ga je akkoord met de app en de privacytekst.</p>" },
     { e: "Stap 5", t: "Veilig bewaren",
