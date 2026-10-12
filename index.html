@@ -94,7 +94,7 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .btn-soft{background:var(--blue-soft);color:var(--blue-ink);width:100%}
 .btn svg{width:22px;height:22px;flex:none}
 .btn:disabled{opacity:.45;cursor:not-allowed}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
 .sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
@@ -197,7 +197,7 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .seg.c5 button{font-family:var(--display);font-size:24px;font-weight:800}
 .field-l{font-weight:700;font-size:15px;margin:0 0 8px;display:flex;justify-content:space-between;gap:8px}
 .field-l span{font-weight:500;color:var(--muted)}
-.dateinput{width:100%;min-height:50px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);padding:10px 12px;font-size:16px}
+.dateinput{width:100%;min-width:0;max-width:100%;min-height:50px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);padding:10px 12px;font-size:16px}
 .jersey{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 .jersey button{aspect-ratio:1/1;max-width:100%;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-family:var(--display);font-weight:800;font-size:30px;line-height:1}
 .answer{position:relative}
@@ -229,6 +229,8 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .morepos[open] summary{margin-bottom:2px}
 .morepos .chips{margin-bottom:6px}
 .chips button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
+.sleepwhy{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.sleepwhy .field-l{margin:0}
 
 /* verslag */
 .toggle{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:4px;gap:4px}
@@ -989,7 +991,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "share.desc": "Wil je je antwoorden delen met je ouders? Jij kiest of je deelt, en met wie: WhatsApp, mail of een berichtje.",
       "share.later": "Nu niet", "share.hint": "Later delen kan ook: tik op de check-in onder Deze week.",
       "share.copied": "Tekst gekopieerd. Plak hem in WhatsApp of in een mail.", "share.subject": "Debrief FC · check-in {d}",
-      "tag.pain": "Pijn gemeld", "detail.pain": "Pijn", "detail.del": "Verwijder deze check-in",
+      "tag.pain": "Pijn gemeld", "detail.pain": "Pijn", "detail.sleep": "Slaap", "detail.del": "Verwijder deze check-in",
       "detail.delSure": "Zeker? Tik nog eens om te verwijderen", "detail.deleted": "Check-in verwijderd.",
       "today.training": "Vandaag training. Daarna: vier vragen, twee minuten.",
       "today.match": "Vandaag match. Succes. Na het laatste fluitsignaal: vier vragen, twee minuten.",
@@ -1068,7 +1070,9 @@ if (typeof module !== "undefined") module.exports = A4;
       "q.energy": "Energie", "q.energyScale": "1 = leeg · 5 = vol", "q.sleep": "Slaap afgelopen nacht", "q.hours": "aantal uur",
       "q.h6": "6 uur of minder", "q.h10": "10 uur of meer",
       "q.sleepHint": "Op jouw leeftijd is 8 tot 10 uur slaap de richtlijn. Slaap is herstel, en herstel is training.",
-      "q.sleepQ": "Hoe heb je geslapen?", "q.bad": "Slecht", "q.ok": "Oké", "q.good": "Goed",
+      "q.sleepQ": "Hoe heb je geslapen?",
+      "q.sleepWhy": "Wat speelde er mee?", "q.sleepWhyOpt": "mag kort", "q.sleepWhyPh": "Bijvoorbeeld: laat thuis na de training en daarna nog huiswerk",
+      "sw.late": "laat gaan slapen", "sw.phone": "op mijn gsm of tablet", "sw.stress": "stress of zenuwen", "sw.woke": "vaak wakker geworden", "sw.early": "vroeg op moeten", "sw.sick": "pijn of ziek", "q.bad": "Slecht", "q.ok": "Oké", "q.good": "Goed",
       "q.pain": "Pijn of last ergens?", "q.painWhere": "Waar, wat voor pijn, en hoeveel op 10?",
       "q.painPh": "Bijvoorbeeld: rechterenkel, stekend, 4/10, sinds de match",
       "q.painNote": "<b>Belangrijk:</b> meld pijn ook altijd meteen aan je trainer of ouders. Deze app vervangt geen medisch advies.",
@@ -1157,7 +1161,7 @@ if (typeof module !== "undefined") module.exports = A4;
       "share.desc": "Tu veux partager tes réponses avec tes parents" + NB + "? C'est toi qui choisis si tu partages, et avec qui" + NB + ": WhatsApp, mail ou message.",
       "share.later": "Pas maintenant", "share.hint": "Tu peux aussi partager plus tard" + NB + ": touche le check-in sous Cette semaine.",
       "share.copied": "Texte copié. Colle-le dans WhatsApp ou dans un mail.", "share.subject": "Debrief FC · check-in du {d}",
-      "tag.pain": "Douleur signalée", "detail.pain": "Douleur", "detail.del": "Supprimer ce check-in",
+      "tag.pain": "Douleur signalée", "detail.pain": "Douleur", "detail.sleep": "Sommeil", "detail.del": "Supprimer ce check-in",
       "detail.delSure": "Sûr" + NB + "? Touche encore pour supprimer", "detail.deleted": "Check-in supprimé.",
       "today.training": "Entraînement aujourd'hui. Ensuite" + NB + ": quatre questions, deux minutes.",
       "today.match": "Match aujourd'hui. Bonne chance. Après le coup de sifflet final" + NB + ": quatre questions, deux minutes.",
@@ -1236,7 +1240,9 @@ if (typeof module !== "undefined") module.exports = A4;
       "q.energy": "Énergie", "q.energyScale": "1 = vide · 5 = plein", "q.sleep": "Sommeil la nuit dernière", "q.hours": "nombre d'heures",
       "q.h6": "6 heures ou moins", "q.h10": "10 heures ou plus",
       "q.sleepHint": "À ton âge, la référence est de 8 à 10 heures de sommeil. Dormir, c'est récupérer, et récupérer, c'est s'entraîner.",
-      "q.sleepQ": "Comment as-tu dormi" + NB + "?", "q.bad": "Mal", "q.ok": "Correct", "q.good": "Bien",
+      "q.sleepQ": "Comment as-tu dormi" + NB + "?",
+      "q.sleepWhy": "Qu'est-ce qui a joué" + NB + "?", "q.sleepWhyOpt": "en bref", "q.sleepWhyPh": "Par exemple" + NB + ": rentré tard de l'entraînement, puis encore des devoirs",
+      "sw.late": "couché tard", "sw.phone": "sur mon téléphone ou ma tablette", "sw.stress": "stress ou nervosité", "sw.woke": "réveillé souvent", "sw.early": "levé tôt", "sw.sick": "douleur ou malade", "q.bad": "Mal", "q.ok": "Correct", "q.good": "Bien",
       "q.pain": "Douleur ou gêne quelque part" + NB + "?", "q.painWhere": "Où, quel type de douleur, et combien sur 10" + NB + "?",
       "q.painPh": "Par exemple" + NB + ": cheville droite, douleur vive, 4/10, depuis le match",
       "q.painNote": "<b>Important" + NB + ":</b> signale toujours aussi une douleur à ton entraîneur ou à tes parents. Cette app ne remplace pas un avis médical.",
@@ -1952,9 +1958,11 @@ if (typeof module !== "undefined") module.exports = A4;
   function sleepHours(h) { return h === "6-" || h === "10+" ? HOURS[h] : h ? h + HOURS.unit : ""; }
   function sleepTxt(s) {
     var h = sleepHours(s.sleepH), q = SLEEP_Q[s.sleepQ] || "";
-    return (h || q) ? T("rep.sleep") + [h, q].filter(Boolean).join(", ") : "";
+    return (h || q) ? T("rep.sleep") + [h, q].filter(Boolean).join(", ") + (s.sleepWhy ? ": " + s.sleepWhy : "") : "";
   }
   function shortSleep(h) { return h === "6-" || h === "7"; }
+  function badSleep(q) { return q === "slecht" || q === "oke"; }
+  var SLEEP_WHY = ["late", "phone", "stress", "woke", "early", "sick"];
 
   /* ====== MATCHCIJFERS: alleen bij een match, per positie een mix van resultaat en inzet ====== */
   var STATS = {
@@ -2759,6 +2767,7 @@ if (typeof module !== "undefined") module.exports = A4;
         var tags = s.pain ? '<span class="tag warn">' + T("tag.pain") + '</span>' : "";
         var det = '<div class="detail" id="d-' + s.id + '"' + (open ? "" : " hidden") + ">" +
           (s.pain ? '<p><b>' + T("detail.pain") + '</b>' + esc(s.painText || T("common.yesL")) + "</p>" : "") +
+          (s.sleepWhy ? '<p><b>' + T("detail.sleep") + '</b>' + esc([sleepHours(s.sleepH), SLEEP_Q[s.sleepQ]].filter(Boolean).join(", ") + ": " + s.sleepWhy) + "</p>" : "") +
           QS.map(function (q, i) { return "<p><b>" + (i + 1) + ". " + esc(q.short) + "</b>" + esc(s.a[i] || "-") + "</p>"; }).join("") +
           (open ? '<div class="phdetail"><b>' + T("ph.label") + '</b><div id="phd-' + s.id + '"></div></div>' : "") +
           '<button class="sharebtn" data-share="' + s.id + '">' + SHARE_SVG + T("share.btn") + "</button>" +
@@ -2826,7 +2835,10 @@ if (typeof module !== "undefined") module.exports = A4;
         '<div><p class="field-l">' + T("q.sleep") + ' <span>' + T("q.hours") + '</span></p><div class="seg c5" id="gSleepH">' +
         '<button data-v="6-" aria-label="' + T("q.h6") + '">≤6</button><button data-v="7">7</button><button data-v="8">8</button><button data-v="9">9</button><button data-v="10+" aria-label="' + T("q.h10") + '">10+</button></div>' +
         '<p class="hint" id="sleepHint" hidden>' + T("q.sleepHint") + '</p></div>' +
-        '<div><p class="field-l">' + T("q.sleepQ") + '</p><div class="seg c3" id="gSleepQ"><button data-v="slecht">' + T("q.bad") + '</button><button data-v="oke">' + T("q.ok") + '</button><button data-v="goed">' + T("q.good") + '</button></div></div>' +
+        '<div><p class="field-l">' + T("q.sleepQ") + '</p><div class="seg c3" id="gSleepQ"><button data-v="slecht">' + T("q.bad") + '</button><button data-v="oke">' + T("q.ok") + '</button><button data-v="goed">' + T("q.good") + '</button></div>' +
+        '<div id="sleepWhyWrap" class="sleepwhy"' + (badSleep(d.sleepQ) ? "" : " hidden") + '><label class="field-l" for="sleepWhy">' + T("q.sleepWhy") + ' <span>' + T("q.sleepWhyOpt") + '</span></label>' +
+        '<div class="chips" id="sleepChips">' + SLEEP_WHY.map(function (k) { var t = T("sw." + k); return '<button type="button" data-v="' + esc(t) + '">' + esc(cap(t)) + "</button>"; }).join("") + "</div>" +
+        '<div class="answer"><textarea class="plain" id="sleepWhy" maxlength="200" placeholder="' + esc(T("q.sleepWhyPh")) + '">' + esc(d.sleepWhy || "") + "</textarea></div></div></div>" +
         '<div><p class="field-l">' + T("q.pain") + '</p><div class="seg c2" id="gPain"><button data-v="false">' + T("common.no") + '</button><button data-v="true">' + T("common.yes") + '</button></div></div>' +
         '<div id="painWrap"' + (d.pain ? "" : " hidden") + '><label class="field-l" for="painTxt">' + T("q.painWhere") + '</label>' +
         '<div class="answer"><textarea class="plain" id="painTxt" placeholder="' + esc(T("q.painPh")) + '">' + esc(d.painText) + "</textarea></div>" +
@@ -2837,7 +2849,18 @@ if (typeof module !== "undefined") module.exports = A4;
       bindSeg("#gType", function (v) { d.type = v; drawProgress(0, stepKeys(d).length); $("stepnum").textContent = "1/" + stepKeys(d).length; });
       bindSeg("#gEnergy", function (v) { d.energy = +v; });
       bindSeg("#gSleepH", function (v) { d.sleepH = v; $("sleepHint").hidden = !shortSleep(v); });
-      bindSeg("#gSleepQ", function (v) { d.sleepQ = v; });
+      bindSeg("#gSleepQ", function (v) { d.sleepQ = v; $("sleepWhyWrap").hidden = !badSleep(v); });
+      // Waarom slecht of oké geslapen: tikken op een chip zet de reden in het tekstvak (of haalt ze weg).
+      function swParts() { return $("sleepWhy").value.split(/\s*,\s*/).filter(Boolean); }
+      function swMark() { var low = swParts().map(function (x) { return x.toLowerCase(); }); document.querySelectorAll("#sleepChips button").forEach(function (b) { b.setAttribute("aria-pressed", String(low.indexOf(b.dataset.v.toLowerCase()) >= 0)); }); }
+      $("sleepChips").addEventListener("click", function (e) {
+        var b = e.target.closest("button"); if (!b) return;
+        var parts = swParts(), low = parts.map(function (x) { return x.toLowerCase(); }), i = low.indexOf(b.dataset.v.toLowerCase());
+        if (i >= 0) parts.splice(i, 1); else parts.push(b.dataset.v);
+        $("sleepWhy").value = parts.join(", "); d.sleepWhy = $("sleepWhy").value; save(); swMark();
+      });
+      $("sleepWhy").addEventListener("input", function (e) { d.sleepWhy = e.target.value; save(); swMark(); });
+      swMark();
       bindSeg("#gPain", function (v) { d.pain = (v === "true"); $("painWrap").hidden = !d.pain; });
       $("ckDate").addEventListener("change", function (e) { if (e.target.value) { d.date = e.target.value; d.type = typeFor(d.date, d.type); setPressed("#gType", d.type); save(); } });
       $("painTxt").addEventListener("input", function (e) { d.painText = e.target.value; save(); });
@@ -2881,6 +2904,7 @@ if (typeof module !== "undefined") module.exports = A4;
     var newS = {
       id: "s" + Date.now(), created: Date.now(), date: d.date, type: d.type, energy: d.energy,
       pain: d.pain, painText: d.pain ? d.painText.trim() : "", score: d.score, sleepH: d.sleepH || "", sleepQ: d.sleepQ || "",
+      sleepWhy: badSleep(d.sleepQ) ? (d.sleepWhy || "").trim() : "",
       stats: statsForSave(d), photos: (d.photos || []).slice(), ask: (d.ask || "").trim(),
       a: d.a.map(function (x) { return x.trim(); })
     };
@@ -2940,7 +2964,7 @@ if (typeof module !== "undefined") module.exports = A4;
     out.push("⭐ " + T("wa.score") + ": *" + s.score + "/10*");
     out.push("🔋 " + T("wa.energy") + ": " + s.energy + "/5");
     var sh = sleepHours(s.sleepH), sq = SLEEP_Q[s.sleepQ] || "";
-    if (sh || sq) out.push("😴 " + T("wa.sleep") + ": " + [sh, sq].filter(Boolean).join(" · "));
+    if (sh || sq) out.push("😴 " + T("wa.sleep") + ": " + [sh, sq].filter(Boolean).join(" · ") + (s.sleepWhy ? " — _" + s.sleepWhy.replace(/\s*\n+\s*/g, " ") + "_" : ""));
     out.push(s.pain ? "🩹 " + T("wa.pain") + (s.painText ? ": " + s.painText.trim() : "") : "✅ " + T("wa.noPain"));
     if (s.stats && POS[s.stats.pos]) {
       var st = s.stats;
