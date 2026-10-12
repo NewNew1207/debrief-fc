@@ -994,7 +994,8 @@ if (typeof module !== "undefined") module.exports = A4;
       "day.planned": "{w} gepland", "day.nothing": "niets gepland", "day.done": ", check-in gedaan", "day.tap": ". Tik om te plannen.",
       "rest.q": "Wat doe je op je rustdag?", "rest.chillax": "Chillax", "rest.specifiek": "Specifiek", "rest.fitness": "Fitness", "rest.lopen": "Lopen", "rest.opt": "(mag, hoeft niet)", "rest.clear": "Toch niets kiezen",
       "rest.day": "Rustdag", "rest.share": "Deel", "rest.shareAria": "Deel je rustdag van {d} met je ouders", "rest.saveShare": "Bewaar en deel met mijn ouders",
-      "rest.shareDay": "Rustdag · {d}", "rest.shareMine": "Mijn keuze: {k}", "rest.subject": "Debrief FC · rustdag {d}",
+      "rest.shareDay": "Rustdag · {d}",
+      "wa.score": "Cijfer", "wa.energy": "Energie", "wa.sleep": "Slaap", "wa.pain": "Pijn", "wa.noPain": "Geen pijn", "wa.stats": "Matchcijfers", "rest.shareMine": "Mijn keuze: {k}", "rest.subject": "Debrief FC · rustdag {d}",
       "today.restKind": "Vandaag rustdag: {k}. Herstel hoort bij de training. Een check-in mag, maar hoeft niet.",
       "plan.eyebrow": "Planning", "plan.group": "Wat staat er op deze dag?", "plan.none": "Niets",
       "plan.every": "Elke {d} zo", "plan.onlyDay": "Geldt alleen voor deze dag", "plan.cancelWord": "geannuleerd",
@@ -1161,7 +1162,8 @@ if (typeof module !== "undefined") module.exports = A4;
       "day.planned": "{w} prévu", "day.nothing": "rien de prévu", "day.done": ", check-in fait", "day.tap": ". Touche pour planifier.",
       "rest.q": "Que fais-tu pendant ton jour de repos" + NB + "?", "rest.chillax": "Chillax", "rest.specifiek": "Spécifique", "rest.fitness": "Fitness", "rest.lopen": "Course", "rest.opt": "(si tu veux)", "rest.clear": "Finalement, rien de prévu",
       "rest.day": "Jour de repos", "rest.share": "Partager", "rest.shareAria": "Partage ton jour de repos du {d} avec tes parents", "rest.saveShare": "Enregistrer et partager avec mes parents",
-      "rest.shareDay": "Jour de repos · {d}", "rest.shareMine": "Mon choix" + NB + ": {k}", "rest.subject": "Debrief FC · jour de repos {d}",
+      "rest.shareDay": "Jour de repos · {d}",
+      "wa.score": "Note", "wa.energy": "Énergie", "wa.sleep": "Sommeil", "wa.pain": "Douleur", "wa.noPain": "Pas de douleur", "wa.stats": "Stats du match", "rest.shareMine": "Mon choix" + NB + ": {k}", "rest.subject": "Debrief FC · jour de repos {d}",
       "today.restKind": "Jour de repos aujourd'hui" + NB + ": {k}. La récupération fait partie de l'entraînement. Un check-in est possible, mais pas obligatoire.",
       "plan.eyebrow": "Planning", "plan.group": "Qu'est-ce qui est prévu ce jour-là" + NB + "?", "plan.none": "Rien",
       "plan.every": "Chaque {d}", "plan.onlyDay": "Uniquement pour ce jour", "plan.cancelWord": "annulé",
@@ -2916,18 +2918,45 @@ if (typeof module !== "undefined") module.exports = A4;
      Geen server: het deelmenu van de telefoon opent (WhatsApp, Mail, Berichten...).
      De speler kiest zelf of en naar wie hij stuurt. Lukt dat niet, dan kopiëren we de tekst. */
   var SHARE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+  /* WhatsApp-opmaak: *vet*, _cursief_, "> " = citaatblok, "- " = opsomming.
+     WhatsApp toont dit netjes; in andere apps blijven de tekens gewoon leesbaar. */
+  var QICON = ["💭", "🎬", "🔄", "🎯"];
+  function waHead() { return "⚽ *Debrief FC*" + (nameNow() ? " · " + nameNow() : ""); }
+  function waQuote(t) {
+    t = (t == null ? "" : String(t)).trim();
+    if (!t) return "> _" + T("rep.noAnswer") + "_";
+    return t.split(/\n+/).map(function (l) { return "> " + l.trim(); }).filter(function (l) { return l !== "> "; }).join("\n");
+  }
   function shareText(s) {
-    var r = sessReport(s), out = ["Debrief FC" + (nameNow() ? " · " + nameNow() : ""), r.title, r.meta];
-    if (r.stats) out.push(r.stats);
-    r.qa.forEach(function (x) { out.push("", x.q, (x.a && String(x.a).trim()) ? String(x.a).trim() : T("rep.noAnswer")); });
+    var d = cap(fmt(parse(s.date), { weekday: "long", day: "numeric", month: "long" }));
+    var out = [waHead(), "_" + d + " · " + typeLabel(s.type) + "_", ""];
+    out.push("⭐ " + T("wa.score") + ": *" + s.score + "/10*");
+    out.push("🔋 " + T("wa.energy") + ": " + s.energy + "/5");
+    var sh = sleepHours(s.sleepH), sq = SLEEP_Q[s.sleepQ] || "";
+    if (sh || sq) out.push("😴 " + T("wa.sleep") + ": " + [sh, sq].filter(Boolean).join(" · "));
+    out.push(s.pain ? "🩹 " + T("wa.pain") + (s.painText ? ": " + s.painText.trim() : "") : "✅ " + T("wa.noPain"));
+    if (s.stats && POS[s.stats.pos]) {
+      var st = s.stats;
+      out.push("", "📊 *" + T("wa.stats") + "* · " + POS[st.pos].l + (st.min != null ? " · " + st.min + " min" : ""));
+      POS[st.pos].stats.forEach(function (id) {
+        var v = st.v[id], S = STATS[id];
+        out.push("- " + S.l + ": " + (S.bool ? (v === true ? T("common.yesL") : v === false ? T("common.noL") : "-") : (v || 0)));
+      });
+    }
+    QS.forEach(function (q, i) { out.push("", QICON[i] + " *" + q.short + "*", waQuote(s.a[i])); });
+    if (s.ask) out.push("", "❓ *" + T("ask.label") + "*", waQuote(s.ask));
     return out.join("\n");
+  }
+  // Voor mail: de WhatsApp-tekens weghalen, zodat het daar ook rustig leest.
+  function plainText(t) {
+    return t.replace(/\*([^*\n]+)\*/g, "$1").replace(/(^|[\s(])_([^_\n]+)_(?=[\s).,!?]|$)/gm, "$1$2");
   }
   function copyFallback(text, subject) {
     var done = function () { toast(T("share.copied")); };
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () {});
     } catch (e) {}
-    if (!inViewer()) { try { location.href = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(text); } catch (e) {} }
+    if (!inViewer()) { try { location.href = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(plainText(text)); } catch (e) {} }
   }
   function shareOut(text, subject) {
     if (navigator.share) {
@@ -2940,7 +2969,7 @@ if (typeof module !== "undefined") module.exports = A4;
   // Rustdagkeuze naar de ouders: "Rustdag · zondag 11 oktober / Mijn keuze: 💪 Fitness".
   function restShareText(k) {
     var r = restKindOf(k);
-    return ["Debrief FC" + (nameNow() ? " · " + nameNow() : ""), T("rest.shareDay", { d: longDay(k).toLowerCase() }), T("rest.shareMine", { k: REST_ICON[r] + " " + T("rest." + r) })].join("\n");
+    return [waHead(), "_" + T("rest.shareDay", { d: longDay(k).toLowerCase() }) + "_", "", T("rest.shareMine", { k: REST_ICON[r] + " *" + T("rest." + r) + "*" })].join("\n");
   }
   function shareRest(k) {
     if (!restKindOf(k)) return;
