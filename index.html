@@ -24,6 +24,7 @@
   een iPhone-foto (HEIC) op Android, heic2any 0.0.4 via jsDelivr.
   Data: alleen lokaal in de browser (localStorage). Maak regelmatig een back-up via Verslag > Back-up.
   Aanpassen: zie CONFIG bovenaan het script.
+  Zaterdag vanaf 12:30: matchquote + keuze voor zondag, zie ZATERDAG in het script (testen: ?test=zaterdag).
   Naam: staat NIET in dit bestand. Die zit in de persoonlijke code (NAAM-XXXX-XXXX).
   Hier staan alleen onomkeerbare afdrukken van die codes (KNOWN_CODES_HASHED).
 -->
@@ -415,6 +416,23 @@ body.incheck .tabbar{position:static;flex:none;margin-inline:-16px}
 .overlay{position:fixed;inset:0;z-index:30;background:rgba(6,18,42,.6);display:grid;place-items:center;padding:16px}
 .dialog{background:var(--surface);color:var(--ink);border-radius:20px;padding:22px;width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 50px rgba(6,18,42,.35)}
 .dialog h2{font-family:var(--display);font-weight:800;font-size:28px;line-height:1.05}
+/* zaterdag vanaf 12:30: matchquote + keuze voor zondag */
+#satOv .dialog{padding:0;gap:0;overflow-x:hidden;overflow-y:auto;max-height:calc(100vh - 32px)}
+.sat-hero{position:relative;isolation:isolate;overflow:hidden;flex:none;background:linear-gradient(160deg,var(--hero-2),var(--hero) 60%);color:#fff;padding:22px 22px 24px}
+.sat-hero::before{content:"";position:absolute;width:220px;height:220px;border-radius:50%;border:2px solid rgba(255,255,255,.14);right:-96px;top:50%;transform:translateY(-50%);z-index:-1}
+.sat-hero::after{content:"";position:absolute;top:0;bottom:0;right:18px;border-left:2px solid rgba(255,255,255,.14);z-index:-1}
+.sat-hero .eyebrow{color:rgba(255,255,255,.8)}
+.sat-hero blockquote{margin:10px 0 0;font-family:var(--display);font-weight:800;font-size:clamp(26px,7.6vw,34px);line-height:1.04;text-transform:uppercase;text-wrap:balance;max-width:18ch}
+.sat-stars{position:absolute;top:22px;right:52px;width:14px;height:14px}
+.sat-hero:not(.is-match) .sat-stars{display:none}
+.sat-body{padding:18px 22px 22px;display:flex;flex-direction:column;gap:12px}
+#satAsk{display:flex;flex-direction:column;gap:10px}
+#satAsk h2{font-size:26px}
+#satAsk .hint,#satTest{margin:0;font-size:14px}
+#satShare{font-size:clamp(16px,4.4vw,18px);letter-spacing:.04em}
+#satShare svg{width:20px;height:20px}
+.satcard{background:var(--blue-soft);border-color:transparent}
+.satcard p{margin:0 0 12px;font-size:15px}
 .dialog p{margin:0}
 /* toegangsscherm: de app opent pas na een geldige code */
 .gate{position:fixed;inset:0;z-index:15;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;padding-inline:16px}
@@ -462,6 +480,11 @@ body.locked #app,body.locked .tabbar{display:none}
         <p class="muted" id="greetSub">Vier vragen, twee minuten.</p>
         <button class="linkbtn" id="codeBtn" data-i18n="code.enter">Persoonlijke code ingeven</button>
         <button type="button" class="teambtn" id="teamBtn"></button>
+      </div>
+      <div class="card satcard" id="satCard" hidden>
+        <div class="sec-h"><h3 data-i18n="sat.q">Wat doe je zondag?</h3><span class="muted" style="font-size:14px" data-i18n="sat.cardTag">vandaag kiezen</span></div>
+        <p data-i18n="sat.cardD">Kies vandaag nog: chillax, specifiek, fitness of lopen.</p>
+        <button type="button" class="btn btn-primary" id="satCardGo" data-i18n="sat.cardBtn">Kies nu</button>
       </div>
       <div class="card warncard" id="painCard" hidden role="status"></div>
       <div class="card" id="goalCard"></div>
@@ -753,6 +776,33 @@ body.locked #app,body.locked .tabbar{display:none}
     <button class="btn btn-ghost" id="codeCancel" data-i18n="common.cancel">Annuleer</button>
   </div>
 </div>
+<div class="overlay" id="satOv" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="satEyebrow" aria-describedby="satQuote">
+    <div class="sat-hero" id="satHero">
+      <span class="sat-stars" aria-hidden="true"><i class="spark a"></i><i class="spark b"></i><i class="spark c"></i></span>
+      <div class="eyebrow" id="satEyebrow">Matchdag</div>
+      <blockquote id="satQuote"></blockquote>
+    </div>
+    <div class="sat-body">
+      <div id="satAsk">
+        <h2 id="satQ" data-i18n="sat.q">Wat doe je zondag?</h2>
+        <div class="seg c2" id="satOpts" role="group" aria-labelledby="satQ">
+          <button type="button" data-v="chillax">😎 <span data-i18n="rest.chillax">Chillax</span></button>
+          <button type="button" data-v="specifiek">⚽ <span data-i18n="rest.specifiek">Specifiek</span></button>
+          <button type="button" data-v="fitness">💪 <span data-i18n="rest.fitness">Fitness</span></button>
+          <button type="button" data-v="lopen">🏃 <span data-i18n="rest.lopen">Lopen</span></button>
+        </div>
+        <p class="hint" data-i18n="sat.hint"></p>
+      </div>
+      <p class="note" id="satBusy" hidden></p>
+      <p class="hint" id="satTest" hidden></p>
+      <button class="btn btn-primary" id="satShare" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span data-i18n="rest.saveShare">Bewaar en deel met mijn ouders</span></button>
+      <button class="btn btn-soft" id="satSave" disabled data-i18n="sat.save">Alleen bewaren</button>
+      <button class="btn btn-ghost" id="satLater" data-i18n="sat.later">Later</button>
+      <button class="btn btn-primary" id="satGo" hidden data-i18n="sat.go">Let's go</button>
+    </div>
+  </div>
+</div>
 <div id="printArea" aria-hidden="true"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
@@ -1002,7 +1052,14 @@ if (typeof module !== "undefined") module.exports = A4;
       "day.planned": "{w} gepland", "day.nothing": "niets gepland", "day.done": ", check-in gedaan", "day.tap": ". Tik om te plannen.",
       "rest.q": "Wat doe je op je rustdag?", "rest.chillax": "Chillax", "rest.specifiek": "Specifiek", "rest.fitness": "Fitness", "rest.lopen": "Lopen", "rest.opt": "(mag, hoeft niet)", "rest.clear": "Toch niets kiezen",
       "rest.day": "Rustdag", "rest.share": "Deel", "rest.shareAria": "Deel je rustdag van {d} met je ouders", "rest.saveShare": "Bewaar en deel met mijn ouders",
-      "rest.shareDay": "Rustdag · {d}",
+      "rest.shareDay": "Rustdag · {d}", "rest.book": "Kunnen jullie een sessie boeken?",
+      "sat.eyebrow": "Zaterdag", "sat.eyebrowMatch": "Matchdag", "sat.eyebrowSunMatch": "Morgen match",
+      "sat.q": "Wat doe je zondag?",
+      "sat.hint": "Kies je specifiek? Deel het vandaag nog met je ouders, dan kan er op tijd een sessie geboekt worden.",
+      "sat.save": "Alleen bewaren", "sat.later": "Later", "sat.go": "Let's go",
+      "sat.sunPlanned": "Zondag staat al gepland: {w}.", "sat.saved": "Zondag: {k}. Bewaard.",
+      "sat.cardTag": "vandaag kiezen", "sat.cardD": "Kies vandaag nog: chillax, specifiek, fitness of lopen. Dan kunnen je ouders op tijd plannen.", "sat.cardBtn": "Kies nu",
+      "sat.test": "Test: je keuze geldt voor zondag {d}.",
       "wa.score": "Cijfer", "wa.energy": "Energie", "wa.sleep": "Slaap", "wa.pain": "Pijn", "wa.noPain": "Geen pijn", "wa.stats": "Matchcijfers", "rest.shareMine": "Mijn keuze: {k}", "rest.subject": "Debrief FC · rustdag {d}",
       "today.restKind": "Vandaag rustdag: {k}. Herstel hoort bij de training. Een check-in mag, maar hoeft niet.",
       "plan.eyebrow": "Planning", "plan.group": "Wat staat er op deze dag?", "plan.none": "Niets",
@@ -1172,7 +1229,14 @@ if (typeof module !== "undefined") module.exports = A4;
       "day.planned": "{w} prévu", "day.nothing": "rien de prévu", "day.done": ", check-in fait", "day.tap": ". Touche pour planifier.",
       "rest.q": "Que fais-tu pendant ton jour de repos" + NB + "?", "rest.chillax": "Chillax", "rest.specifiek": "Spécifique", "rest.fitness": "Fitness", "rest.lopen": "Course", "rest.opt": "(si tu veux)", "rest.clear": "Finalement, rien de prévu",
       "rest.day": "Jour de repos", "rest.share": "Partager", "rest.shareAria": "Partage ton jour de repos du {d} avec tes parents", "rest.saveShare": "Enregistrer et partager avec mes parents",
-      "rest.shareDay": "Jour de repos · {d}",
+      "rest.shareDay": "Jour de repos · {d}", "rest.book": "Vous pouvez réserver une séance" + NB + "?",
+      "sat.eyebrow": "Samedi", "sat.eyebrowMatch": "Jour de match", "sat.eyebrowSunMatch": "Match demain",
+      "sat.q": "Que fais-tu dimanche" + NB + "?",
+      "sat.hint": "Tu choisis spécifique" + NB + "? Partage-le aujourd'hui avec tes parents, comme ça une séance peut être réservée à temps.",
+      "sat.save": "Juste enregistrer", "sat.later": "Plus tard", "sat.go": "Let's go",
+      "sat.sunPlanned": "Dimanche est déjà planifié" + NB + ": {w}.", "sat.saved": "Dimanche" + NB + ": {k}. Enregistré.",
+      "sat.cardTag": "à choisir aujourd'hui", "sat.cardD": "Choisis aujourd'hui" + NB + ": chillax, spécifique, fitness ou course. Comme ça, tes parents peuvent s'organiser à temps.", "sat.cardBtn": "Choisir maintenant",
+      "sat.test": "Test" + NB + ": ton choix vaut pour le dimanche {d}.",
       "wa.score": "Note", "wa.energy": "Énergie", "wa.sleep": "Sommeil", "wa.pain": "Douleur", "wa.noPain": "Pas de douleur", "wa.stats": "Stats du match", "rest.shareMine": "Mon choix" + NB + ": {k}", "rest.subject": "Debrief FC · jour de repos {d}",
       "today.restKind": "Jour de repos aujourd'hui" + NB + ": {k}. La récupération fait partie de l'entraînement. Un check-in est possible, mais pas obligatoire.",
       "plan.eyebrow": "Planning", "plan.group": "Qu'est-ce qui est prévu ce jour-là" + NB + "?", "plan.none": "Rien",
@@ -1336,6 +1400,18 @@ if (typeof module !== "undefined") module.exports = A4;
       { t: "Douter, c'est normal. Continue à demander le ballon.", s: "" },
       { t: "Scanne. Décide. Ose.", s: "" }
     ],
+    SAT_QUOTES: [
+      "Trust your game. Tu l'as déjà travaillé cent fois.",
+      "Premier ballon, premier duel" + NB + ": donne le ton tout de suite.",
+      "Demande le ballon. Même après une occasion ratée.",
+      "Ose le 1 contre 1. L'audace, c'est aussi une qualité.",
+      "Scanne avant de recevoir le ballon. Tu auras du temps.",
+      "Pas besoin de jouer parfaitement. Donne tout, à chaque minute.",
+      "Dis-toi ce que tu dirais à ton meilleur ami.",
+      "Énervé après une erreur" + NB + "? Mets cette énergie dans ton prochain sprint.",
+      "Joue pour l'équipe. Progresse pour toi.",
+      "Grinta. Chaque duel compte, jusqu'à la dernière minute."
+    ],
     QS: [
       { q: "Quelle note te donnes-tu aujourd'hui" + NB + "? Et pourquoi pas un point de plus" + NB + "?", short: "Quelle note te donnes-tu" + NB + "? Et pourquoi pas un point de plus" + NB + "?",
         hint: "Choisis d'abord ta note. Dis ensuite ce qui manquait pour ce point en plus.", ph: "Je me donne un ... parce que ..." },
@@ -1367,7 +1443,7 @@ if (typeof module !== "undefined") module.exports = A4;
       { e: "Bienvenue", t: "Deux minutes après chaque séance",
         h: "<p>Après chaque entraînement ou match, tu réponds à quatre petites questions. Tu vois ainsi toi-même où tu progresses, semaine après semaine.</p><p>Il n'y a pas de mauvaise réponse. Être honnête suffit.</p><p>Sur l'écran d'accueil, fixe aussi <b>ton propre objectif</b>" + NB + ": que veux-tu atteindre, et que fais-tu toi-même chaque semaine pour y arriver" + NB + "?</p>" },
       { e: "Étape 1", t: "Planifie ta semaine",
-        h: "<p>Touche un jour dans <b>Cette semaine</b> et choisis <b>entraînement</b>, <b>match</b>, <b>repos</b> ou <b>annulé</b>.</p><p>Si tu choisis <b>repos</b>, tu peux aussi choisir ce que tu fais" + NB + ": chillax, spécifique, fitness ou course. Ce n'est pas obligatoire. Avec <b>Partager</b>, tu envoies ton choix à tes parents.</p><p>Coche <b>Chaque …</b> pour tes jours d'entraînement fixes. Tu ne dois les régler qu'une fois. Les jours de match reçoivent des étoiles.</p>" },
+        h: "<p>Touche un jour dans <b>Cette semaine</b> et choisis <b>entraînement</b>, <b>match</b>, <b>repos</b> ou <b>annulé</b>.</p><p>Si tu choisis <b>repos</b>, tu peux aussi choisir ce que tu fais" + NB + ": chillax, spécifique, fitness ou course. Ce n'est pas obligatoire. Avec <b>Partager</b>, tu envoies ton choix à tes parents.</p><p>Coche <b>Chaque …</b> pour tes jours d'entraînement fixes. Tu ne dois les régler qu'une fois. Les jours de match reçoivent des étoiles.</p><p><b>Le samedi à partir de 12h30</b>, en ouvrant l'app, tu reçois une citation pour le match et tu choisis ce que tu fais dimanche. Tu choisis <b>spécifique</b>" + NB + "? Partage-le tout de suite" + NB + ": comme ça, une séance peut être réservée à temps. Astuce" + NB + ": mets un rappel qui se répète sur ton téléphone, car l'app ne peut pas envoyer de notification elle-même.</p>" },
       { e: "Étape 2", t: "Fais ton check-in",
         h: "<ul><li><b>Check rapide" + NB + ":</b> énergie, sommeil et douleur.</li><li><b>Après un match" + NB + ":</b> ton poste et tes stats, comme les buts, les duels et les récupérations.</li><li><b>Quatre questions" + NB + ":</b> ta note, ton highlight, ton moment reset et ton point d'attention.</li><li><b>Pour finir" + NB + ":</b> une question pour ton entraîneur et, si tu veux, une photo du jour. Ta question reste sur ton écran d'accueil jusqu'à ce que tu l'aies posée.</li></ul><p>Un check-in commencé reste enregistré. Tu peux le terminer plus tard.</p>" },
       { e: "Étape 3", t: "Écrire ou dicter",
@@ -1375,7 +1451,7 @@ if (typeof module !== "undefined") module.exports = A4;
       { e: "Étape 4", t: "Ton rapport hebdomadaire",
         h: "<p>Dans <b>Rapport</b>, choisis la semaine et coche les check-ins à inclure. Ton <b>équipe</b> (catégorie U) se choisit sur l'écran d'accueil, sous ton nom. Elle apparaît en haut de ton rapport.</p><p>Ensuite <b>Télécharger le PDF</b> ou <b>Imprimer</b>" + NB + ": une page A4 soignée pour toi et ton entraîneur. En bas, un cadre est prévu pour écrire <b>à la main</b>" + NB + ": emporte la feuille et note le retour de ton entraîneur pour ton prochain entraînement ou match. Les photos ne sont pas imprimées.</p><p>Sur ton écran d'accueil, <b>Mon évolution</b> montre comment tes stats de match évoluent par rapport à ta propre moyenne. Sous <b>Entraînements</b>, tu vois ta note et ton énergie, et si le sommeil joue un rôle.</p>" },
       { e: "Pour les parents", t: "Comment suivre",
-        h: "<p>L'app n'a <b>ni serveur ni compte</b>. Tout ce que votre enfant encode reste uniquement sur son propre téléphone.</p><p>Si vous ouvrez l'app sur votre propre téléphone, elle est vide, même avec le code de votre enfant. Ce n'est pas une erreur" + NB + ": les réponses restent ainsi privées.</p><p><b>Pour suivre" + NB + ":</b></p><ul><li><b>Le rapport hebdomadaire" + NB + ":</b> votre enfant télécharge le PDF dans Rapport et vous l'envoie.</li><li><b>Après chaque check-in" + NB + ":</b> votre enfant peut vous envoyer ses réponses en un clic via WhatsApp ou mail. C'est lui qui choisit.</li><li><b>Un jour de repos" + NB + ":</b> votre enfant peut vous dire en un clic ce qu'il fait" + NB + ": chillax, spécifique, fitness ou course.</li><li><b>Regarder ensemble</b> sur le téléphone de votre enfant.</li></ul><p><b>Accord" + NB + ":</b> votre enfant reçoit son code via vous. En donnant le code ou en le saisissant vous-même, vous acceptez l'app et le texte sur la vie privée.</p>" },
+        h: "<p>L'app n'a <b>ni serveur ni compte</b>. Tout ce que votre enfant encode reste uniquement sur son propre téléphone.</p><p>Si vous ouvrez l'app sur votre propre téléphone, elle est vide, même avec le code de votre enfant. Ce n'est pas une erreur" + NB + ": les réponses restent ainsi privées.</p><p><b>Pour suivre" + NB + ":</b></p><ul><li><b>Le rapport hebdomadaire" + NB + ":</b> votre enfant télécharge le PDF dans Rapport et vous l'envoie.</li><li><b>Après chaque check-in" + NB + ":</b> votre enfant peut vous envoyer ses réponses en un clic via WhatsApp ou mail. C'est lui qui choisit.</li><li><b>Un jour de repos" + NB + ":</b> votre enfant peut vous dire en un clic ce qu'il fait" + NB + ": chillax, spécifique, fitness ou course.</li><li><b>Le samedi" + NB + ":</b> à partir de 12h30, l'app demande à votre enfant ce qu'il fait dimanche. S'il partage son choix, vous savez dès le samedi s'il faut réserver une séance.</li><li><b>Regarder ensemble</b> sur le téléphone de votre enfant.</li></ul><p><b>Accord" + NB + ":</b> votre enfant reçoit son code via vous. En donnant le code ou en le saisissant vous-même, vous acceptez l'app et le texte sur la vie privée.</p>" },
       { e: "Étape 5", t: "Garder tes données en sécurité",
         h: "<p>Tout reste uniquement sur cet appareil. Personne d'autre ne peut le voir.</p><p>Fais de temps en temps une <b>sauvegarde</b> (Rapport, tout en bas), surtout sur iPhone. Tu changes de téléphone" + NB + "? Restaure ta sauvegarde et saisis à nouveau ton <b>code personnel</b>.</p>" }
     ],
@@ -1527,6 +1603,19 @@ if (typeof module !== "undefined") module.exports = A4;
     { t: "Wie zich verstopt, raakt de bal niet. Vraag hem.", s: "" },
     { t: "Twijfel is normaal. Blijf toch de bal vragen.", s: "" },
     { t: "Scan. Beslis. Durf.", s: "" }
+  ];
+  /* Matchquotes voor het zaterdag-venster (vanaf 12:30). Elke week een andere, in eigen woorden. */
+  var SAT_QUOTES = [
+    "Trust your game. Je hebt dit al honderd keer getraind.",
+    "Eerste bal, eerste duel: zet meteen de toon.",
+    "Vraag de bal. Ook na een gemiste kans.",
+    "Durf het 1-tegen-1. Lef is ook een kwaliteit.",
+    "Scan voor je de bal krijgt. Dan heb je tijd.",
+    "Je hoeft niet perfect te spelen. Wel alles geven, elke minuut.",
+    "Zeg tegen jezelf wat je tegen je beste vriend zou zeggen.",
+    "Kwaad na een fout? Steek die energie in je volgende sprint.",
+    "Speel voor de ploeg. Groei voor jezelf.",
+    "Grinta. Elk duel telt, tot de laatste minuut."
   ];
   var QS = [
     { q: "Welk cijfer geef je jezelf vandaag? En waarom geen punt hoger?", short: "Welk cijfer geef je jezelf? En waarom geen punt hoger?",
@@ -1769,7 +1858,7 @@ if (typeof module !== "undefined") module.exports = A4;
     });
     $("app").classList.toggle("wide", v === "export");
     document.body.classList.toggle("incheck", v === "check");
-    if (v === "start") renderStart();
+    if (v === "start") { renderStart(); setTimeout(satCheck, 600); }
     if (v === "check") { if (!store.draft) newDraft(); renderStep(); }
     if (v === "export") { exportMon = monday(today()); excluded = {}; renderExport(); }
     window.scrollTo(0, 0);
@@ -2633,7 +2722,7 @@ if (typeof module !== "undefined") module.exports = A4;
     { e: "Welkom", t: "Twee minuten na elke sessie",
       h: "<p>Na elke training of match beantwoord je vier korte vragen. Zo zie je zelf waar je groeit, week na week.</p><p>Er is geen fout antwoord. Eerlijk is genoeg.</p><p>Stel op het startscherm ook <b>je eigen doel</b>: wat wil je bereiken, en wat doe je er elke week zelf voor?</p>" },
     { e: "Stap 1", t: "Plan je week",
-      h: "<p>Tik op een dag in <b>Deze week</b> en kies <b>training</b>, <b>match</b>, <b>rust</b> of <b>geannuleerd</b>.</p><p>Kies je <b>rust</b>, dan kan je ook kiezen wat je doet: chillax, specifiek, fitness of lopen. Dat hoeft niet. Met <b>Deel</b> stuur je je keuze naar je ouders.</p><p>Vink <b>Elke … zo</b> aan voor je vaste trainingsdagen. Dan hoef je ze maar één keer in te stellen. Matchdagen krijgen sterretjes.</p>" },
+      h: "<p>Tik op een dag in <b>Deze week</b> en kies <b>training</b>, <b>match</b>, <b>rust</b> of <b>geannuleerd</b>.</p><p>Kies je <b>rust</b>, dan kan je ook kiezen wat je doet: chillax, specifiek, fitness of lopen. Dat hoeft niet. Met <b>Deel</b> stuur je je keuze naar je ouders.</p><p>Vink <b>Elke … zo</b> aan voor je vaste trainingsdagen. Dan hoef je ze maar één keer in te stellen. Matchdagen krijgen sterretjes.</p><p><b>Op zaterdag vanaf 12u30</b> krijg je bij het openen van de app een matchquote en kies je wat je zondag doet. Kies je <b>specifiek</b>, deel het dan meteen: zo kan er op tijd een sessie geboekt worden. Tip: zet een herhalende herinnering op je gsm, want de app kan zelf geen melding sturen.</p>" },
     { e: "Stap 2", t: "Doe je check-in",
       h: "<ul><li><b>Snelle check:</b> energie, slaap en pijn.</li><li><b>Bij een match:</b> je positie en je cijfers, zoals goals, duels en recuperaties.</li><li><b>Vier vragen:</b> je cijfer, je highlight, je reset-moment en je focus.</li><li><b>Tot slot:</b> een vraag voor je trainer en eventueel een foto van de dag. Je vraag blijft op je startscherm staan tot je ze gesteld hebt.</li></ul><p>Een half ingevulde check-in blijft bewaard. Je kan later verderdoen.</p>" },
     { e: "Stap 3", t: "Typen of inspreken",
@@ -2641,7 +2730,7 @@ if (typeof module !== "undefined") module.exports = A4;
     { e: "Stap 4", t: "Je weekverslag",
       h: "<p>In <b>Verslag</b> kies je de week en vink je aan welke check-ins erin komen. Je <b>ploeg</b> (U-categorie) kies je op het startscherm, onder je naam. Die komt bovenaan je verslag.</p><p>Daarna <b>Download PDF</b> of <b>Print</b>: een nette A4 voor jou en je trainer. Onderaan staat een kader om <b>met de hand</b> in te vullen: neem het blad mee en noteer de feedback van je trainer voor je volgende training of match. Foto's komen niet op papier.</p><p>Op je startscherm zie je bij <b>Mijn evolutie</b> hoe je matchcijfers evolueren tegenover je eigen gemiddelde. Bij <b>Trainingen</b> zie je je eigen cijfer en je energie, en of slaap daarin meespeelt.</p>" },
     { e: "Voor ouders", t: "Zo volg je mee",
-      h: "<p>De app heeft <b>geen server en geen account</b>. Alles wat je kind invult, staat alleen op zijn eigen telefoon.</p><p>Open je de app op je eigen telefoon, dan is die leeg, ook met de code van je kind. Dat is geen fout: zo blijven de antwoorden privé.</p><p><b>Zo volg je mee:</b></p><ul><li><b>Het weekverslag:</b> je kind downloadt de PDF in Verslag en stuurt hem naar jou.</li><li><b>Na elke check-in:</b> je kind kan met één tik zijn antwoorden naar jou sturen via WhatsApp of mail. Je kind kiest zelf.</li><li><b>Op een rustdag:</b> je kind kan met één tik laten weten wat het doet: chillax, specifiek, fitness of lopen.</li><li><b>Samen kijken</b> op de telefoon van je kind.</li></ul><p><b>Akkoord:</b> je kind krijgt zijn code via jou. Door de code te geven of zelf in te geven, ga je akkoord met de app en de privacytekst.</p>" },
+      h: "<p>De app heeft <b>geen server en geen account</b>. Alles wat je kind invult, staat alleen op zijn eigen telefoon.</p><p>Open je de app op je eigen telefoon, dan is die leeg, ook met de code van je kind. Dat is geen fout: zo blijven de antwoorden privé.</p><p><b>Zo volg je mee:</b></p><ul><li><b>Het weekverslag:</b> je kind downloadt de PDF in Verslag en stuurt hem naar jou.</li><li><b>Na elke check-in:</b> je kind kan met één tik zijn antwoorden naar jou sturen via WhatsApp of mail. Je kind kiest zelf.</li><li><b>Op een rustdag:</b> je kind kan met één tik laten weten wat het doet: chillax, specifiek, fitness of lopen.</li><li><b>Op zaterdag:</b> vanaf 12u30 vraagt de app wat je kind zondag doet. Deelt het zijn keuze, dan weet je op zaterdag al of er een sessie geboekt moet worden.</li><li><b>Samen kijken</b> op de telefoon van je kind.</li></ul><p><b>Akkoord:</b> je kind krijgt zijn code via jou. Door de code te geven of zelf in te geven, ga je akkoord met de app en de privacytekst.</p>" },
     { e: "Stap 5", t: "Veilig bewaren",
       h: "<p>Alles staat alleen op dit toestel. Niemand anders kan het zien.</p><p>Maak af en toe een <b>back-up</b> (Verslag, onderaan), zeker op iPhone. Wissel je van telefoon? Zet je back-up terug en geef je <b>persoonlijke code</b> opnieuw in.</p>" }
   ];
@@ -2756,7 +2845,7 @@ if (typeof module !== "undefined") module.exports = A4;
     renderSeason(now);
     renderTrend(now);
     renderAsks(now);
-    renderGoal(now); renderPain(); renderBk();
+    renderGoal(now); renderPain(); renderBk(); renderSatCard(now);
     renderMoments();
 
     if (!ws.length) {
@@ -3000,12 +3089,92 @@ if (typeof module !== "undefined") module.exports = A4;
   // Rustdagkeuze naar de ouders: "Rustdag · zondag 11 oktober / Mijn keuze: 💪 Fitness".
   function restShareText(k) {
     var r = restKindOf(k);
-    return [waHead(), "_" + T("rest.shareDay", { d: longDay(k).toLowerCase() }) + "_", "", T("rest.shareMine", { k: REST_ICON[r] + " *" + T("rest." + r) + "*" })].join("\n");
+    var out = [waHead(), "_" + T("rest.shareDay", { d: longDay(k).toLowerCase() }) + "_", "", T("rest.shareMine", { k: REST_ICON[r] + " *" + T("rest." + r) + "*" })];
+    if (r === "specifiek") out.push("📅 " + T("rest.book"));   // specifiek = een sessie die geboekt moet worden
+    return out.join("\n");
   }
   function shareRest(k) {
     if (!restKindOf(k)) return;
     shareOut(restShareText(k), T("rest.subject", { d: fmt(parse(k), { day: "numeric", month: "long" }) }));
   }
+
+  /* ====== ZATERDAG VANAF 12:30: matchquote + keuze voor zondag ======
+     Een web-app kan geen melding sturen als ze dicht is: daar is een server voor nodig.
+     Daarom verschijnt dit venster wanneer de speler de app op zaterdag vanaf 12:30 opent
+     of terug naar voren haalt, één keer per zaterdag. Koos hij nog niets voor zondag,
+     dan blijft er tot middernacht een kaart op het startscherm staan.
+     De keuze komt in de planning (zondag = rust + chillax/specifiek/fitness/lopen), net als via de weekstrook.
+     Testen zonder te wachten: open de app met ?test=zaterdag achter het adres, of typ testZaterdag() in de console. */
+  var SAT_FROM = 12 * 60 + 30;   // 12:30
+  var satKey = null, satDay = null, satSel = "", satTest = false;
+  function satOpen(now) { return now.getDay() === 6 && now.getHours() * 60 + now.getMinutes() >= SAT_FROM; }
+  function nextSunday(d) { var x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); return addDays(x, ((7 - x.getDay()) % 7) || 7); }
+  function sunBusy(k) { var p = planOf(k); return (p === "training" || p === "match") ? p : ""; }
+  function renderSatCard(now) {
+    var k = iso(nextSunday(now));
+    $("satCard").hidden = !(satOpen(now) && !sunBusy(k) && !restKindOf(k));
+  }
+  function markSat() {
+    document.querySelectorAll("#satOpts button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === satSel)); });
+    $("satShare").disabled = $("satSave").disabled = !satSel;
+  }
+  function openSat(test) {
+    var now = today(), sun = nextSunday(now), busy;
+    satTest = !!test; satKey = iso(sun); satDay = iso(addDays(sun, -1)); busy = sunBusy(satKey);
+    $("satHero").classList.toggle("is-match", planOf(satDay) === "match" || busy === "match");
+    $("satEyebrow").textContent = busy === "match" ? T("sat.eyebrowSunMatch") : planOf(satDay) === "match" ? T("sat.eyebrowMatch") : T("sat.eyebrow");
+    $("satQuote").textContent = SAT_QUOTES[isoWeek(now) % SAT_QUOTES.length];
+    $("satAsk").hidden = !!busy; $("satBusy").hidden = !busy;
+    $("satShare").hidden = $("satSave").hidden = $("satLater").hidden = !!busy; $("satGo").hidden = !busy;
+    if (busy) $("satBusy").textContent = T("sat.sunPlanned", { w: PLAN[busy].l.toLowerCase() });
+    $("satTest").hidden = !satTest;
+    if (satTest) $("satTest").textContent = T("sat.test", { d: fmt(sun, { day: "numeric", month: "long" }) });
+    satSel = busy ? "" : restKindOf(satKey);
+    markSat();
+    $("satOv").hidden = false;
+    setTimeout(function () {
+      var f = busy ? $("satGo") : (document.querySelector('#satOpts button[aria-pressed="true"]') || document.querySelector("#satOpts button"));
+      if (f) f.focus();
+    }, 30);
+  }
+  function closeSat() {
+    $("satOv").hidden = true;
+    // Eén keer per zaterdag. Een test op een andere dag telt niet mee, zodat zaterdag gewoon werkt.
+    if (!satTest || satDay === iso(today())) { store.satSeen = satDay; save(); }
+    if (!$("v-start").hidden) renderStart();
+  }
+  function saveSunday() {
+    if (!satKey || !satSel) return false;
+    planStore(); var wd = wdOf(satKey);
+    if ((store.template[wd] || "") === "rust") delete store.plan[satKey]; else store.plan[satKey] = "rust";
+    if (!store.restKind) store.restKind = {};
+    store.restKind[satKey] = satSel;
+    save(); return true;
+  }
+  // Niet tussenkomen tijdens een check-in, tijdens het typen of als er al een ander venster openstaat.
+  function satCheck() {
+    var now = today();
+    if (document.visibilityState === "hidden" || !satOpen(now) || store.satSeen === iso(now)) return;
+    if (document.body.classList.contains("locked") || document.body.classList.contains("typing")) return;
+    if (!$("v-check").hidden || !$("legalPage").hidden || !$("phView").hidden || document.querySelector(".overlay:not([hidden])")) return;
+    openSat(false);
+  }
+  $("satOpts").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) { satSel = b.dataset.v; markSat(); } });
+  // Bewaren en meteen delen: share() moet in dezelfde tik gebeuren, dus alles synchroon.
+  $("satShare").addEventListener("click", function () { var k = satKey; if (!saveSunday()) return; closeSat(); shareRest(k); });
+  $("satSave").addEventListener("click", function () {
+    var k = satKey; if (!saveSunday()) return;
+    closeSat(); toast(T("sat.saved", { k: REST_ICON[restKindOf(k)] + " " + restLabel(k) }));
+  });
+  $("satLater").addEventListener("click", closeSat);
+  $("satGo").addEventListener("click", closeSat);
+  $("satOv").addEventListener("click", function (e) { if (e.target === $("satOv")) closeSat(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("satOv").hidden) closeSat(); });
+  $("satCardGo").addEventListener("click", function () { openSat(false); });
+  function satTick() { if (document.visibilityState === "hidden") return; if (!$("v-start").hidden) renderSatCard(today()); satCheck(); }
+  document.addEventListener("visibilitychange", satTick);
+  setInterval(satTick, 30000);
+  window.testZaterdag = function () { openSat(true); return "Zaterdag-venster geopend (test)."; };
   var lastSaved = null;
   function openShare(s) {
     lastSaved = s;
@@ -3186,7 +3355,7 @@ if (typeof module !== "undefined") module.exports = A4;
   /* ====== TAAL TOEPASSEN ====== */
   function typeLabel(t) { return PLAN[t === "match" ? "match" : "training"].l; }
   var DATA_NL = {
-    QUOTES: QUOTES, QS: QS, DAGEN: DAGEN, DN: DN, SLEEP_Q: SLEEP_Q, HOURS: HOURS, FOCUS: FOCUS, GUIDE: GUIDE, LEGAL: LEGAL,
+    QUOTES: QUOTES, SAT_QUOTES: SAT_QUOTES, QS: QS, DAGEN: DAGEN, DN: DN, SLEEP_Q: SLEEP_Q, HOURS: HOURS, FOCUS: FOCUS, GUIDE: GUIDE, LEGAL: LEGAL,
     PLANL: {}, STATSL: {}, POSL: {}
   };
   Object.keys(PLAN).forEach(function (k) { DATA_NL.PLANL[k] = [PLAN[k].l, PLAN[k].s]; });
@@ -3202,7 +3371,7 @@ if (typeof module !== "undefined") module.exports = A4;
   }
   function applyLang() {
     var D = LANG === "fr" ? DATA_FR : DATA_NL;
-    QUOTES = D.QUOTES; QS = D.QS; DAGEN = D.DAGEN; DN = D.DN; SLEEP_Q = D.SLEEP_Q; HOURS = D.HOURS;
+    QUOTES = D.QUOTES; SAT_QUOTES = D.SAT_QUOTES; QS = D.QS; DAGEN = D.DAGEN; DN = D.DN; SLEEP_Q = D.SLEEP_Q; HOURS = D.HOURS;
     FOCUS = D.FOCUS; GUIDE = D.GUIDE; LEGAL = D.LEGAL;
     Object.keys(PLAN).forEach(function (k) { PLAN[k].l = D.PLANL[k][0]; PLAN[k].s = D.PLANL[k][1]; });
     Object.keys(STATS).forEach(function (k) { STATS[k].l = D.STATSL[k]; });
@@ -3230,6 +3399,15 @@ if (typeof module !== "undefined") module.exports = A4;
   /* ====== start ====== */
   renderStart();
   if (!updateGate()) maybeGuide();
+  // Zaterdag vanaf 12:30 (zie ZATERDAG). Testlink: ?test=zaterdag opent het venster meteen (na je code).
+  (function () {
+    var q = null; try { q = new URLSearchParams(location.search); } catch (e) {}
+    if (q && q.get("test") === "zaterdag") {
+      try { q.delete("test"); var rest = q.toString(); history.replaceState(null, "", location.pathname + (rest ? "?" + rest : "") + location.hash); } catch (e) {}
+      if (!document.body.classList.contains("locked")) { openSat(true); return; }
+    }
+    satCheck();
+  })();
   $("gHelp").addEventListener("click", openGuide);
   $("gDisc").addEventListener("click", function () { openLegal("disclaimer"); });
   $("gPriv").addEventListener("click", function () { openLegal("privacy"); });
